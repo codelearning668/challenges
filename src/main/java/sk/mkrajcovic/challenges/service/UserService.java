@@ -7,7 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.User;
-import sk.mkrajcovic.challenges.repository.UserRepository;
+import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
 import sk.mkrajcovic.challenges.security.UserRoles;
 
 @Service

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.model.Car;
-import sk.mkrajcovic.challenges.repository.CarRepository;
-import sk.mkrajcovic.challenges.repository.CarRepository.CarData;
+import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
+import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 
 @Service

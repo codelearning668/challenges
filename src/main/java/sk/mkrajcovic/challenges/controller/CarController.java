@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.model.Car;
-import sk.mkrajcovic.challenges.repository.CarRepository.CarData;
+import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
 import sk.mkrajcovic.challenges.security.UserRoles;
 import sk.mkrajcovic.challenges.service.CarService;
 

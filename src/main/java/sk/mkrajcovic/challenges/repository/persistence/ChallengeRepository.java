@@ -1,4 +1,4 @@
-package sk.mkrajcovic.challenges.repository;
+package sk.mkrajcovic.challenges.repository.persistence;
 
 import java.time.Duration;
 import java.time.LocalDate;

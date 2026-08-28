@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.model.Track;
-import sk.mkrajcovic.challenges.repository.TrackRepository.TrackData;
+import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
 import sk.mkrajcovic.challenges.security.UserRoles;
 import sk.mkrajcovic.challenges.service.TrackService;
 

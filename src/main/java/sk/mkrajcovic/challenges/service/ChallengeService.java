@@ -12,8 +12,8 @@ import sk.mkrajcovic.challenges.context.CallContext;
 import sk.mkrajcovic.challenges.exception.ChallengeAlreadyEnded;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.Challenge;
-import sk.mkrajcovic.challenges.repository.ChallengeRepository;
-import sk.mkrajcovic.challenges.repository.ChallengeRepository.ChallengeData;
+import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
+import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 
 @Service

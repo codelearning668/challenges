@@ -1,4 +1,4 @@
-package sk.mkrajcovic.challenges.repository;
+package sk.mkrajcovic.challenges.repository.persistence;
 
 import java.util.Optional;
 

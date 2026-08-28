@@ -17,7 +17,7 @@ import sk.mkrajcovic.challenges.exception.InvalidParticipantAccess;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
-import sk.mkrajcovic.challenges.repository.ParticipantRepository;
+import sk.mkrajcovic.challenges.repository.persistence.ParticipantRepository;
 
 @Service
 @RequiredArgsConstructor

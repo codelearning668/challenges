@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
-import sk.mkrajcovic.challenges.repository.ChallengeRepository.ChallengeData;
+import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.service.ChallengeService;
 import sk.mkrajcovic.challenges.service.ParticipantService;
 
