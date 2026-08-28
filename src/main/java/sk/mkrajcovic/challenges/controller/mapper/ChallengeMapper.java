@@ -1,5 +1,7 @@
 package sk.mkrajcovic.challenges.controller.mapper;
 
+import java.util.Objects;
+
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ParticipantDetailResponse;
 import sk.mkrajcovic.challenges.model.Challenge;
@@ -8,9 +10,13 @@ import sk.mkrajcovic.challenges.model.Participant;
 public final class ChallengeMapper {
 
 	public static ChallengeDetailResponse toDetailResponse(Challenge challenge) {
+		Objects.requireNonNull(challenge, "challenge cannot be null in order to map its values");
+
 		var challengeDetail = new ChallengeDetailResponse();
 		challengeDetail.setChallengeId(challenge.getId());
 		challengeDetail.setChallengeEndDate(challenge.getEndDate());
+
+		// TODO: handle NPEs here or ensure there are none
 
 		var track = challenge.getTrack();
 		challengeDetail.setTrackId(track.getId());
@@ -35,6 +41,8 @@ public final class ChallengeMapper {
 	}
 
 	public static ParticipantDetailResponse toParticipantDetailResponse(Participant participant) {
+		Objects.requireNonNull(participant, "participant cannot be null in order to map its values");
+
 		var participantDetail = new ParticipantDetailResponse();
 		participantDetail.setParticipantId(participant.getId());
 		participantDetail.setParticipantName(participant.getName());

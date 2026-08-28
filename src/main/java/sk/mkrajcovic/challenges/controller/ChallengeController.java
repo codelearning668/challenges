@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
@@ -56,20 +57,20 @@ public class ChallengeController {
 	}
 
 	@GetMapping(path = "/challenge/{challengeId}", produces = APPLICATION_JSON_VALUE)
-	ChallengeDetailResponse getChallenge(@PathVariable Integer challengeId) {
+	ChallengeDetailResponse getChallenge(@PathVariable @Positive Integer challengeId) {
 		var challenge = challengeService.getChallenge(challengeId);
 		return ChallengeMapper.toDetailResponse(challenge);
 	}
 
 	@RolesAllowed(PARTICIPANT)
 	@PostMapping(path = "/challenge/{challengeId}/register")
-	void registerForChallenge(@PathVariable Integer challengeId) {
+	void registerForChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.registerForChallenge(challengeId);
 	}
 
 	@RolesAllowed({ADMIN, PARTICIPANT})
 	@PutMapping(path = "/challenge/{challengeId}/participant", consumes = APPLICATION_JSON_VALUE)
-	void updateLapTime(@PathVariable Integer challengeId, @Valid @RequestBody UpdateLapTimeRequest request) {
+	void updateLapTime(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateLapTimeRequest request) {
 		participantService.updateLapTime(challengeId, request.getParticipantName(), request.getNewLapTime());
 	}
 
