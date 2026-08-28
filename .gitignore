@@ -1,0 +1,74 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.aar
+*.jmod
+
+# Gradle
+.gradle/
+build/
+out/
+target/
+!target/**/*.java
+captures/
+.externalVersion/
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.properties
+!.mvn/wrapper/MavenWrapperDownloader.java
+.mvn/wrapper/classworlds.xml
+.mvn/wrapper/jar.txt
+.mvn/wrapper/maven-wrapper.jar
+
+# Build tools
+pom.xml.tag
+pom.xml.tmp
+pom.xml.releasenotes
+.ivy/
+.scala/
+/localjars/
+
+# IDE
+.idea/
+*.iwb
+*.iws
+*.ipr
+.vscode/
+*.tmproj
+
+# Eclipse
+.classpath
+.project
+.metadata
+bin/
+tmp/
+tmp/**
+*.tmp
+*.bak
+*.swp
+*~/.nib
+old/
+.actionScript/
+actionscript-java/
+actionscript-java-eclipse/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.bin/nbbuild-ant.xml
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
