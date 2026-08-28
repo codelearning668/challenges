@@ -1,8 +1,10 @@
 package sk.mkrajcovic.challenges.controller;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
+
 import java.util.List;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,10 +14,9 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.mapper.CarMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
-import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
-import sk.mkrajcovic.challenges.security.UserRoles;
 import sk.mkrajcovic.challenges.service.CarService;
 
 @RestController
@@ -24,25 +25,14 @@ public class CarController {
 
 	private final CarService service;
 
-	@RolesAllowed(UserRoles.ADMIN)
-	@PostMapping(path = "/car", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RolesAllowed(ADMIN)
+	@PostMapping(path = "/car", consumes = APPLICATION_JSON_VALUE)
 	CreatedResponseEntity createCar(@Valid @RequestBody CreateCarRequest request) {
-		Integer carId = service.createCar(toCar(request));
+		Integer carId = service.createCar(CarMapper.toCar(request));
 		return CreatedResponseEntity.create("/car/{id}", carId);
 	}
 
-	// TODO: review - extract to mapper classes? (if will grow, here and elsewhere, only then)
-	private Car toCar(CreateCarRequest request) {
-		var car = new Car();
-		car.setBrand(request.getBrand());
-		car.setName(request.getName());
-		car.setHorsePower(request.getHp());
-		car.setTorque(request.getTorque());
-		car.setWheelDrive(request.getDrive());
-		return car;
-	}
-
-	@GetMapping(path = "/cars/", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/cars/", produces = APPLICATION_JSON_VALUE)
 	List<CarData> search() {
 		return service.searchCars();
 	}

@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
+import sk.mkrajcovic.challenges.controller.mapper.ChallengeMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.service.ChallengeService;
@@ -39,6 +41,8 @@ public class ChallengeController {
 	}
 
 	// TODO: allow updating the challenge endDate for ADMIN!
+	// +/or cancel challenge immediately:
+	// -> time remaining in the day might be a problem, when validating based only by endDate
 
 	@RolesAllowed(ADMIN)
 	@PostMapping(path = "/challenge", consumes = APPLICATION_JSON_VALUE)
@@ -49,6 +53,12 @@ public class ChallengeController {
 				challenge.getEndDate()
 		);
 		return CreatedResponseEntity.create("/challenge/{challengeId}", challengeId);
+	}
+
+	@GetMapping(path = "/challenge/{challengeId}", produces = APPLICATION_JSON_VALUE)
+	ChallengeDetailResponse getChallenge(@PathVariable Integer challengeId) {
+		var challenge = challengeService.getChallenge(challengeId);
+		return ChallengeMapper.toDetailResponse(challenge);
 	}
 
 	@RolesAllowed(PARTICIPANT)

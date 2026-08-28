@@ -22,11 +22,14 @@ curl -vvv -u admin:admin -X POST localhost:8790/challenge -H "Content-type: appl
 curl -vvv localhost:8790/challenges/
 
 # apply/register for challenge - PARTICIPANT authorization
-curl -vvv -u participant:participant -X POST localhost:8790/challenge/1/apply
+curl -vvv -u participant:participant -X POST localhost:8790/challenge/1/register
 
 # update participant's lap time in particular challenge - ADMIN can alter anyone's lap time, PARTICIPANT its own only
 curl -vvv -u participant:participant -X PUT localhost:8790/challenge/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":null}'
 curl -vvv -u admin:admin -X PUT localhost:8790/challenge/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":"2:10.672"}'
+
+# get single challenge:
+curl -vvv localhost:8790/challenge/1 -H "Accept:application/json"
 
 
 
