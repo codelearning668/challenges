@@ -6,6 +6,7 @@ import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.dto.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.controller.mapper.CarMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
@@ -42,8 +44,8 @@ public class CarController {
 	}
 
 	@GetMapping(path = "/cars/", produces = APPLICATION_JSON_VALUE)
-	List<CarData> search() {
-		return service.searchCars();
+	List<CarData> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
+		return service.searchCars(searchCriteria);
 	}
 
 }

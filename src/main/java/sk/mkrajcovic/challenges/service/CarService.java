@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.dto.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
@@ -26,9 +27,8 @@ public class CarService {
 		return EntityUtils.getExistingEntityById(repository, carId);
 	}
 
-	// TODO: implement searchCriteria
-	public List<CarData> searchCars() {
-		return repository.findCarsByParams();
+	public List<CarData> searchCars(SearchCarsCriteria searchCriteria) {
+		return repository.findCars(searchCriteria);
 	}
 
 }

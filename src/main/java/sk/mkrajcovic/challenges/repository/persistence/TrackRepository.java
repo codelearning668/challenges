@@ -4,17 +4,26 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import sk.mkrajcovic.challenges.controller.dto.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.model.Track;
 
 @Repository
 public interface TrackRepository extends JpaRepository<Track, Integer> {
 
 	@Query("""
-		SELECT t.id as id, t.country as country, t.name as name, t.lengthKm as lengthKm FROM Track t
+		SELECT t.id as id,
+		       t.country as country,
+		       t.name as name,
+		       t.lengthKm as lengthKm
+		FROM Track t
+		WHERE (:#{#criteria.country} IS NULL OR t.country LIKE %:#{#criteria.country}%)
+		AND (:#{#criteria.name} IS NULL OR t.name LIKE %:#{#criteria.name}%)
+		AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
 	""")
-	public List<TrackData> findTracks();
+	public List<TrackData> findTracks(@Param("criteria") SearchTracksCriteria criteria);
 
 	interface TrackData {
 		Integer getId();

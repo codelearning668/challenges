@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import sk.mkrajcovic.challenges.controller.dto.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.model.Car;
 
 @Repository
@@ -19,9 +21,15 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
 		       c.torque as torque,
 		       c.wheelDrive as wheelDrive
 		FROM Car c
+		WHERE (:#{#criteria.brand} IS NULL OR c.brand LIKE %:#{#criteria.brand}%)
+		AND (:#{#criteria.name} IS NULL OR c.name LIKE %:#{#criteria.name}%)
+		AND (:#{#criteria.horsePower} IS NULL OR c.horsePower = :#{#criteria.horsePower})
+		AND (:#{#criteria.torque} IS NULL OR c.torque = :#{#criteria.torque})
+		AND (:#{#criteria.wheelDrive} IS NULL OR c.wheelDrive = :#{#criteria.wheelDrive})
 	""")
-	public List<CarData> findCarsByParams();
+	public List<CarData> findCars(@Param("criteria") SearchCarsCriteria criteria);
 
+	// Note: projection represents domain object in this case
 	interface CarData {
 		Integer getId();
 		String getBrand();

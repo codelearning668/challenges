@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.context.CallContext;
+import sk.mkrajcovic.challenges.controller.dto.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.exception.ChallengeAlreadyEnded;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.Challenge;
@@ -34,8 +35,8 @@ public class ChallengeService {
 		this.callContext = callContext;
 	}
 
-	public List<ChallengeData> searchChallenges() {
-		return repository.searchChallenges();
+	public List<ChallengeData> searchChallenges(SearchChallengesCriteria searchCriteria) {
+		return repository.searchChallenges(searchCriteria);
 	}
 
 	@Transactional

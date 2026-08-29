@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.dto.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
@@ -26,8 +27,8 @@ public class TrackService {
 		return EntityUtils.getExistingEntityById(repository, trackId);
 	}
 
-	public List<TrackData> searchTracks() {
-		return repository.findTracks();
+	public List<TrackData> searchTracks(SearchTracksCriteria searchCriteria) {
+		return repository.findTracks(searchCriteria);
 	}
 
 }

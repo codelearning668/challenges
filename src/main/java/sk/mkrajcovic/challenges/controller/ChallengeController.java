@@ -7,6 +7,7 @@ import static sk.mkrajcovic.challenges.security.UserRoles.PARTICIPANT;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
+import sk.mkrajcovic.challenges.controller.dto.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
 import sk.mkrajcovic.challenges.controller.mapper.ChallengeMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
@@ -37,8 +39,8 @@ public class ChallengeController {
 	// TODO: review - return challengeSearchResponse dto? has this some real boundary or maintainability issue?
 	// can we assume the projection as domain object? (btw, entities are not domain objects, so we are down a layer anyway)
 	@GetMapping(path = "/challenges/", produces = APPLICATION_JSON_VALUE)
-	List<ChallengeData> searchChallanges() {
-		return challengeService.searchChallenges();
+	List<ChallengeData> searchChallanges(@ModelAttribute SearchChallengesCriteria searchCriteria) {
+		return challengeService.searchChallenges(searchCriteria);
 	}
 
 	// TODO: allow updating the challenge endDate for ADMIN!
