@@ -46,6 +46,7 @@ public class ParticipantService {
 
 		verifyChallengeIsActive(participant.getChallenge());
 
+		// because only ADMIN can change someone else's lap time
 		if (!callContext.isUserInRole(ADMIN)) {
 			verifyParticipantIsCurrentUser(participantName);
 		}

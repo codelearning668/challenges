@@ -21,8 +21,8 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
 		       c.torque as torque,
 		       c.wheelDrive as wheelDrive
 		FROM Car c
-		WHERE (:#{#criteria.brand} IS NULL OR c.brand LIKE %:#{#criteria.brand}%)
-		AND (:#{#criteria.name} IS NULL OR c.name LIKE %:#{#criteria.name}%)
+		WHERE (:#{#criteria.brand} IS NULL OR c.brandSearch LIKE %:#{#criteria.brand}%)
+		AND (:#{#criteria.name} IS NULL OR c.nameSearch LIKE %:#{#criteria.name}%)
 		AND (:#{#criteria.horsePower} IS NULL OR c.horsePower = :#{#criteria.horsePower})
 		AND (:#{#criteria.torque} IS NULL OR c.torque = :#{#criteria.torque})
 		AND (:#{#criteria.wheelDrive} IS NULL OR c.wheelDrive = :#{#criteria.wheelDrive})

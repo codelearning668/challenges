@@ -11,6 +11,7 @@ import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
+import sk.mkrajcovic.challenges.util.Text;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,16 @@ public class TrackService {
 	}
 
 	public List<TrackData> searchTracks(SearchTracksCriteria searchCriteria) {
+		normalizeSearchCriteria(searchCriteria);
 		return repository.findTracks(searchCriteria);
 	}
 
+	/*
+	 * Mutation is intentional because the criteria object is passed to the
+	 * repository afterwards and have no other usage really.
+	 */
+	private void normalizeSearchCriteria(SearchTracksCriteria criteria) {
+		criteria.setCountry(Text.normalizeForSearch(criteria.getCountry()));
+		criteria.setName(Text.normalizeForSearch(criteria.getName()));
+	}
 }

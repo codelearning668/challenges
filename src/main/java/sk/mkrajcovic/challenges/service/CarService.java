@@ -11,6 +11,7 @@ import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
+import sk.mkrajcovic.challenges.util.Text;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,17 @@ public class CarService {
 	}
 
 	public List<CarData> searchCars(SearchCarsCriteria searchCriteria) {
+		normalizeSearchCriteria(searchCriteria);
 		return repository.findCars(searchCriteria);
+	}
+
+	/*
+	 * Mutation is intentional because the criteria object is passed to the
+	 * repository afterwards and have no other usage really.
+	 */
+	private void normalizeSearchCriteria(SearchCarsCriteria criteria) {
+		criteria.setBrand(Text.normalizeForSearch(criteria.getBrand()));
+		criteria.setName(Text.normalizeForSearch(criteria.getName()));
 	}
 
 }

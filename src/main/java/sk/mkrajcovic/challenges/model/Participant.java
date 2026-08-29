@@ -1,5 +1,7 @@
 package sk.mkrajcovic.challenges.model;
 
+import static lombok.AccessLevel.NONE;
+
 import java.time.Duration;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -8,9 +10,12 @@ import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import sk.mkrajcovic.challenges.util.Text;
 
 @Entity
 @Getter @Setter
@@ -31,5 +36,20 @@ public class Participant extends BaseEntity {
 
 	@ManyToOne
 	private Challenge challenge;
+
+	/*
+	 * Denormalized search representation maintained
+	 * automatically before persistence.
+	 */
+	@Getter(NONE)
+	@Setter(NONE)
+	@Column(nullable = false, length = 100)
+	private String nameSearch;
+
+	@PrePersist
+	@PreUpdate
+	private void runPreSaveOperations() {
+		nameSearch = Text.normalizeForSearch(name);
+	}
 
 }

@@ -25,10 +25,10 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 		JOIN ch.track tr
 		JOIN ch.car c
 		WHERE (cast(:#{#criteria.endDate} as text) IS NULL OR ch.endDate = :#{#criteria.endDate})
-		AND (:#{#criteria.trackName} IS NULL OR tr.name LIKE %:#{#criteria.trackName}%)
-		AND (:#{#criteria.trackCountry} IS NULL OR tr.country LIKE %:#{#criteria.trackCountry}%)
-		AND (:#{#criteria.carBrand} IS NULL OR c.brand LIKE %:#{#criteria.carBrand}%)
-		AND (:#{#criteria.carName} IS NULL OR c.name LIKE %:#{#criteria.carName}%)
+		AND (:#{#criteria.trackName} IS NULL OR tr.nameSearch LIKE %:#{#criteria.trackName}%)
+		AND (:#{#criteria.trackCountry} IS NULL OR tr.countrySearch LIKE %:#{#criteria.trackCountry}%)
+		AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
+		AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
 	""")
 	public List<ChallengeData> searchChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 
