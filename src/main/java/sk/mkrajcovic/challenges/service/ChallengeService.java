@@ -1,5 +1,8 @@
 package sk.mkrajcovic.challenges.service;
 
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -88,8 +91,10 @@ public class ChallengeService {
 
 	private void verifyChallengeIsActive(Challenge challenge) {
 		var today = LocalDate.now();
-		if (challenge.getEndDate().isBefore(today)) {
-			throw new ChallengeAlreadyEnded("this event has ended");
+		var endDate = challenge.getEndDate();
+
+		if (endDate.isBefore(today)) {
+			throw new ChallengeAlreadyEnded(CANNOT_REGISTER_ON_CLOSED_CHALLENGE, endDate);
 		}
 	}
 
@@ -98,7 +103,7 @@ public class ChallengeService {
 				.anyMatch(participant -> participant.getName().equals(newParticipantName));
 
 		if (alreadyAssigned) {
-			throw new Conflict("you are already registered for this event");
+			throw new Conflict(PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE);
 		}
 	}
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.enums.MessageCodeConstants;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
@@ -36,7 +37,7 @@ public class UserService {
 
 	private void verifyUsernameIsAvailable(String username) {
 		if (userRepository.existsById(username)) {
-			throw new Conflict("Username already exists!");
+			throw new Conflict(MessageCodeConstants.USERNAME_ALREADY_TAKEN);
 		}
 	}
 }

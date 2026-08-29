@@ -1,6 +1,9 @@
 package sk.mkrajcovic.challenges.service;
 
 import static java.util.Objects.requireNonNull;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE;
 import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 
 import java.time.Duration;
@@ -57,7 +60,7 @@ public class ParticipantService {
 
 	private Participant lookupRegisteredParticipant(Integer challengeId, String participantName) {
 		return repository.findByChallengeIdAndName(challengeId, participantName)
-			.orElseThrow(() -> new ResourceNotFound("participant: " + participantName + " is not found for this challenge"));
+			.orElseThrow(() -> new ResourceNotFound(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE));
 	}
 
 	// TODO: code duplication, move this method from this and challengeService
@@ -65,13 +68,13 @@ public class ParticipantService {
 	private void verifyChallengeIsActive(Challenge challenge) {
 		var today = LocalDate.now();
 		if (challenge.getEndDate().isBefore(today)) {
-			throw new ChallengeAlreadyEnded("this event has ended");
+			throw new ChallengeAlreadyEnded(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
 		}
 	}
 
 	private void verifyParticipantIsCurrentUser(String participantName) {
 		if (!callContext.getCurrentUser().equals(participantName)) {
-			throw new InvalidParticipantAccess("participant cannot update other participant lap time!");
+			throw new InvalidParticipantAccess(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
 		}
 	}
 
