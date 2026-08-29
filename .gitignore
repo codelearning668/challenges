@@ -55,6 +55,7 @@ old/
 actionscript-java/
 actionscript-java-eclipse/
 .settings/
+.factorypath
 
 # NetBeans
 nbproject/private/
