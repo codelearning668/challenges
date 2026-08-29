@@ -41,7 +41,7 @@ public final class Text {
 		}
 		return Normalizer.normalize(value, Normalizer.Form.NFD)
 			.replaceAll("\\p{M}", "")
-			.toLowerCase();
+			.toLowerCase(Locale.ROOT);
 	}
 
 }
