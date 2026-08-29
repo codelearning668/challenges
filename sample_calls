@@ -1,38 +1,38 @@
 
 # create track - ADMIN authorization
-curl -vvv -u admin:admin -X POST localhost:8790/track -H "Content-type: application/json" --data '{"country": "United Kingdom", "name": "Black Cat County"}'
+curl -vvv -u admin:admin -X POST localhost:8790/challenges/svc/tracks -H "Content-type: application/json" --data '{"country": "United Kingdom", "name": "Black Cat County"}'
 
 # get all tracks
-curl -vvv localhost:8790/tracks/ -H "Accept:application/json"
+curl -vvv localhost:8790/challenges/svc/tracks -H "Accept:application/json"
 
 
 
 # create car - ADMIN authorization
-curl -vvv -u admin:admin -X POST localhost:8790/car -H "Content-type: application/json" --data '{"brand": "BMW", "name": "M4 GT3", "hp":650, "torque":500, "drive": "REAR"}'
+curl -vvv -u admin:admin -X POST localhost:8790/challenges/svc/cars -H "Content-type: application/json" --data '{"brand": "BMW", "name": "M4 GT3", "hp":650, "torque":500, "drive": "REAR"}'
 
 # get all cars
-curl -vvv localhost:8790/cars/ -H "Accept:application/json"
+curl -vvv localhost:8790/challenges/svc/cars -H "Accept:application/json"
 
 
 
 # create challenge - ADMIN authorization
-curl -vvv -u admin:admin -X POST localhost:8790/challenge -H "Content-type: application/json" --data '{"carId": 1, "trackId": 1, "endDate":"2026-08-28"}'
+curl -vvv -u admin:admin -X POST localhost:8790/challenges/svc/challenges -H "Content-type: application/json" --data '{"carId": 1, "trackId": 1, "endDate":"2026-10-28"}'
 
 # get all challenges
-curl -vvv localhost:8790/challenges/
+curl -vvv localhost:8790/challenges/svc/challenges
 
 # apply/register for challenge - PARTICIPANT authorization
-curl -vvv -u participant:participant -X POST localhost:8790/challenge/1/register
+curl -vvv -u participant:participant -X POST localhost:8790/challenges/svc/challenges/1/register
 
 # update participant's lap time in particular challenge - ADMIN can alter anyone's lap time, PARTICIPANT its own only
-curl -vvv -u participant:participant -X PUT localhost:8790/challenge/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":null}'
-curl -vvv -u admin:admin -X PUT localhost:8790/challenge/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":"2:10.672"}'
+curl -vvv -u participant:participant -X PUT localhost:8790/challenges/svc/challenges/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":null}'
+curl -vvv -u admin:admin -X PUT localhost:8790/challenges/svc/challenges/1/participant -H "Content-type: application/json" --data '{"participantName":"participant", "newLapTime":"2:10.672"}'
 
 # get single challenge:
-curl -vvv localhost:8790/challenge/1 -H "Accept:application/json"
+curl -vvv localhost:8790/challenges/svc/challenges/1 -H "Accept:application/json"
 
 
 
 # register new user (participant)
-curl -vvv -X POST http://localhost:8790/public/register -H "Content-Type: application/json" -d '{"username": "Martin", "password": "martin"}'
+curl -vvv -X POST http://localhost:8790/challenges/svc/users/register -H "Content-Type: application/json" -d '{"username": "Martin", "password": "martin"}'
 

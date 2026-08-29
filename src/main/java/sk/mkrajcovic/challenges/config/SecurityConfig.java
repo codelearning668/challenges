@@ -60,7 +60,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET).permitAll()
 				.requestMatchers(
 				// not secured
-				"/public/**",
+				"/users/register",
 				"/ping/**",
 				"/swagger-ui/**",
 				"/api-docs/**",

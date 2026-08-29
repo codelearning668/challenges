@@ -19,7 +19,7 @@ public class UserController {
 	private final UserService userService;
 
 	@PermitAll
-	@PostMapping(path = "/public/register", consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/users/register", consumes = APPLICATION_JSON_VALUE)
 	void registerUser(@Valid @RequestBody UserRegistrationRequest registrationRequest) {
 		userService.registerNewUser(
 			registrationRequest.username(),

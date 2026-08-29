@@ -31,19 +31,19 @@ public class CarController {
 	private final CarService service;
 
 	@RolesAllowed(ADMIN)
-	@PostMapping(path = "/car", consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/cars", consumes = APPLICATION_JSON_VALUE)
 	CreatedResponseEntity createCar(@Valid @RequestBody CreateCarRequest request) {
 		Integer carId = service.createCar(CarMapper.toCar(request));
-		return CreatedResponseEntity.create("/car/{id}", carId);
+		return CreatedResponseEntity.create("/cars/{carId}", carId);
 	}
 
-	@GetMapping(path = "/car/{carId}", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/cars/{carId}", produces = APPLICATION_JSON_VALUE)
 	CarDetailResponse getCar(@PathVariable @Positive Integer carId) {
 		var car = service.getCar(carId);
 		return CarMapper.toDetailResponse(car);
 	}
 
-	@GetMapping(path = "/cars/", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/cars", produces = APPLICATION_JSON_VALUE)
 	List<CarData> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
 		return service.searchCars(searchCriteria);
 	}

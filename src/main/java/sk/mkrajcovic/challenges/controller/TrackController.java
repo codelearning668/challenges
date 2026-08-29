@@ -31,19 +31,19 @@ public class TrackController {
 	private final TrackService service;
 
 	@RolesAllowed(ADMIN)
-	@PostMapping(path = "/track", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/tracks", produces = APPLICATION_JSON_VALUE)
 	CreatedResponseEntity createTrack(@Valid @RequestBody CreateTrackRequest request) {
 		Integer trackId = service.createTrack(TrackMapper.toTrack(request));
-		return CreatedResponseEntity.create("/track/{trackId}", trackId);
+		return CreatedResponseEntity.create("/tracks/{trackId}", trackId);
 	}
 
-	@GetMapping(path = "/track/{trackId}", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/tracks/{trackId}", produces = APPLICATION_JSON_VALUE)
 	TrackDetailResponse getTrack(@PathVariable @Positive Integer trackId) {
 		var track = service.getTrack(trackId);
 		return TrackMapper.toDetailResponse(track);
 	}
 
-	@GetMapping(path = "/tracks/", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/tracks", produces = APPLICATION_JSON_VALUE)
 	List<TrackData> searchTracks(@ModelAttribute SearchTracksCriteria searchCriteria) {
 		return service.searchTracks(searchCriteria);
 	}
