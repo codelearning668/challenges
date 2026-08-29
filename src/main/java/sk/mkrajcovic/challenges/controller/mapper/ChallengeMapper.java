@@ -43,11 +43,10 @@ public final class ChallengeMapper {
 	public static ParticipantDetailResponse toParticipantDetailResponse(Participant participant) {
 		Objects.requireNonNull(participant, "participant cannot be null in order to map its values");
 
-		var participantDetail = new ParticipantDetailResponse();
-		participantDetail.setParticipantId(participant.getId());
-		participantDetail.setParticipantName(participant.getName());
-		participantDetail.setParticipantBestLapTime(participant.getBestLapTime());
-
-		return participantDetail;
+		return new ParticipantDetailResponse(
+			participant.getId(),
+			participant.getName(),
+			participant.getBestLapTime()
+		);
 	}
 }

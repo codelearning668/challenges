@@ -8,6 +8,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Flat response DTO for challenge details.
+ *
+ * <p>
+ * This DTO intentionally remains a class rather than a record. Its flat
+ * structure requires many values from different parts of the domain model.
+ * Using a record would result in a large constructor, making the mapper less
+ * readable and increasing the risk of accidentally swapping parameters.
+ */
 @Getter @Setter
 public class ChallengeDetailResponse {
 

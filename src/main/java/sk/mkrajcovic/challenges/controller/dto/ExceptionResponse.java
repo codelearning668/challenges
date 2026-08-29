@@ -1,8 +1,5 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -10,25 +7,27 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+/**
+ * DTO used for API error responses.
+ * <p>
+ * This DTO intentionally remains a mutable class rather than a record.
+ * Error responses may contain optional fields depending on the exception,
+ * and the exception handler builds the response incrementally.<br>
+ * Using a record would introduce unnecessary constructor parameters and
+ * reduce readability at the call site.
+ */
+@Getter @Setter
 public class ExceptionResponse {
 
 	@NotNull
 	private String message;
 	private String type;
 
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	private String code;
 
-    @JsonInclude(Include.NON_NULL)
-	private List<String> hints;
-
-    @JsonInclude(Include.NON_NULL)
-    private Map<String, Object> naskResponse; 
-
-    @JsonInclude(Include.NON_NULL)
-    private String stackTrace;
+	@JsonInclude(Include.NON_NULL)
+	private String stackTrace;
 
 	public ExceptionResponse() { /* intentionally empty */ }
 }

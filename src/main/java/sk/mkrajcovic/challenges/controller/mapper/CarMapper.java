@@ -11,25 +11,24 @@ public final class CarMapper {
 	public static CarDetailResponse toDetailResponse(Car car) {
 		Objects.requireNonNull(car, "car cannot be null in order to map its values");
 
-		var carDetail = new CarDetailResponse();
-		carDetail.setId(car.getId());
-		carDetail.setBrand(car.getBrand());
-		carDetail.setName(car.getName());
-		carDetail.setHorsePower(car.getHorsePower());
-		carDetail.setTorque(car.getTorque());
-
-		return carDetail;
+		return new CarDetailResponse(
+			car.getId(),
+			car.getBrand(),
+			car.getName(),
+			car.getHorsePower(),
+			car.getTorque()
+		);
 	}
 
-	public static Car toCar(CreateCarRequest request) {
-		Objects.requireNonNull(request, "input request cannot be null in order to map its values");
+	public static Car toCar(CreateCarRequest createRequest) {
+		Objects.requireNonNull(createRequest, "input request cannot be null in order to map its values");
 
 		var car = new Car();
-		car.setBrand(request.getBrand());
-		car.setName(request.getName());
-		car.setHorsePower(request.getHp());
-		car.setTorque(request.getTorque());
-		car.setWheelDrive(request.getDrive());
+		car.setBrand(createRequest.brand());
+		car.setName(createRequest.name());
+		car.setHorsePower(createRequest.hp());
+		car.setTorque(createRequest.torque());
+		car.setWheelDrive(createRequest.drive());
 
 		return car;
 	}

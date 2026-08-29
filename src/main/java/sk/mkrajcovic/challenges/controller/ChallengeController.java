@@ -51,9 +51,9 @@ public class ChallengeController {
 	@PostMapping(path = "/challenge", consumes = APPLICATION_JSON_VALUE)
 	CreatedResponseEntity createChallenge(@Valid @RequestBody CreateChallengeRequest challenge) {
 		Integer challengeId = challengeService.createChallenge(
-				challenge.getTrackId(),
-				challenge.getCarId(),
-				challenge.getEndDate()
+				challenge.trackId(),
+				challenge.carId(),
+				challenge.endDate()
 		);
 		return CreatedResponseEntity.create("/challenge/{challengeId}", challengeId);
 	}
@@ -73,7 +73,7 @@ public class ChallengeController {
 	@RolesAllowed({ADMIN, PARTICIPANT})
 	@PutMapping(path = "/challenge/{challengeId}/participant", consumes = APPLICATION_JSON_VALUE)
 	void updateLapTime(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateLapTimeRequest request) {
-		participantService.updateLapTime(challengeId, request.getParticipantName(), request.getNewLapTime());
+		participantService.updateLapTime(challengeId, request.participantName(), request.newLapTime());
 	}
 
 }

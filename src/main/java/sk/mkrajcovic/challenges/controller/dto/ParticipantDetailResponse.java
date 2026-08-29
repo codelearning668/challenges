@@ -2,14 +2,27 @@ package sk.mkrajcovic.challenges.controller.dto;
 
 import java.time.Duration;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-@Getter @Setter
-public class ParticipantDetailResponse {
+public record ParticipantDetailResponse(
+	Integer participantId,
+	String participantName,
+	Duration participantBestLapTime,
 
-	private Integer participantId;
-	private String participantName;
-	private Duration participantBestLapTime;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	Integer version) {
 
+	/**
+	 * Creates a participant response without a version.
+	 * <p>
+	 * Use this constructor when the participant version is not relevant to the
+	 * response. The version field will be omitted from JSON serialization.
+	 */
+	public ParticipantDetailResponse(
+			Integer participantId,
+			String participantName,
+			Duration participantBestLapTime) {
+
+		this(participantId, participantName, participantBestLapTime, null);
+	}
 }

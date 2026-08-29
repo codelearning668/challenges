@@ -1,14 +1,11 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+public record TrackDetailResponse(
 
-@Getter @Setter
-public class TrackDetailResponse {
+	Integer id,
+	String country,
+	String name,
+	Double lengthKm,
+	Integer version
 
-	private Integer id;
-	private String country;
-	private String name;
-	private Double lengthKm;
-
-}
+) { }

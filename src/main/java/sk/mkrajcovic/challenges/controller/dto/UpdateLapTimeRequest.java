@@ -4,15 +4,13 @@ import java.time.Duration;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter @Setter
-public class UpdateLapTimeRequest {
+public record UpdateLapTimeRequest(
 
 	@NotBlank @Size(max = 100)
-	private String participantName;
+	String participantName,
 
 	// can be null as we might want to discard it
-	private Duration newLapTime;
-}
+	Duration newLapTime
+
+) { }

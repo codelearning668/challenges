@@ -11,22 +11,22 @@ public final class TrackMapper {
 	public static TrackDetailResponse toDetailResponse(Track track) {
 		Objects.requireNonNull(track, "track cannot be null in order to map its values");
 
-		var trackDetail = new TrackDetailResponse();
-		trackDetail.setId(track.getId());
-		trackDetail.setCountry(track.getCountry());
-		trackDetail.setName(track.getName());
-		trackDetail.setLengthKm(track.getLengthKm());
-
-		return trackDetail;
+		return new TrackDetailResponse(
+			track.getId(),
+			track.getName(),
+			track.getCountry(),
+			track.getLengthKm(),
+			track.getVersion()
+		);
 	}
 
-	public static Track toTrack(CreateTrackRequest request) {
-		Objects.requireNonNull(request, "input request cannot be null in order to map its values");
+	public static Track toTrack(CreateTrackRequest trackRequest) {
+		Objects.requireNonNull(trackRequest, "input request cannot be null in order to map its values");
 
 		var track = new Track();
-		track.setCountry(request.getCountry());
-		track.setName(request.getName());
-		track.setLengthKm(request.getLengthKm());
+		track.setCountry(trackRequest.country());
+		track.setName(trackRequest.name());
+		track.setLengthKm(trackRequest.lengthKm());
 
 		return track;
 	}

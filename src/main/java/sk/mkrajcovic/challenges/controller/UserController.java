@@ -22,8 +22,8 @@ public class UserController {
 	@PostMapping(path = "/public/register", consumes = APPLICATION_JSON_VALUE)
 	void registerUser(@Valid @RequestBody UserRegistrationRequest registrationRequest) {
 		userService.registerNewUser(
-			registrationRequest.getUsername(),
-			registrationRequest.getPassword()
+			registrationRequest.username(),
+			registrationRequest.password()
 		);
 	}
 }

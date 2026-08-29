@@ -34,8 +34,8 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
 		Integer getId();
 		String getBrand();
 		String getName();
-		int getHorsePower();
-		int getTorque();
+		Integer getHorsePower();
+		Integer getTorque();
 		String getWheelDrive();
 	}
 
