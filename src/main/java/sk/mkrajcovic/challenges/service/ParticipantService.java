@@ -47,10 +47,9 @@ public class ParticipantService {
 	public void updateLapTime(Integer challengeId, String participantName, Duration newLapTime) {
 		var participant = lookupRegisteredParticipant(challengeId, participantName);
 
-		verifyChallengeIsActive(participant.getChallenge());
-
-		// because only ADMIN can change someone else's lap time
+		// because only ADMIN can change someone else's lap time even after challenge has ended
 		if (!callContext.isUserInRole(ADMIN)) {
+			verifyChallengeIsActive(participant.getChallenge());
 			verifyParticipantIsCurrentUser(participantName);
 		}
 
