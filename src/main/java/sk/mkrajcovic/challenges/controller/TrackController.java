@@ -17,11 +17,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
-import sk.mkrajcovic.challenges.controller.dto.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.controller.dto.TrackDetailResponse;
 import sk.mkrajcovic.challenges.controller.mapper.TrackMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
+import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.service.TrackService;
 
 @RestController

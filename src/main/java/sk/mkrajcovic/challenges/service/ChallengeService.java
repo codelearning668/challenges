@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.context.CallContext;
-import sk.mkrajcovic.challenges.controller.dto.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.exception.ChallengeAlreadyEnded;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
+import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 
 @Service
 @RequiredArgsConstructor

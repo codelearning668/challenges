@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import sk.mkrajcovic.challenges.controller.dto.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
+import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 
 @Service
 @RequiredArgsConstructor

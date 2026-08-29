@@ -1,4 +1,4 @@
-package sk.mkrajcovic.challenges.controller.dto;
+package sk.mkrajcovic.challenges.search;
 
 import lombok.Getter;
 import lombok.Setter;

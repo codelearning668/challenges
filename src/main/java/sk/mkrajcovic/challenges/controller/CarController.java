@@ -18,10 +18,10 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
-import sk.mkrajcovic.challenges.controller.dto.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.controller.mapper.CarMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
+import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.service.CarService;
 
 @RestController

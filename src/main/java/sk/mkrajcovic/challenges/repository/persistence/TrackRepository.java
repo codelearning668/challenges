@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import sk.mkrajcovic.challenges.controller.dto.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 
 @Repository
 public interface TrackRepository extends JpaRepository<Track, Integer> {

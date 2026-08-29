@@ -20,11 +20,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
-import sk.mkrajcovic.challenges.controller.dto.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
 import sk.mkrajcovic.challenges.controller.mapper.ChallengeMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
+import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.service.ChallengeService;
 import sk.mkrajcovic.challenges.service.ParticipantService;
 

@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import sk.mkrajcovic.challenges.controller.dto.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 
 @Repository
 public interface CarRepository extends JpaRepository<Car, Integer> {

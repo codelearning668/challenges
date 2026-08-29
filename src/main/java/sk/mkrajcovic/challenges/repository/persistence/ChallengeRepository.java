@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import sk.mkrajcovic.challenges.controller.dto.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 
 @Repository
 public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
