@@ -2,6 +2,7 @@ package sk.mkrajcovic.challenges.util;
 
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Text {
 
-	// TODO: check usage of lang3.StringUtils, wrap it here and use this class
+	/**
+	 * Checks whether the input text is blank (null, empty or contains
+	 * only whitespaces).
+	 *
+	 * @param input text to evaluate
+	 * @return {@code true}, if the text is null or blank
+	 */
+	public static boolean isBlank(CharSequence input) {
+		return org.apache.commons.lang3.StringUtils.isBlank(input);
+	} 
 
 	/**
 	 * Normalizes a string for accent-insensitive and case-insensitive searching.
@@ -35,9 +45,9 @@ public final class Text {
 	 * @return the normalized string, or {@code null} if {@code value} is
 	 *         {@code null}
 	 */
-	public static String normalizeForSearch(String value) {
-		if (value == null) {
-			return null;
+	public static String normalizeForSearch(CharSequence value) {
+		if (isBlank(value)) {
+			return Objects.toString(value, null);
 		}
 		return Normalizer.normalize(value, Normalizer.Form.NFD)
 			.replaceAll("\\p{M}", "")

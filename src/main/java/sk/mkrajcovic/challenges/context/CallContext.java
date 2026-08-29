@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import sk.mkrajcovic.challenges.util.Text;
 
 @Component @RequestScope
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class CallContext {
 	}
 
 	public boolean isUserInRole(String role) {
-		if (StringUtils.isBlank(role)) {
+		if (Text.isBlank(role)) {
 			return false;
 		}
 		for (var simpleGrantedAuthority : getUserAuthorities()) {
