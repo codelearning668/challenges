@@ -1,4 +1,4 @@
-package sk.mkrajcovic.challenges.controller;
+package sk.mkrajcovic.challenges.controller.exception;
 
 import java.util.Map;
 
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import sk.mkrajcovic.challenges.config.MessageSource;
 import sk.mkrajcovic.challenges.controller.dto.ExceptionResponse;
@@ -25,7 +24,7 @@ import sk.mkrajcovic.challenges.exception.InfrastructureException;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 
 @ControllerAdvice
-public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
+public class ExceptionHandlerController extends AbstractValidationExceptionHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExceptionHandlerController.class);
 
