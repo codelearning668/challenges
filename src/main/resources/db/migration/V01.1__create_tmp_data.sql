@@ -62,9 +62,151 @@ from (
 ) as data(country, name, length_km, version);
 
 
+-- all assetto corsa ultimate edition cars
+insert into car (
+    brand,
+    name,
+    horse_power,
+    torque,
+    wheel_drive,
+    brand_search,
+    name_search,
+    version
+)
+select
+    brand,
+    name,
+    horse_power,
+    torque,
+    wheel_drive,
+    lower(unaccent(brand)),
+    lower(unaccent(name)),
+    version
+from (
+    values
+    	('Abarth', '500 Assetto Corse', 195, 302, 'FRONT', 1),
+	('Abarth', '500 EsseEsse', 160, 230, 'FRONT', 1),
+	('Abarth', '500 EsseEsse Step 1', 175, 245, 'FRONT', 1),
+	('Abarth', '595 SS', 32, 44, 'REAR', 1),
+	('Abarth', '595 SS Step 1', 32, 44, 'REAR', 1),
+	('Abarth', '595 SS Step 2', 65, 80, 'REAR', 1),
 
-insert into car (brand, name, horse_power, torque, wheel_drive, version, brand_search, name_search)
-	values ('Ferrari','LaFerrari', 963, 900, 'REAR', 1, 'ferrari', 'laferrari');
+	('Alfa Romeo', '155 TI V6', 420, 294, 'ALL', 1),
+	('Alfa Romeo', '33 Stradale', 230, 206, 'REAR', 1),
+	('Alfa Romeo', '4C', 240, 350, 'REAR', 1),
+	('Alfa Romeo', 'GTA', 170, 200, 'REAR', 1),
+	('Alfa Romeo', 'Giulia Quadrifoglio', 510, 600, 'REAR', 1),
+	('Alfa Romeo', 'Mito QV', 168, 250, 'FRONT', 1),
+	('Alfa Romeo', 'Giulietta QV', 235, 349, 'FRONT', 1),
+	('Alfa Romeo', 'Qiulietta QV Launch Edition 2014', 240, 349, 'FRONT', 1),
+
+	('Audi', 'R18 e-tron quattro 2014', 700, 850, 'ALL', 1),
+	('Audi', 'R8 LMS 2016', 500, 500, 'REAR', 1),
+	('Audi', 'R8 LMS Ultra', 570, 500, 'REAR', 1),
+	('Audi', 'R8 V10 Plus', 550, 540, 'ALL', 1),
+	('Audi', 'S1', 231, 370, 'ALL', 1),
+	('Audi', 'Sport quattro', 306, 350, 'ALL', 1),
+	('Audi', 'Sport quattro S1 E2', 540, 570, 'ALL', 1),
+	('Audi', 'Sport quattro Step 1', 373, 425, 'ALL', 1),
+	('Audi', 'TT Cup', 310, 400, 'FRONT', 1),
+	('Audi', 'TT RS (VLN)', 390, 530, 'FRONT', 1),
+
+	('BMW', '1M', 340, 500, 'REAR', 1),
+	('BMW', '1M Stage 3', 400, 580, 'REAR', 1),
+	('BMW', 'M235i Racing', 333, 500, 'REAR', 1),
+	('BMW', 'M3 E30', 238, 240, 'REAR', 1),
+	('BMW', 'M3 E30 Drift', 343, 365, 'REAR', 1),
+	('BMW', 'M3 E30 Gr.A 92', 350, 310, 'REAR', 1),
+	('BMW', 'M3 E30 Group A', 290, 310, 'REAR', 1),
+	('BMW', 'M3 E30 Step 1', 238, 240, 'REAR', 1),
+	('BMW', 'M3 E92', 414, 400, 'REAR', 1),
+	('BMW', 'M3 E92 Step 1', 414, 400, 'REAR', 1),
+	('BMW', 'M3 E92 Drift', 414, 400, 'REAR', 1),
+	('BMW', 'M3 GT2', 485, 499, 'REAR', 1),
+	('BMW', 'M4', 431, 550, 'REAR', 1),
+	('BMW', 'M4 Akrapovic', 445, 589, 'REAR', 1),
+	('BMW', 'Z4 E89', 330, 500, 'REAR', 1),
+	('BMW', 'Z4 E89 Drift', 390, 580, 'REAR', 1),
+	('BMW', 'Z4 E89 Step 1', 330, 500, 'REAR', 1),
+	('BMW', 'Z4 GT3', 530, 520, 'REAR', 1),
+
+	('Chevrolet', 'Corvette C7 Stingray', 455, 625, 'REAR', 1),
+	('Chevrolet', 'Corvette C7R', 495, 650, 'REAR', 1),
+
+	('Ferrari', '250 GTO', 300, 294, 'REAR', 1),
+	('Ferrari', '312/67', 390, null, 'REAR', 1),
+	('Ferrari', '312T', 495, 308, 'REAR', 1),
+	('Ferrari', '330 P4', 450, null, 'REAR', 1),
+	('Ferrari', '458 GT2', 470, 520, 'REAR', 1),
+	('Ferrari', '458 Italia', 570, 540, 'REAR', 1),
+	('Ferrari', '458 Italia Stage 3', 570, 540, 'REAR', 1),
+	('Ferrari', '488 GT3', 500, 640, 'REAR', 1),
+	('Ferrari', '488 GTB', 660, 760, 'REAR', 1),
+	('Ferrari', '599XX EVO', 750, 700, 'REAR', 1),
+	('Ferrari', '812 Superfast', 800, 718, 'REAR', 1),
+	('Ferrari', 'F138', 763, 310, 'REAR', 1),
+	('Ferrari', 'F2004', 865, null, 'REAR', 1),
+	('Ferrari', 'F40', 478, 577, 'REAR', 1),
+	('Ferrari', 'F40 Stage 3', 610, 715, 'REAR', 1),
+	('Ferrari', 'FXX K', 1050, 900, 'REAR', 1),
+	('Ferrari', 'GTO', 400, 496, 'REAR', 1),
+	('Ferrari', 'LaFerrari', 963, 900, 'REAR', 1),
+	('Ferrari', 'SF15-T', 840, 721, 'REAR', 1),
+	('Ferrari', 'SF70H', null, null, 'REAR', 1),
+        
+	('Ford', 'Escort RS1600', 260, 200, 'REAR', 1),
+	('Ford', 'GT40', 430, 530, 'REAR', 1),
+	('Ford', 'Mustang 2015', 435, 542, 'REAR', 1),
+
+	('KTM', 'X-Bow R', 300, 400, 'REAR', 1),
+
+	('Lamborghini', 'Aventador SV', 750, 690, 'ALL', 1),
+	('Lamborghini', 'Countach', 422, 500, 'REAR', 1),
+	('Lamborghini', 'Countach S1', 442, 500, 'REAR', 1),
+	('Lamborghini', 'Gallardo SL', 570, 540, 'ALL', 1),
+	('Lamborghini', 'Gallardo SL Step 3', 1200, null, 'ALL', 1),
+	('Lamborghini', 'Huracan GT3', 600, 500, 'REAR', 1),
+	('Lamborghini', 'Huracan Performante', 640, 600, 'ALL', 1),
+	('Lamborghini', 'Huracan ST', 620, 570, 'REAR', 1),
+	('Lamborghini', 'Miura P400 SV', 385, 400, 'REAR', 1),
+	('Lamborghini', 'Sesto Elemento', 570, 540, 'ALL', 1),
+
+	('Lotus', '2-Eleven', 252, 242, 'REAR', 1),
+	('Lotus', '2-Eleven GT4', 270, 252, 'REAR', 1),
+	('Lotus', '3-Eleven', 460, 525, 'REAR', 1),
+	('Lotus', 'Elise SC', 217, 242, 'REAR', 1),
+	('Lotus', 'Elise SC Step 1', 217, 242, 'REAR', 1),
+	('Lotus', 'Elise SC Step 2', 217, 242, 'REAR', 1),
+	('Lotus', 'Evora GTC', 450, 460, 'REAR', 1),
+	('Lotus', 'Evora GTE', 420, 461, 'REAR', 1),
+	('Lotus', 'Evora GTE Carbon', 420, 461, 'REAR', 1),
+	('Lotus', 'Evora GX', 440, 460, 'REAR', 1),
+	('Lotus', 'Evora S', 345, 400, 'REAR', 1),
+	('Lotus', 'Evora S Stage 2', 400, 420, 'REAR', 1),
+	('Lotus', 'Exige 240R', 243, 236, 'REAR', 1),
+	('Lotus', 'Exige 240R Stage 3', 270, 270, 'REAR', 1),
+	('Lotus', 'Exige S', 345, 400, 'REAR', 1),
+	('Lotus', 'Exige S roadster', 345, 400, 'REAR', 1),
+	('Lotus', 'Exige Scura', 257, 243, 'REAR', 1),
+	('Lotus', 'Exige V6 Cup', 345, 400, 'REAR', 1),
+	('Lotus', 'Exos 125', 640, 4540, 'REAR', 1),
+	('Lotus', 'Exos 125 Stage 1', 750, null, 'REAR', 1),
+	('Lotus', '720', 440, 332, 'REAR', 1),
+	('Lotus', '98T', 1000, 800, 'REAR', 1),
+	('Lotus', 'Type 25', 195, 160, 'REAR', 1),
+	('Lotus', 'Type 49', 410, 350, 'REAR', 1),
+
+	('Toyota', 'AE86', 122, 142, 'REAR', 1),
+	('Toyota', 'AE86 Drift', 185, 206, 'REAR', 1),
+	('Toyota', 'AE86 Tuned', 200, 206, 'REAR', 1),
+	('Toyota', 'Celica ST185 4WD Turbo', 295, 459, 'ALL', 1),
+	('Toyota', 'GT86', 200, 205, 'REAR', 1),
+	('Toyota', 'Supra MKIV', 280, 458, 'REAR', 1),
+	('Toyota', 'Supra MKIV Drift', 624, 756, 'REAR', 1),
+	('Toyota', 'Supra MKIV Time Attack', 690, 756, 'REAR', 1),
+	('Toyota', 'TS040 Hybrid 2014', 1000, null, 'ALL', 1)
+) as data(brand, name, horse_power, torque, wheel_drive, version);
+
 
 -- test users
 insert into users (username, password, enabled)
