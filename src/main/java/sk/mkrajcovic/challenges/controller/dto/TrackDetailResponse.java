@@ -5,7 +5,6 @@ public record TrackDetailResponse(
 	Integer id,
 	String country,
 	String name,
-	Double lengthKm,
-	Integer version
+	Double lengthKm
 
 ) { }
