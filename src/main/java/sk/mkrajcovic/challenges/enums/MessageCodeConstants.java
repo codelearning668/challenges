@@ -22,6 +22,7 @@ public class MessageCodeConstants {
 	public static final String CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE = "cannotUpdateLapTimeOnClosedChallenge";
 	public static final String CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME = "cannotUpdateOtherParticipantLapTime";
 	public static final String PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE = "participantNotRegisteredForChallenge";
+	public static final String CHALLENGE_ALREADY_ACTIVE = "challengeAlreadyActive";
 
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 

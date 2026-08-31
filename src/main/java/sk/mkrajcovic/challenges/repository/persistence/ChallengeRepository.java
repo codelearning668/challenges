@@ -15,6 +15,15 @@ import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 
 	@Query("""
+		SELECT COUNT(ch) > 0
+		FROM Challenge ch
+		WHERE ch.track.id = :trackId
+		AND ch.car.id = :carId
+		AND ch.endDate > cast(now() as date)
+	""")
+	public boolean existsActiveChallengeForTrackAndCar(Integer trackId, Integer carId);
+
+	@Query("""
 		SELECT ch.id as id,
 		       ch.endDate as endDate,
 		       tr.name as trackName,

@@ -1,6 +1,7 @@
 package sk.mkrajcovic.challenges.service;
 
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CHALLENGE_ALREADY_ACTIVE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
 
 import java.time.LocalDate;
@@ -57,6 +58,8 @@ public class ChallengeService {
 
 	@Transactional
 	public Integer createChallenge(Integer trackId, Integer carId, LocalDate endDate) {
+		verifyChallengeNotActive(trackId, carId);
+
 		var track = trackService.getTrack(trackId);
 		var car = carService.getCar(carId);
 
@@ -66,6 +69,12 @@ public class ChallengeService {
 		challenge.setEndDate(endDate);
 
 		return repository.save(challenge).getId();
+	}
+
+	private void verifyChallengeNotActive(Integer trackId, Integer carId) {
+		if (repository.existsActiveChallengeForTrackAndCar(trackId, carId)) {
+			throw new Conflict(CHALLENGE_ALREADY_ACTIVE);
+		}
 	}
 
 	public Challenge getChallenge(Integer challengeId) {
