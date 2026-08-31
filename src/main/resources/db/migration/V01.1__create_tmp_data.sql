@@ -196,6 +196,86 @@ from (
 	('Lotus', 'Type 25', 195, 160, 'REAR', 1),
 	('Lotus', 'Type 49', 410, 350, 'REAR', 1),
 
+	('Maserati', '250F 12 cylinder', 310, null, 'REAR', 1),
+	('Maserati', '250F 6 cylinder', 270, null, 'REAR', 1),
+	('Maserati', 'Alfieri', 460, 520, 'REAR', 1),
+	('Maserati', 'GranTurismo MC GT4', 430, 535, 'REAR', 1),
+	('Maserati', 'Levante S', 424, 580, 'ALL', 1),
+	('Maserati', 'MC12 GT1', 580, 650, 'REAR', 1),
+	('Maserati', 'Quattroporte GTS', 530, 710, 'REAR', 1),
+
+	('Mazda', '787B', 690, 608, 'REAR', 1),
+	('Mazda', 'MX5 Cup', 160, 200, 'REAR', 1),
+	('Mazda', 'MX5 ND', 160, 200, 'REAR', 1),
+	('Mazda', 'Miata NA', 130, 152, 'REAR', 1),
+	('Mazda', 'RX-7 Spirit R', 276, 314, 'REAR', 1),
+	('Mazda', 'RX-7 Tuned', 444, 398, 'REAR', 1),
+
+	('McLaren', '570S', 562, 600, 'REAR', 1),
+	('McLaren', '650S GT3', 500, 500, 'REAR', 1),
+	('McLaren', 'F1 GTR', 595, 693, 'REAR', 1),
+	('McLaren', 'MP4-12C', 616, 600, 'REAR', 1),
+	('McLaren', 'MP4-12C GT3', 500, 500, 'REAR', 1),
+	('McLaren', 'P1 GTR', 986, 1000, 'REAR', 1),
+	('McLaren', 'P1', 903, 900, 'REAR', 1),
+
+
+	('Mercedes', 'SLS AMG', 571, 650, 'REAR', 1),
+	('Mercedes', 'SLS AMG GT3', 520, 600, 'REAR', 1),
+	('Mercedes', '190E EVO II', 370, 310, 'REAR', 1),
+	('Mercedes', 'AMG GT3', 520, 600, 'REAR', 1),
+	('Mercedes', 'C9 1989 LM', 750, 500, 'REAR', 1),
+
+	('Nissan', '370z Nismo', 350, 374, 'REAR', 1),
+	('Nissan', 'GT-R GT3', 600, 700, 'ALL', 1),
+	('Nissan', 'GT-R NISMO', 592, 652, 'ALL', 1),
+	('Nissan', 'Skyline GTR R34 V-Spec', 325, 392, 'ALL', 1),
+
+	('Pagani', 'Huayra', 730, 1000, 'REAR', 1),
+	('Pagani', 'Huayra BC', 740, 1100, 'REAR', 1),
+	('Pagani', 'Zonda R', 750, 710, 'REAR', 1),
+
+	('Porsche', '718 Boxter S', 350, 420, 'REAR', 1),
+	('Porsche', '718 Boxter S PDK', 350, 420, 'REAR', 1),
+	('Porsche', '718 VCayman', 350, 420, 'REAR', 1),
+	('Porsche', '718 RS 60 Spyder', 150, 148, 'REAR', 1),
+	('Porsche', '908 LH', 350, 320, 'REAR', 1),
+	('Porsche', '911 Carrera RSR 3.0', 330, null, 'REAR', 1),
+	('Porsche', '911 Carrera S', 420, 500, 'REAR', 1),
+	('Porsche', '911 GT1-98', 600, null, 'REAR', 1),
+	('Porsche', '911 GT3 Cup 2017', 485, null, 'REAR', 1),
+	('Porsche', '911 GT3 R 2016', 500, null, 'REAR', 1),
+	('Porsche', '911 GT3 RS', 500, 460, 'REAR', 1),
+	('Porsche', '911 R', 500, 460, 'REAR', 1),
+	('Porsche', '911 RSR 2017', 510, null, 'REAR', 1),
+	('Porsche', '911 Turbo S', 580, 750, 'ALL', 1),
+	('Porsche', 'Porsche 917 K', 600, null, 'REAR', 1),
+	('Porsche', 'Porsche 917/30 Spyder', 1200, 1200, 'REAR', 1),
+	('Porsche', '918 Spyder', 887, 1275, 'ALL', 1),
+	('Porsche', '919 Hybrid 2015', 900, null, 'ALL', 1),
+	('Porsche', '919 Hybrid 2016', 900, null, 'ALL', 1),
+	('Porsche', '935/78 "Moby Dick"', 845, 784, 'REAR', 1),
+	('Porsche', '962 C Long Tail', 650, null, 'REAR', 1),
+	('Porsche', '962 C Short Tail', 625, null, 'REAR', 1),
+	('Porsche', 'Cayenne Turbo S', 570, 800, 'ALL', 1),
+	('Porsche', 'Cayman GT4', 385, 420, 'REAR', 1),
+	('Porsche', 'Cayman GT4 Clubsport', 385, 420, 'REAR', 1),
+	('Porsche', 'Macan Turbo', 400, 550, 'ALL', 1),
+	('Porsche', 'Panamera Turbo', 550, 770, 'ALL', 1),
+
+	('Praga', 'R1', 210, 220, 'REAR', 1),
+
+	('RUF', 'CTR Yellowbird', 469, 553, 'REAR', 1),
+	('RUF', 'RT12 R', 730, 940, 'REAR', 1),
+	('RUF', 'RT12 R AWD', 730, 940, 'ALL', 1),
+
+	('Scuderia Glickenhaus', 'P4/5 Competizione 2011', 450, 500, 'REAR', 1),
+	('Scuderia Glickenhaus', 'SCG 003C', 530, 700, 'REAR', 1),
+
+	('Shelby', 'Cobra 427 S/C', 500, 626, 'REAR', 1),
+
+	('Tatuus', 'FA01', 198, 230, 'REAR', 1),
+
 	('Toyota', 'AE86', 122, 142, 'REAR', 1),
 	('Toyota', 'AE86 Drift', 185, 206, 'REAR', 1),
 	('Toyota', 'AE86 Tuned', 200, 206, 'REAR', 1),
@@ -205,6 +285,7 @@ from (
 	('Toyota', 'Supra MKIV Drift', 624, 756, 'REAR', 1),
 	('Toyota', 'Supra MKIV Time Attack', 690, 756, 'REAR', 1),
 	('Toyota', 'TS040 Hybrid 2014', 1000, null, 'ALL', 1)
+	
 ) as data(brand, name, horse_power, torque, wheel_drive, version);
 
 
