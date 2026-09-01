@@ -15,29 +15,29 @@ import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 
 	@Query("""
-		SELECT COUNT(ch) > 0
-		FROM Challenge ch
-		WHERE ch.track.id = :trackId
-		AND ch.car.id = :carId
-		AND ch.endDate > cast(now() as date)
+        SELECT COUNT(ch) > 0
+        FROM Challenge ch
+        WHERE ch.track.id = :trackId
+        AND ch.car.id = :carId
+        AND ch.endDate > cast(now() as date)
 	""")
 	public boolean existsActiveChallengeForTrackAndCar(Integer trackId, Integer carId);
 
 	@Query("""
-		SELECT ch.id as id,
-		       ch.endDate as endDate,
-		       tr.name as trackName,
-		       tr.country as trackCountry,
-		       c.brand as carBrand,
-		       c.name as carName
-		FROM Challenge ch
-		JOIN ch.track tr
-		JOIN ch.car c
-		WHERE (cast(:#{#criteria.endDate} as text) IS NULL OR ch.endDate = :#{#criteria.endDate})
-		AND (:#{#criteria.trackName} IS NULL OR tr.nameSearch LIKE %:#{#criteria.trackName}%)
-		AND (:#{#criteria.trackCountry} IS NULL OR tr.countrySearch LIKE %:#{#criteria.trackCountry}%)
-		AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
-		AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
+        SELECT ch.id as id,
+               ch.endDate as endDate,
+               tr.name as trackName,
+               tr.country as trackCountry,
+               c.brand as carBrand,
+               c.name as carName
+        FROM Challenge ch
+        JOIN ch.track tr
+        JOIN ch.car c
+        WHERE (cast(:#{#criteria.endDate} as text) IS NULL OR ch.endDate = :#{#criteria.endDate})
+        AND (:#{#criteria.trackName} IS NULL OR tr.nameSearch LIKE %:#{#criteria.trackName}%)
+        AND (:#{#criteria.trackCountry} IS NULL OR tr.countrySearch LIKE %:#{#criteria.trackCountry}%)
+        AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
+        AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
 	""")
 	public List<ChallengeData> searchChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 

@@ -14,14 +14,14 @@ import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 public interface TrackRepository extends JpaRepository<Track, Integer> {
 
 	@Query("""
-		SELECT t.id as id,
-		       t.country as country,
-		       t.name as name,
-		       t.lengthKm as lengthKm
-		FROM Track t
-		WHERE (:#{#criteria.country} IS NULL OR t.countrySearch LIKE %:#{#criteria.country}%)
-		AND (:#{#criteria.name} IS NULL OR t.nameSearch LIKE %:#{#criteria.name}%)
-		AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
+        SELECT t.id as id,
+               t.country as country,
+               t.name as name,
+               t.lengthKm as lengthKm
+        FROM Track t
+        WHERE (:#{#criteria.country} IS NULL OR t.countrySearch LIKE %:#{#criteria.country}%)
+        AND (:#{#criteria.name} IS NULL OR t.nameSearch LIKE %:#{#criteria.name}%)
+        AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
 	""")
 	public List<TrackData> findTracks(@Param("criteria") SearchTracksCriteria criteria);
 
