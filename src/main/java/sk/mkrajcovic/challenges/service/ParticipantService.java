@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.context.CallContext;
-import sk.mkrajcovic.challenges.exception.ChallengeAlreadyEnded;
-import sk.mkrajcovic.challenges.exception.InvalidParticipantAccess;
+import sk.mkrajcovic.challenges.exception.AccessDenied;
+import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
@@ -67,13 +67,13 @@ public class ParticipantService {
 	private void verifyChallengeIsActive(Challenge challenge) {
 		var today = LocalDate.now();
 		if (challenge.getEndDate().isBefore(today)) {
-			throw new ChallengeAlreadyEnded(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
+			throw new BusinessViolation(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
 		}
 	}
 
 	private void verifyParticipantIsCurrentUser(String participantName) {
 		if (!callContext.getCurrentUser().equals(participantName)) {
-			throw new InvalidParticipantAccess(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
+			throw new AccessDenied(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
 		}
 	}
 

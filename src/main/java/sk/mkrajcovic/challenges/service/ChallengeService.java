@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.context.CallContext;
-import sk.mkrajcovic.challenges.exception.ChallengeAlreadyEnded;
+import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
@@ -103,7 +103,7 @@ public class ChallengeService {
 		var endDate = challenge.getEndDate();
 
 		if (endDate.isBefore(today)) {
-			throw new ChallengeAlreadyEnded(CANNOT_REGISTER_ON_CLOSED_CHALLENGE, endDate);
+			throw new BusinessViolation(CANNOT_REGISTER_ON_CLOSED_CHALLENGE, endDate);
 		}
 	}
 

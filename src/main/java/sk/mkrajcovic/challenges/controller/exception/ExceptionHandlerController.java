@@ -19,8 +19,6 @@ import sk.mkrajcovic.challenges.exception.AccessDenied;
 import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.ClientException;
 import sk.mkrajcovic.challenges.exception.Conflict;
-import sk.mkrajcovic.challenges.exception.GlobalException;
-import sk.mkrajcovic.challenges.exception.InfrastructureException;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 
 @ControllerAdvice
@@ -41,7 +39,6 @@ public class ExceptionHandlerController extends AbstractValidationExceptionHandl
 	private static final Map<Class<? extends Exception>, HttpStatus> STATUS_MAP = Map.of(
 		// main parents
 		ClientException.class, HttpStatus.BAD_REQUEST,
-		InfrastructureException.class, HttpStatus.INTERNAL_SERVER_ERROR,
 		// children
 		BusinessViolation.class, HttpStatus.UNPROCESSABLE_ENTITY,
 		ResourceNotFound.class, HttpStatus.NOT_FOUND,
@@ -84,10 +81,10 @@ public class ExceptionHandlerController extends AbstractValidationExceptionHandl
 		var exceptionDto = new ExceptionResponse();
 		exceptionDto.setStackTrace(displayStackTrace ? readStackTrace(exception) : null);
 
-		if (exception instanceof GlobalException global) {
-			exceptionDto.setMessage(messageSource.getMessage(global.getCode(), global.getArgs()));
+		if (exception instanceof ClientException clientEx) {
+			exceptionDto.setMessage(messageSource.getMessage(clientEx.getCode(), clientEx.getArgs()));
 			exceptionDto.setType(resolveErrorType(resolveHttpStatus(exception).series()));
-			exceptionDto.setCode(global.getCode());
+			exceptionDto.setCode(clientEx.getCode());
 		} else {
 			exceptionDto.setMessage(messageSource.getMessage(MessageCodeConstants.UNEXPECTED_ERROR));
 			exceptionDto.setType(resolveErrorType(HttpStatus.Series.SERVER_ERROR));

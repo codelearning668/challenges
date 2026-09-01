@@ -15,7 +15,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
-import sk.mkrajcovic.challenges.exception.InfrastructureException;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -29,8 +28,7 @@ public class TransactionIdInjectingFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		String tid = getGuid();
 
 		// to make TransactionId available in request processing
@@ -40,7 +38,7 @@ public class TransactionIdInjectingFilter implements Filter {
 		if (response instanceof HttpServletResponse httpServletResponse) {
 			httpServletResponse.addHeader("X-TransactionId", tid);
 		} else {
-			throw new InfrastructureException("Unable to handle servlet response with class " + response.getClass());
+			throw new IllegalArgumentException("Unable to handle servlet response with class " + response.getClass());
 		}
 
 		try {
