@@ -35,10 +35,8 @@ public class ChallengeController {
 	private final ChallengeService challengeService;
 	private final ParticipantService participantService;
 
-	// TODO mkrajcovic: add pagination LATER
 	// TODO: review - return challengeSearchResponse dto? has this some serious boundary or maintainability issue?
 	// repository can change its projection but will end up changing the API contract !!!
-	// Can we assume the projection as domain object? (btw, entities are not domain objects, so we are down a layer anyway)
 	@GetMapping(path = "/challenges", produces = APPLICATION_JSON_VALUE)
 	List<ChallengeData> searchChallenges(@ModelAttribute SearchChallengesCriteria searchCriteria) {
 		return challengeService.searchChallenges(searchCriteria);
@@ -46,7 +44,6 @@ public class ChallengeController {
 
 	// TODO: allow updating the challenge endDate for ADMIN!
 	// +/or cancel challenge immediately:
-	// -> time remaining in the day might be a problem, when validating based only by endDate
 
 	@RolesAllowed(ADMIN)
 	@PostMapping(path = "/challenges", consumes = APPLICATION_JSON_VALUE)
