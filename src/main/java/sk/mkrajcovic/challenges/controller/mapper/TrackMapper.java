@@ -16,8 +16,8 @@ public final class TrackMapper {
 
 		return new TrackDetailResponse(
 			track.getId(),
-			track.getName(),
 			track.getCountry(),
+			track.getName(),
 			track.getLengthKm()
 		);
 	}
