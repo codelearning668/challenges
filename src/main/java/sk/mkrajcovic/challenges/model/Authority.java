@@ -10,15 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import sk.mkrajcovic.challenges.model.Authority.AuthorityId;
 
 @Entity
 @Table(name = "authorities")
 @IdClass(AuthorityId.class) // handles the default composite key structure
-@Getter @Setter
 @NoArgsConstructor
 public class Authority {
 
@@ -28,12 +25,12 @@ public class Authority {
 	private User user;
 
 	@Id
-	@Column(length = 50, nullable = false)
-	private String authority;
+	@Column(name = "authority", length = 50, nullable = false)
+	private String role;
 
-	public Authority(User user, String authority) {
+	public Authority(User user, String role) {
 		this.user = user;
-		this.authority = authority;
+		this.role = role;
 	}
 
 	// composite key class required for the default schema
@@ -42,6 +39,6 @@ public class Authority {
 	@NoArgsConstructor
 	static class AuthorityId implements Serializable {
 		private String user;
-		private String authority;
+		private String role;
 	}
 }
