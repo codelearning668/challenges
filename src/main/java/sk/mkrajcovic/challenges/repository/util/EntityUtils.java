@@ -5,32 +5,10 @@ import org.springframework.data.repository.CrudRepository;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.enums.MessageCodeConstants;
-import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
-import sk.mkrajcovic.challenges.model.BaseEntity;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class EntityUtils {
-
-	/**
-	 * Use this method as pre-check before hitting the database, as it may be
-	 * beneficial by reducing useless database access and providing better user
-	 * friendly message about the issue.
-	 *
-	 * @param entity  BaseEntity instance
-	 * @param version value to check against
-	 * @throws IllegalArgumentException if entity argument is {@code null}
-	 * @throws Conflict if the business version of an entity does  not match the second argument
-	 */
-
-	public static void checkStaleUpdate(BaseEntity entity, int version) {
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity cannot be null to perform this check");
-		}
-		if (entity.getVersion() != version) {
-			throw new Conflict(MessageCodeConstants.STALE_UPDATE);
-		}
-	}
 
 	/**
 	 * Retrieves an entity from the given {@link CrudRepository} if it is found,
