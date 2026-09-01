@@ -2,11 +2,14 @@ package sk.mkrajcovic.challenges.controller.mapper;
 
 import java.util.Objects;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ParticipantDetailResponse;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public final class ChallengeMapper {
 
 	public static ChallengeDetailResponse toDetailResponse(Challenge challenge) {

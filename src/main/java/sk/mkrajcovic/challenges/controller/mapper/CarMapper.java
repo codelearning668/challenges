@@ -2,10 +2,13 @@ package sk.mkrajcovic.challenges.controller.mapper;
 
 import java.util.Objects;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public final class CarMapper {
 
 	public static CarDetailResponse toDetailResponse(Car car) {

@@ -1,5 +1,8 @@
 package sk.mkrajcovic.challenges.security;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Application roles used for authorization.
  * <p>
@@ -7,6 +10,7 @@ package sk.mkrajcovic.challenges.security;
  * therefore have access to the functionality associated with each assigned
  * role.
  */
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class UserRoles {
 
 	/** Registered users with usually participating in challenges */
