@@ -26,7 +26,7 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
         AND (:#{#criteria.horsePower} IS NULL OR c.horsePower = :#{#criteria.horsePower})
         AND (:#{#criteria.torque} IS NULL OR c.torque = :#{#criteria.torque})
         AND (:#{#criteria.wheelDrive} IS NULL OR c.wheelDrive = :#{#criteria.wheelDrive})
-	""")
+    """)
 	public List<CarData> findCars(@Param("criteria") SearchCarsCriteria criteria);
 
 	// Note: projection represents domain object in this case

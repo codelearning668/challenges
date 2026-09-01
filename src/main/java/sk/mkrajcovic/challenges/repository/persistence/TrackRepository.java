@@ -22,7 +22,7 @@ public interface TrackRepository extends JpaRepository<Track, Integer> {
         WHERE (:#{#criteria.country} IS NULL OR t.countrySearch LIKE %:#{#criteria.country}%)
         AND (:#{#criteria.name} IS NULL OR t.nameSearch LIKE %:#{#criteria.name}%)
         AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
-	""")
+    """)
 	public List<TrackData> findTracks(@Param("criteria") SearchTracksCriteria criteria);
 
 	interface TrackData {
