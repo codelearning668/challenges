@@ -1,6 +1,9 @@
 package sk.mkrajcovic.challenges.controller;
 
 import static io.restassured.RestAssured.given;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.CONFLICT;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -8,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -17,17 +19,14 @@ import sk.mkrajcovic.challenges.controller.dto.UserRegistrationRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserControllerTest {
 
+	private static final String USER_REGISTRATION_URI = "/users/register";
+
 	private static final String VALID_USERNAME = "TestUser";
 	private static final String VALID_PASSWORD = "TestUserPwd";
 	private static final String TAKEN_USERNAME = "TestUserTaken"; // same user registered twice
-
 	private static final String WHITESPACE = " ";
 	private static final String USERNAME_TOO_LONG = "x".repeat(101);
 	private static final String PASSWORD_TOO_LONG = "x".repeat(501);
-
-	private static final int OK = HttpStatus.OK.value();
-	private static final int CONFLICT = HttpStatus.CONFLICT.value();
-	private static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
 	@LocalServerPort
 	int port;
@@ -42,15 +41,6 @@ class UserControllerTest {
 
 	@Nested
 	class UserRegistrationTest {
-
-		Response register(String username, String password) {
-			return given()
-					.contentType(ContentType.JSON)
-					.accept(ContentType.JSON)
-					.body(new UserRegistrationRequest(username, password))
-				.when()
-					.post("/users/register");
-		}
 
 		@Nested
 		class Positive {
@@ -118,6 +108,15 @@ class UserControllerTest {
 							.statusCode(BAD_REQUEST);
 				}
 			}
+		}
+
+		Response register(String username, String password) {
+			return given()
+					.contentType(ContentType.JSON)
+					.accept(ContentType.JSON)
+					.body(new UserRegistrationRequest(username, password))
+				.when()
+					.post(USER_REGISTRATION_URI);
 		}
 
 	}
