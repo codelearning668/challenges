@@ -299,14 +299,13 @@ class CarControllerTest {
 	}
 
 	private int createCarAndReturnId() {
-		return Integer.parseInt(
-			createValidCar()
-				.then()
-					.statusCode(CREATED)
-					.extract()
-					.header("Location")
-				.replaceAll(".*(\\d+)$", "$1")
-		);
+		String location = createValidCar()
+			.then()
+				.statusCode(CREATED)
+				.extract()
+				.header("Location");
+
+		return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
 	}
 
 	private Response getCar(int id) {
