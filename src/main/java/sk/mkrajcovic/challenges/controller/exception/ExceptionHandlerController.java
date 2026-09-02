@@ -58,6 +58,7 @@ public class ExceptionHandlerController extends AbstractValidationExceptionHandl
 
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException ex) {
+		// TODO: review and fix logging - tests shown that client error is logged as unexpected error
 		LOG.error(MessageCodeConstants.UNEXPECTED_ERROR, ex);
 		var exceptionDto = new ExceptionResponse();
 		exceptionDto.setMessage("Access denied");
@@ -68,6 +69,7 @@ public class ExceptionHandlerController extends AbstractValidationExceptionHandl
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ExceptionResponse> handleException(Exception ex) {
+		// TODO: review and fix logging - tests shown that client error is logged as unexpected error
 		LOG.error(MessageCodeConstants.UNEXPECTED_ERROR, ex);
 		return createResponseEntity(ex).body(serializeException(ex));
 	}
