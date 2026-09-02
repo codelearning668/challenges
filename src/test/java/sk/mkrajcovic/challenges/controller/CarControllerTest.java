@@ -339,29 +339,7 @@ class CarControllerTest {
 				"BmW",
 				"BMW MOTORSPORT"
 			})
-			void canSearchByBrandCaseInsensitive(String searchBrand) {
-				int id = createCarAndReturnId(
-					SEARCH_BRAND,
-					VALID_NAME,
-					VALID_HP,
-					VALID_TORQUE,
-					VALID_DRIVE
-				);
-
-				assertSearchContainsCar(
-					searchCars(searchBrand, null, null, null, null),
-					id
-				);
-			}
-
-			@ParameterizedTest
-			@ValueSource(strings = {
-				"BMW",
-				"bm",
-				"motorsport",
-				"SPORT"
-			})
-			void canSearchByBrandUsingContains(String searchBrand) {
+			void canSearchByBrandIgnoringCaseAndUsingContains(String searchBrand) {
 				int id = createCarAndReturnId(
 					SEARCH_BRAND,
 					VALID_NAME,
