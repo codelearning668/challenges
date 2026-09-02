@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.enums.MessageCodeConstants;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EntityUtils {
 
 	/**
