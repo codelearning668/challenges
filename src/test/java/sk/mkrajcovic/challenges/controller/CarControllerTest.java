@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -37,6 +39,9 @@ import sk.mkrajcovic.challenges.security.UserRoles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CarControllerTest {
 
+	private static final String CAR_URI = "/cars";
+	private static final String CAR_URI_WITH_ID = CAR_URI + "/{id}";
+
 	private static final String ADMIN_USER = "admin";
 	private static final String ADMIN_PASS = "admin";
 	private static final String PARTICIPANT_USER = "participant";
@@ -44,9 +49,16 @@ class CarControllerTest {
 
 	private static final String VALID_BRAND = "BMW";
 	private static final String VALID_NAME = "M3";
-	private static final Integer VALID_HP = 510;
-	private static final Integer VALID_TORQUE = 650;
+	private static final int VALID_HP = 510;
+	private static final int VALID_TORQUE = 650;
 	private static final WheelDrive VALID_DRIVE = WheelDrive.REAR;
+
+	private static final String SEARCH_BRAND = "BMW Motorsport";
+	private static final String SEARCH_NAME = "M3 Competition";
+	private static final String DIACRITIC_BRAND = "Škoda";
+	private static final String DIACRITIC_NAME = "Škoda Competition Edition";
+
+	private static final int NON_EXISTENT_CAR_ID = 99999;
 
 	@LocalServerPort
 	int port;
@@ -54,20 +66,19 @@ class CarControllerTest {
 	@Autowired
 	private InitHelper helper;
 
-	@BeforeEach
-	void setup() {
-		helper.init(port);
-	}
-
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@BeforeEach
+	void setup() {
+		helper.init(port);
+	}
+
 	@BeforeAll
 	void createUsers() {
-
 		var admin = new User();
 		admin.setUsername(ADMIN_USER);
 		admin.setPassword(passwordEncoder.encode(ADMIN_PASS));
@@ -94,7 +105,13 @@ class CarControllerTest {
 				createValidCar()
 					.then()
 						.statusCode(CREATED)
-						.header("Location", allOf(notNullValue(), containsString("/cars/")));
+						.header(
+							"Location",
+							allOf(
+								notNullValue(),
+								containsString(CAR_URI + "/")
+							)
+						);
 			}
 		}
 
@@ -109,9 +126,9 @@ class CarControllerTest {
 					given()
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new CreateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(validCarRequest())
 					.when()
-						.post("/cars")
+						.post(CAR_URI)
 					.then()
 						.statusCode(UNAUTHORIZED);
 				}
@@ -119,12 +136,14 @@ class CarControllerTest {
 				@Test
 				void unauthorizedCannotCreateCar() {
 					given()
-						.auth().preemptive().basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+						.auth()
+							.preemptive()
+							.basic(PARTICIPANT_USER, PARTICIPANT_PASS)
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new CreateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(validCarRequest())
 					.when()
-						.post("/cars")
+						.post(CAR_URI)
 					.then()
 						.statusCode(FORBIDDEN);
 				}
@@ -135,70 +154,130 @@ class CarControllerTest {
 
 				@Test
 				void withoutBrand() {
-					createCar(null, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						null,
+						VALID_NAME,
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withEmptyBrand() {
-					createCar(" ", VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						" ",
+						VALID_NAME,
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withBrandTooLong() {
-					createCar("x".repeat(51), VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						"x".repeat(51),
+						VALID_NAME,
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withoutName() {
-					createCar(VALID_BRAND, null, VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						null,
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withEmptyName() {
-					createCar(VALID_BRAND, " ", VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						" ",
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withNameTooLong() {
-					createCar(VALID_BRAND, "x".repeat(101), VALID_HP, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						"x".repeat(101),
+						VALID_HP,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withNegativeHp() {
-					createCar(VALID_BRAND, VALID_NAME, -1, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						VALID_NAME,
+						-1,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withZeroHp() {
-					createCar(VALID_BRAND, VALID_NAME, 0, VALID_TORQUE, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						VALID_NAME,
+						0,
+						VALID_TORQUE,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withNegativeTorque() {
-					createCar(VALID_BRAND, VALID_NAME, VALID_HP, -1, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						VALID_NAME,
+						VALID_HP,
+						-1,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
 
 				@Test
 				void withZeroTorque() {
-					createCar(VALID_BRAND, VALID_NAME, VALID_HP, 0, VALID_DRIVE)
+					createCar(
+						VALID_BRAND,
+						VALID_NAME,
+						VALID_HP,
+						0,
+						VALID_DRIVE
+					)
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
@@ -233,7 +312,7 @@ class CarControllerTest {
 
 			@Test
 			void cannotGetNonExistentCar() {
-				getCar(99999)
+				getCar(NON_EXISTENT_CAR_ID)
 					.then()
 						.statusCode(NOT_FOUND);
 			}
@@ -254,29 +333,194 @@ class CarControllerTest {
 						.contentType(ContentType.JSON);
 			}
 
-			@Test
-			void canSearchByBrand() {
-				createCar(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE);
+			@ParameterizedTest
+			@ValueSource(strings = {
+				"bmw",
+				"BmW",
+				"BMW MOTORSPORT"
+			})
+			void canSearchByBrandCaseInsensitive(String searchBrand) {
+				int id = createCarAndReturnId(
+					SEARCH_BRAND,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
 
-				searchCars(VALID_BRAND, null, null, null, null)
-					.then()
-						.statusCode(OK)
-						.contentType(ContentType.JSON);
+				assertSearchContainsCar(
+					searchCars(searchBrand, null, null, null, null),
+					id
+				);
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = {
+				"BMW",
+				"bm",
+				"motorsport",
+				"SPORT"
+			})
+			void canSearchByBrandUsingContains(String searchBrand) {
+				int id = createCarAndReturnId(
+					SEARCH_BRAND,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(searchBrand, null, null, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByBrandIgnoringDiacritics() {
+				int id = createCarAndReturnId(
+					DIACRITIC_BRAND,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars("skoda", null, null, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByBrandIgnoringCaseDiacriticsAndUsingContains() {
+				String brand = "Škoda Motorsport";
+
+				int id = createCarAndReturnId(
+					brand,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars("KODA MOTOR", null, null, null, null),
+					id
+				);
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = {
+				"competition",
+				"COMPETITION",
+				"petit",
+				"ition"
+			})
+			void canSearchByNameCaseInsensitiveAndUsingContains(String searchName) {
+				int id = createCarAndReturnId(
+					VALID_BRAND,
+					SEARCH_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(null, searchName, null, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByNameIgnoringDiacritics() {
+				int id = createCarAndReturnId(
+					VALID_BRAND,
+					DIACRITIC_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(null, "skoda", null, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByNameIgnoringCaseDiacriticsAndUsingContains() {
+				int id = createCarAndReturnId(
+					VALID_BRAND,
+					DIACRITIC_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(null, "KODA COMP", null, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByHorsePower() {
+				int id = createCarAndReturnId(
+					SEARCH_BRAND,
+					SEARCH_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(null, null, VALID_HP, null, null),
+					id
+				);
+			}
+
+			@Test
+			void canSearchByTorque() {
+				int id = createCarAndReturnId(
+					SEARCH_BRAND,
+					SEARCH_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
+
+				assertSearchContainsCar(
+					searchCars(null, null, null, VALID_TORQUE, null),
+					id
+				);
 			}
 
 			@Test
 			void canSearchByWheelDrive() {
-				createCar(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE);
+				int id = createCarAndReturnId(
+					VALID_BRAND,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE
+				);
 
-				searchCars(null, null, null, null, VALID_DRIVE)
-					.then()
-						.statusCode(OK)
-						.contentType(ContentType.JSON);
+				assertSearchContainsCar(
+					searchCars(null, null, null, null, VALID_DRIVE),
+					id
+				);
 			}
 
 			@Test
 			void returnsEmptyListWhenNoMatch() {
-				searchCars("NonExistentBrand", null, null, null, null)
+				searchCars(
+					"NonExistentBrand",
+					null,
+					null,
+					null,
+					null
+				)
 					.then()
 						.statusCode(OK)
 						.body("size()", is(0));
@@ -284,38 +528,99 @@ class CarControllerTest {
 		}
 	}
 
-	private Response createCar(String brand, String name, Integer hp, Integer torque, WheelDrive drive) {
+	private Response createCar(
+		String brand,
+		String name,
+		Integer hp,
+		Integer torque,
+		WheelDrive drive
+	) {
 		return given()
-				.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+				.auth()
+					.preemptive()
+					.basic(ADMIN_USER, ADMIN_PASS)
 				.contentType(ContentType.JSON)
 				.accept(ContentType.JSON)
-				.body(new CreateCarRequest(brand, name, hp, torque, drive))
+				.body(new CreateCarRequest(
+					brand,
+					name,
+					hp,
+					torque,
+					drive
+				))
 			.when()
-				.post("/cars");
+				.post(CAR_URI);
 	}
 
 	private Response createValidCar() {
-		return createCar(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE);
+		return createCar(
+			VALID_BRAND,
+			VALID_NAME,
+			VALID_HP,
+			VALID_TORQUE,
+			VALID_DRIVE
+		);
+	}
+
+	private CreateCarRequest validCarRequest() {
+		return new CreateCarRequest(
+			VALID_BRAND,
+			VALID_NAME,
+			VALID_HP,
+			VALID_TORQUE,
+			VALID_DRIVE
+		);
 	}
 
 	private int createCarAndReturnId() {
-		String location = createValidCar()
+		return createCarAndReturnId(
+			VALID_BRAND,
+			VALID_NAME,
+			VALID_HP,
+			VALID_TORQUE,
+			VALID_DRIVE
+		);
+	}
+
+	private int createCarAndReturnId(
+		String brand,
+		String name,
+		Integer hp,
+		Integer torque,
+		WheelDrive drive
+	) {
+		String location = createCar(
+			brand,
+			name,
+			hp,
+			torque,
+			drive
+		)
 			.then()
 				.statusCode(CREATED)
 				.extract()
 				.header("Location");
 
-		return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+		return Integer.parseInt(
+			location.substring(location.lastIndexOf('/') + 1)
+		);
 	}
 
 	private Response getCar(int id) {
 		return given()
 			.when()
-				.get("/cars/{id}", id);
+				.get(CAR_URI_WITH_ID, id);
 	}
 
-	private Response searchCars(String brand, String name, Integer hp, Integer torque, WheelDrive drive) {
+	private Response searchCars(
+		String brand,
+		String name,
+		Integer hp,
+		Integer torque,
+		WheelDrive drive
+	) {
 		var spec = given();
+
 		if (brand != null) {
 			spec = spec.param("brand", brand);
 		}
@@ -331,12 +636,23 @@ class CarControllerTest {
 		if (drive != null) {
 			spec = spec.param("drive", drive.name());
 		}
-		return spec.when().get("/cars");
+
+		return spec
+			.when()
+				.get(CAR_URI);
 	}
 
 	private Response searchCars() {
 		return given()
 			.when()
-				.get("/cars");
+				.get(CAR_URI);
+	}
+
+	private void assertSearchContainsCar(Response response, int carId) {
+		response.then()
+			.body(
+				"find { it.id == " + carId + " }",
+				notNullValue()
+			);
 	}
 }
