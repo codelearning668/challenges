@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  *
  * @author mkrajcovicux
  */
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageCodeConstants {
 
 	public static final String UNEXPECTED_ERROR = "unexpectedError";

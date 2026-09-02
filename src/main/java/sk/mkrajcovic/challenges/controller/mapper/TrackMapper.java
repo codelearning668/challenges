@@ -8,7 +8,7 @@ import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.TrackDetailResponse;
 import sk.mkrajcovic.challenges.model.Track;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TrackMapper {
 
 	public static TrackDetailResponse toDetailResponse(Track track) {

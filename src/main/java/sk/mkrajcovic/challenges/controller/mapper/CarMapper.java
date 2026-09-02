@@ -8,7 +8,7 @@ import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CarMapper {
 
 	public static CarDetailResponse toDetailResponse(Car car) {

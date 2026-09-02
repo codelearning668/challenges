@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * therefore have access to the functionality associated with each assigned
  * role.
  */
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserRoles {
 
 	/** Registered users with usually participating in challenges */
