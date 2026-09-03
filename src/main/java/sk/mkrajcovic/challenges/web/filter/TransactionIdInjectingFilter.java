@@ -33,13 +33,7 @@ public class TransactionIdInjectingFilter implements Filter {
 
 		// to make TransactionId available in request processing
 		request.setAttribute(TRANSACTION_ID, tid);
-
-		// to avoid writing this header after flushing output stream
-		if (response instanceof HttpServletResponse httpServletResponse) {
-			httpServletResponse.addHeader("X-TransactionId", tid);
-		} else {
-			throw new IllegalArgumentException("Unable to handle servlet response with class " + response.getClass());
-		}
+		((HttpServletResponse) response).addHeader("X-TransactionId", tid);
 
 		try {
 			//to log transactionId in slf
