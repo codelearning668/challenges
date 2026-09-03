@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 
 @Repository
@@ -23,13 +24,6 @@ public interface TrackRepository extends JpaRepository<Track, Integer> {
         AND (:#{#criteria.name} IS NULL OR t.nameSearch LIKE %:#{#criteria.name}%)
         AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
     """)
-	public List<TrackData> findTracks(@Param("criteria") SearchTracksCriteria criteria);
-
-	interface TrackData {
-		Integer getId();
-		String getCountry();
-		String getName();
-		Double getLengthKm();
-	}
+	public List<TrackDetail> findTracks(@Param("criteria") SearchTracksCriteria criteria);
 
 }

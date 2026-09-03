@@ -20,7 +20,6 @@ import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.mapper.CarMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
-import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
 import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.service.CarService;
 
@@ -44,8 +43,10 @@ public class CarController {
 	}
 
 	@GetMapping(path = "/cars", produces = APPLICATION_JSON_VALUE)
-	List<CarData> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
-		return service.searchCars(searchCriteria);
+	List<CarDetailResponse> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
+		return service.searchCars(searchCriteria).stream()
+			.map(CarMapper::toDetailResponse)
+			.toList();
 	}
 
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class TrackMapperTest {
@@ -31,8 +32,51 @@ class TrackMapperTest {
 
 	@Test
 	void shouldRejectNullTrackWhenMappingToDetailResponse() {
-		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toDetailResponse(null));
+		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toDetailResponse((Track)null));
 		assertEquals("track cannot be null in order to map its values", exception.getMessage());
+	}
+
+	@Test
+	void shouldMapTrackDetailToDetailResponse() {
+		var trackDetail = new TrackDetail() {
+
+			@Override
+			public Integer getId() {
+				return 42;
+			}
+
+			@Override
+			public String getCountry() {
+				return "Slovakia";
+			}
+
+			@Override
+			public String getName() {
+				return "Slovakia Ring";
+			}
+
+			@Override
+			public Double getLengthKm() {
+				return 5.922;
+			}
+		};
+
+		var response = TrackMapper.toDetailResponse(trackDetail);
+
+		assertAll(
+			() -> assertEquals(42, response.id()),
+			() -> assertEquals("Slovakia Ring", response.name()),
+			() -> assertEquals("Slovakia", response.country()),
+			() -> assertEquals(5.922, response.lengthKm()));
+	}
+
+	@Test
+	void shouldRejectNullTrackDetailWhenMappingToDetailResponse() {
+		var exception = assertThrows(
+			NullPointerException.class,
+			() -> TrackMapper.toDetailResponse((TrackDetail) null));
+
+		assertEquals("trackDetail cannot be null in order to map its values", exception.getMessage());
 	}
 
 	@Test

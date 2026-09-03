@@ -5,9 +5,11 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
+import sk.mkrajcovic.challenges.controller.dto.ChallengeSummaryResponse;
 import sk.mkrajcovic.challenges.controller.dto.ParticipantDetailResponse;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
+import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ChallengeMapper {
@@ -50,6 +52,19 @@ public final class ChallengeMapper {
 			participant.getId(),
 			participant.getName(),
 			participant.getBestLapTime()
+		);
+	}
+
+	public static ChallengeSummaryResponse toSummaryResponse(ChallengeDetail challengeDetail) {
+		Objects.requireNonNull(challengeDetail, "challengeDetail cannot be null in order to map its values");
+
+		return new ChallengeSummaryResponse(
+			challengeDetail.getId(),
+			challengeDetail.getEndDate(),
+			challengeDetail.getTrackCountry(),
+			challengeDetail.getTrackName(),
+			challengeDetail.getCarBrand(),
+			challengeDetail.getCarName()
 		);
 	}
 }

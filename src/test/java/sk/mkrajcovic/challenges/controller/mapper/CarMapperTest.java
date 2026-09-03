@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.WheelDrive;
+import sk.mkrajcovic.challenges.model.read.CarDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class CarMapperTest {
@@ -34,7 +35,61 @@ class CarMapperTest {
 
 	@Test
 	void shouldRejectNullCarWhenMappingToDetailResponse() {
-		assertThrows(NullPointerException.class, () -> CarMapper.toDetailResponse(null));
+		assertThrows(NullPointerException.class, () -> CarMapper.toDetailResponse((Car) null));
+	}
+
+	@Test
+	void shouldMapCarDetailToDetailResponse() {
+		var carDetail = new CarDetail() {
+
+			@Override
+			public Integer getId() {
+				return 42;
+			}
+
+			@Override
+			public String getBrand() {
+				return "BMW";
+			}
+
+			@Override
+			public String getName() {
+				return "M3";
+			}
+
+			@Override
+			public Integer getHorsePower() {
+				return 510;
+			}
+
+			@Override
+			public Integer getTorque() {
+				return 650;
+			}
+
+			@Override
+			public String getWheelDrive() {
+				return "ALL";
+			}
+		};
+
+		var response = CarMapper.toDetailResponse(carDetail);
+
+		assertAll(
+			() -> assertEquals(42, response.id()),
+			() -> assertEquals("BMW", response.brand()),
+			() -> assertEquals("M3", response.name()),
+			() -> assertEquals(510, response.horsePower()),
+			() -> assertEquals(650, response.torque()));
+	}
+
+	@Test
+	void shouldRejectNullCarDetailWhenMappingToDetailResponse() {
+		var exception = assertThrows(
+			NullPointerException.class,
+			() -> CarMapper.toDetailResponse((CarDetail) null));
+
+		assertEquals("carDetail cannot be null in order to map its values", exception.getMessage());
 	}
 
 	@Test

@@ -16,8 +16,8 @@ import sk.mkrajcovic.challenges.context.CallContext;
 import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
-import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.util.Text;
@@ -40,9 +40,9 @@ public class ChallengeService {
 		this.callContext = callContext;
 	}
 
-	public List<ChallengeData> searchChallenges(SearchChallengesCriteria searchCriteria) {
+	public List<ChallengeDetail> searchChallenges(SearchChallengesCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
-		return repository.searchChallenges(searchCriteria);
+		return repository.findChallenges(searchCriteria);
 	}
 
 	/*

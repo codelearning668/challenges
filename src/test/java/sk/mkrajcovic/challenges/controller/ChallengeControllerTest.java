@@ -289,7 +289,7 @@ class ChallengeControllerTest {
                 .then()
                 .statusCode(OK)
                 .contentType(ContentType.JSON)
-                .body("find { it.id == " + challengeId + " }", notNullValue());
+                .body("find { it.challengeId == " + challengeId + " }", notNullValue());
         }
 
         @Test
@@ -299,7 +299,7 @@ class ChallengeControllerTest {
             searchChallenges("endDate", VALID_END_DATE.toString())
                 .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test
@@ -309,7 +309,7 @@ class ChallengeControllerTest {
             searchChallenges("trackName", "OVAKIA RING")
                 .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test
@@ -325,7 +325,7 @@ class ChallengeControllerTest {
             searchChallenges("trackCountry", "CESKA")
                 .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test
@@ -341,7 +341,7 @@ class ChallengeControllerTest {
             searchChallenges("carBrand", "bmw motor")
                 .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test
@@ -357,7 +357,7 @@ class ChallengeControllerTest {
             searchChallenges("carName", "competition")
                 .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test
@@ -376,7 +376,7 @@ class ChallengeControllerTest {
                 .get(CHALLENGES_URI)
             .then()
                 .statusCode(OK)
-                .body("id", hasItem(challengeId));
+                .body("challengeId", hasItem(challengeId));
         }
 
         @Test

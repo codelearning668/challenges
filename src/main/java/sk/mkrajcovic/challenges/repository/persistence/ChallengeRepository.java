@@ -1,6 +1,5 @@
 package sk.mkrajcovic.challenges.repository.persistence;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 
 @Repository
@@ -39,15 +39,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
         AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
     """)
-	public List<ChallengeData> searchChallenges(@Param("criteria") SearchChallengesCriteria criteria);
-
-	interface ChallengeData {
-		Integer getId();
-		LocalDate getEndDate();
-		String getTrackName();
-		String getTrackCountry();
-		String getCarBrand();
-		String getCarName();
-	}
+	public List<ChallengeDetail> findChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 
 }

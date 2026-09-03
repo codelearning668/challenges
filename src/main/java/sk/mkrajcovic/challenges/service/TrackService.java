@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
-import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.util.Text;
@@ -28,7 +28,7 @@ public class TrackService {
 		return EntityUtils.getExistingEntityById(repository, trackId);
 	}
 
-	public List<TrackData> searchTracks(SearchTracksCriteria searchCriteria) {
+	public List<TrackDetail> searchTracks(SearchTracksCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
 		return repository.findTracks(searchCriteria);
 	}

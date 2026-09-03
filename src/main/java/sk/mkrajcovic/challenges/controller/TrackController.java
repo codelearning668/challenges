@@ -20,7 +20,6 @@ import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.TrackDetailResponse;
 import sk.mkrajcovic.challenges.controller.mapper.TrackMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
-import sk.mkrajcovic.challenges.repository.persistence.TrackRepository.TrackData;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 import sk.mkrajcovic.challenges.service.TrackService;
 
@@ -44,7 +43,9 @@ public class TrackController {
 	}
 
 	@GetMapping(path = "/tracks", produces = APPLICATION_JSON_VALUE)
-	List<TrackData> searchTracks(@ModelAttribute SearchTracksCriteria searchCriteria) {
-		return service.searchTracks(searchCriteria);
+	List<TrackDetailResponse> searchTracks(@ModelAttribute SearchTracksCriteria searchCriteria) {
+		return service.searchTracks(searchCriteria).stream()
+			.map(TrackMapper::toDetailResponse)
+			.toList();
 	}
 }

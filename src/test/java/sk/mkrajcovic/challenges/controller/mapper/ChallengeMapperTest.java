@@ -15,6 +15,7 @@ import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class ChallengeMapperTest {
@@ -99,6 +100,58 @@ class ChallengeMapperTest {
 			() -> ChallengeMapper.toParticipantDetailResponse(null)
 		);
 		assertEquals("participant cannot be null in order to map its values", exception.getMessage());
+	}
+
+	@Test
+	void shouldMapChallengeDetailToSummaryResponse() {
+		var challengeDetail = new ChallengeDetail() {
+
+			@Override
+			public Integer getId() {
+				return 1;
+			}
+
+			@Override
+			public LocalDate getEndDate() {
+				return LocalDate.of(2026, 9, 30);
+			}
+
+			@Override
+			public String getTrackName() {
+				return "Slovakia Ring";
+			}
+
+			@Override
+			public String getTrackCountry() {
+				return "Slovakia";
+			}
+
+			@Override
+			public String getCarBrand() {
+				return "BMW";
+			}
+
+			@Override
+			public String getCarName() {
+				return "M3";
+			}
+		};
+
+		var response = ChallengeMapper.toSummaryResponse(challengeDetail);
+
+		assertAll(
+			() -> assertEquals(1, response.challengeId()),
+			() -> assertEquals(LocalDate.of(2026, 9, 30), response.challengeEndDate()),
+			() -> assertEquals("Slovakia Ring", response.trackName()),
+			() -> assertEquals("Slovakia", response.trackCountry()),
+			() -> assertEquals("BMW", response.carBrand()),
+			() -> assertEquals("M3", response.carName()));
+	}
+
+	@Test
+	void shouldRejectNullChallengeDetail() {
+		var exception = assertThrows(NullPointerException.class, () -> ChallengeMapper.toSummaryResponse(null));
+		assertEquals("challengeDetail cannot be null in order to map its values", exception.getMessage());
 	}
 
 	private static Track createTrack() {

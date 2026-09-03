@@ -19,11 +19,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
+import sk.mkrajcovic.challenges.controller.dto.ChallengeSummaryResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
 import sk.mkrajcovic.challenges.controller.mapper.ChallengeMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
-import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository.ChallengeData;
 import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.service.ChallengeService;
 import sk.mkrajcovic.challenges.service.ParticipantService;
@@ -35,11 +35,11 @@ public class ChallengeController {
 	private final ChallengeService challengeService;
 	private final ParticipantService participantService;
 
-	// TODO: review - return challengeSearchResponse dto? has this some serious boundary or maintainability issue?
-	// repository can change its projection but will end up changing the API contract !!!
 	@GetMapping(path = "/challenges", produces = APPLICATION_JSON_VALUE)
-	List<ChallengeData> searchChallenges(@ModelAttribute SearchChallengesCriteria searchCriteria) {
-		return challengeService.searchChallenges(searchCriteria);
+	List<ChallengeSummaryResponse> searchChallenges(@ModelAttribute SearchChallengesCriteria searchCriteria) {
+		return challengeService.searchChallenges(searchCriteria).stream()
+			.map(ChallengeMapper::toSummaryResponse)
+			.toList();
 	}
 
 	// TODO: allow updating the challenge endDate for ADMIN!

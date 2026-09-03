@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.model.read.CarDetail;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
-import sk.mkrajcovic.challenges.repository.persistence.CarRepository.CarData;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.util.Text;
@@ -28,7 +28,7 @@ public class CarService {
 		return EntityUtils.getExistingEntityById(repository, carId);
 	}
 
-	public List<CarData> searchCars(SearchCarsCriteria searchCriteria) {
+	public List<CarDetail> searchCars(SearchCarsCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
 		return repository.findCars(searchCriteria);
 	}

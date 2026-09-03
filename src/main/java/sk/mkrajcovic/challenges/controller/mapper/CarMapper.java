@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.model.read.CarDetail;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CarMapper {
@@ -20,6 +21,18 @@ public final class CarMapper {
 			car.getName(),
 			car.getHorsePower(),
 			car.getTorque()
+		);
+	}
+
+	public static CarDetailResponse toDetailResponse(CarDetail carDetail) {
+		Objects.requireNonNull(carDetail, "carDetail cannot be null in order to map its values");
+
+		return new CarDetailResponse(
+			carDetail.getId(),
+			carDetail.getBrand(),
+			carDetail.getName(),
+			carDetail.getHorsePower(),
+			carDetail.getTorque()
 		);
 	}
 
