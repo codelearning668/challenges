@@ -1,10 +1,8 @@
 
--- tmp migration script for testing, will be removed completely after implementation
-
 -- activate unaccent function
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
--- test data -> all assetto corsa ultimate edition tracks (will be potentially differently structured when the simulator dependency is implemented)
+-- all assetto corsa ultimate edition tracks (will be potentially differently structured when the simulator dependency is implemented)
 insert into track (
     country,
     name,
@@ -287,17 +285,4 @@ from (
 	('Toyota', 'TS040 Hybrid 2014', 1000, null, 'ALL', 1)
 	
 ) as data(brand, name, horse_power, torque, wheel_drive, version);
-
-
--- test users
-insert into users (username, password, enabled)
-	values ('admin', '$2a$10$kBC31uAS0uX4YjS9qgaO.eQliPKjzRidDWJbfdHnnaZn5ZmhsR1ye', true),
-	       ('participant', '$2a$10$/4TayRdR7me4A8VAH2rrlOah7BpdGkG5dfCTELNsQ2ipLQk34EaTe', true),
-       	       ('thor', '$2a$10$dcoUcEhmRg/jRZjRuIpx/.gSn3OVn9mZ0/Yf0a0/7smuWzhwc/KwC', true);
-
-insert into authorities (username, authority)
-	values ('participant', 'PARTICIPANT'),
-               ('thor', 'PARTICIPANT'),
-               ('thor', 'ADMIN'),
-               ('admin', 'ADMIN');
 
