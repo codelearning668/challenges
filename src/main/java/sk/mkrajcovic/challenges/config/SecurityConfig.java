@@ -4,7 +4,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,28 +21,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 @Configuration
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class SecurityConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
-
-	private final boolean permitAll;
-
-	SecurityConfig(@Value("${challenges.security.permit-all:false}") boolean permitAll) {
-		this.permitAll = permitAll;
-	}
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, ServerProperties serverProperties) throws Exception {
         http.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.csrf(CsrfConfigurer::disable); // NOSONAR - safe because there is no session
         http.headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(FrameOptionsConfig::sameOrigin));
-
-        if (permitAll) {
-            LOG.warn("PERMIT ALL - Security turned off!!!");
-            http.authorizeHttpRequests(ar -> ar.anyRequest().permitAll());
-            return http.build();
-        }
 
         http.exceptionHandling(exh -> exh.authenticationEntryPoint((request, response, authException) -> {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());

@@ -2,7 +2,6 @@ package sk.mkrajcovic.challenges.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
@@ -21,7 +20,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * @author mkrajcovicux
  */
 @Configuration
-@ConditionalOnProperty(name = "challenges.security.permit-all", havingValue = "false", matchIfMissing = true)
 @EnableMethodSecurity(jsr250Enabled = true)
 public class MethodLevelSecurityConfig {
 
