@@ -11,5 +11,6 @@ public class HttpCodes {
 	public static final int UNAUTHORIZED = HttpStatus.UNAUTHORIZED.value();
 	public static final int FORBIDDEN = HttpStatus.FORBIDDEN.value();
 	public static final int CONFLICT = HttpStatus.CONFLICT.value();
+	public static final int UNPROCESSABLE_ENTITY = HttpStatus.UNPROCESSABLE_ENTITY.value();
 
 }

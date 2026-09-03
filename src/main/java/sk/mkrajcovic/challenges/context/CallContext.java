@@ -1,7 +1,5 @@
 package sk.mkrajcovic.challenges.context;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -23,12 +21,6 @@ public class CallContext {
 
 	@Setter(AccessLevel.NONE)
 	private String currentUser;
-
-	private final LocalDateTime transactionTime;
-
-	public CallContext() {
-		this.transactionTime = LocalDateTime.now(ZoneOffset.UTC);
-	}
 
 	public String getCurrentUser() {
 		if (currentUser == null) {
