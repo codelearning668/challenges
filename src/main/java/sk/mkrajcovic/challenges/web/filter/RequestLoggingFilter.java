@@ -7,7 +7,6 @@ import static org.springframework.http.HttpMethod.PUT;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +25,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import sk.mkrajcovic.challenges.util.Text;
 
 @ConditionalOnProperty(name = "challenges.request-logging.enabled", havingValue = "true", matchIfMissing = false)
 @Component
@@ -85,7 +85,7 @@ class RequestLoggingFilter extends OncePerRequestFilter {
 			.append(request.getMethod()).append(": ")
 			.append(request.getRequestURI());
 
-		if (!StringUtils.isBlank(request.getQueryString())) {
+		if (Text.isNotBlank(request.getQueryString())) {
 			message.append('?').append(request.getQueryString());
 		}
 		message.append(", ").append(compactJsonSafely(request.getRequestBody()));
@@ -93,7 +93,7 @@ class RequestLoggingFilter extends OncePerRequestFilter {
 	}
 
     private String compactJsonSafely(String input) {
-		if (StringUtils.isBlank(input)) {
+		if (Text.isBlank(input)) {
 			return "<no payload>";
 		}
 		try {

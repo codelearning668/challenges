@@ -28,7 +28,18 @@ public final class Text {
 	 */
 	public static boolean isBlank(CharSequence input) {
 		return org.apache.commons.lang3.StringUtils.isBlank(input);
-	} 
+	}
+
+	/**
+	 * Checks whether the input text is not blank (not null, empty or consist of
+	 * only whitespaces).
+	 *
+	 * @param input text to evaluate
+	 * @return {@code true}, if the text has at least one non-whitespace char
+	 */
+	public static boolean isNotBlank(CharSequence input) {
+		return org.apache.commons.lang3.StringUtils.isNotBlank(input);
+	}
 
 	/**
 	 * Normalizes a string for accent-insensitive and case-insensitive searching.

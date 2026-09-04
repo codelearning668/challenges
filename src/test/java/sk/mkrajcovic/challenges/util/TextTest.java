@@ -34,6 +34,24 @@ class TextTest {
 	}
 
 	@Nested
+	@DisplayName("isNotBlank()")
+	class IsNotBlankTest {
+
+		@ParameterizedTest
+		@NullAndEmptySource
+		@ValueSource(strings = { " ", "   ", "\t", "\n" })
+		void shouldReturnFalseForBlankInputs(String input) {
+			assertFalse(Text.isNotBlank(input));
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "a", "abc", " abc ", "0" })
+		void shouldReturnTrueForNonBlankInputs(String input) {
+			assertTrue(Text.isNotBlank(input));
+		}
+	}
+
+	@Nested
 	@DisplayName("normalizeForSearch()")
 	class NormalizeForSearchTest {
 
