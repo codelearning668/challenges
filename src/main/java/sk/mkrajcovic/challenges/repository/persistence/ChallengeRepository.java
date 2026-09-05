@@ -19,7 +19,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         FROM Challenge ch
         WHERE ch.track.id = :trackId
         AND ch.car.id = :carId
-        AND ch.endDate > cast(now() as date)
+        AND ch.endDate >= cast(now() as date)
     """)
 	public boolean existsActiveChallengeForTrackAndCar(Integer trackId, Integer carId);
 

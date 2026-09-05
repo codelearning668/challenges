@@ -214,7 +214,9 @@ class ChallengeControllerTest {
             int trackId = createTrackAndReturnId();
             int carId = createCarAndReturnId();
 
-            createChallenge(trackId, carId, VALID_END_DATE)
+            // Bug fix test - simulates the case when duplicate challenge
+            // could be created on the final day of the challenge !! 
+            createChallenge(trackId, carId, LocalDate.now())
                 .then()
                 .statusCode(CREATED);
 
