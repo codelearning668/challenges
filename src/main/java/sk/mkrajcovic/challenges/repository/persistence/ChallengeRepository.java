@@ -44,4 +44,21 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
     """)
 	public List<ChallengeDetail> findChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 
+	@Query("""
+        SELECT EXISTS (
+            SELECT ch
+            FROM Challenge ch
+            JOIN ch.participants p
+            WHERE p.name = :participantName
+            AND ch.endDate >= cast(now() as date)
+            AND NOT EXISTS (
+                SELECT wonCh
+                FROM Challenge wonCh
+                WHERE wonCh.bestParticipantName = :participantName
+                AND wonCh.endDate < cast(now() as date)
+            )
+        )
+    """)
+	boolean hasActiveChallengeWithoutPreviousWin(String participantName);
+
 }

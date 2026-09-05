@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import io.restassured.RestAssured;
 
 @Component
-public class InitHelper {
+class InitHelper {
 
     private int port;
 

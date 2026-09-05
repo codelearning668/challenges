@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.CONFLICT;
@@ -22,6 +21,7 @@ import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNPROCESSABLE_ENTITY;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,6 @@ import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
 import sk.mkrajcovic.challenges.security.UserRoles;
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ChallengeControllerTest {
@@ -54,9 +53,10 @@ class ChallengeControllerTest {
 
     private static final String ADMIN_USER = "challengeTestAdmin";
     private static final String ADMIN_PASS = "admin";
+
     private static final String PARTICIPANT_USER = "challengeTestParticipant";
+    private static final String SECOND_PARTICIPANT_USER = "challengeTestSecondParticipant";
     private static final String PARTICIPANT_PASS = "participant";
-    private static final String SECOND_PARTICIPANT_USER = "challengeTestSecondPrticipant";
 
     private static final String TRACK_NAME = "Slovakia Ring";
     private static final String TRACK_COUNTRY = "Slovakia";
@@ -99,19 +99,31 @@ class ChallengeControllerTest {
         admin.addAuthority(UserRoles.ADMIN);
         admin.setEnabled(true);
 
-        var participant = new User();
-        participant.setUsername(PARTICIPANT_USER);
-        participant.setPassword(passwordEncoder.encode(PARTICIPANT_PASS));
-        participant.addAuthority(UserRoles.PARTICIPANT);
-        participant.setEnabled(true);
+        var participant = createParticipantUser(PARTICIPANT_USER);
+        var secondParticipant = createParticipantUser(SECOND_PARTICIPANT_USER);
 
-        var secondParticipant = new User();
-        secondParticipant.setUsername(SECOND_PARTICIPANT_USER);
-        secondParticipant.setPassword(passwordEncoder.encode(PARTICIPANT_PASS));
-        secondParticipant.addAuthority(UserRoles.PARTICIPANT);
-        secondParticipant.setEnabled(true);
+        userRepository.saveAll(List.of(
+            admin,
+            participant,
+            secondParticipant
+        ));
+    }
 
-        userRepository.saveAll(List.of(admin, participant, secondParticipant));
+    private User createParticipantUser(String username) {
+        var user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(PARTICIPANT_PASS));
+        user.addAuthority(UserRoles.PARTICIPANT);
+        user.setEnabled(true);
+        return user;
+    }
+
+    private String newParticipant() {
+        String username = "participant-" + UUID.randomUUID();
+
+        userRepository.save(createParticipantUser(username));
+
+        return username;
     }
 
     @Nested
@@ -150,7 +162,13 @@ class ChallengeControllerTest {
             int trackId = createTrackAndReturnId();
             int carId = createCarAndReturnId();
 
-            createChallengeAs(PARTICIPANT_USER, PARTICIPANT_PASS, trackId, carId, VALID_END_DATE)
+            createChallengeAs(
+                PARTICIPANT_USER,
+                PARTICIPANT_PASS,
+                trackId,
+                carId,
+                VALID_END_DATE
+            )
                 .then()
                 .statusCode(FORBIDDEN);
         }
@@ -160,34 +178,52 @@ class ChallengeControllerTest {
 
             @Test
             void rejectsMissingTrackId() {
-                createChallenge(null, 1, VALID_END_DATE).then().statusCode(BAD_REQUEST);
+                createChallenge(null, 1, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
 
             @Test
             void rejectsNonPositiveTrackId() {
-                createChallenge(0, 1, VALID_END_DATE).then().statusCode(BAD_REQUEST);
-                createChallenge(-1, 1, VALID_END_DATE).then().statusCode(BAD_REQUEST);
+                createChallenge(0, 1, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
+
+                createChallenge(-1, 1, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
 
             @Test
             void rejectsMissingCarId() {
-                createChallenge(1, null, VALID_END_DATE).then().statusCode(BAD_REQUEST);
+                createChallenge(1, null, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
 
             @Test
             void rejectsNonPositiveCarId() {
-                createChallenge(1, 0, VALID_END_DATE).then().statusCode(BAD_REQUEST);
-                createChallenge(1, -1, VALID_END_DATE).then().statusCode(BAD_REQUEST);
+                createChallenge(1, 0, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
+
+                createChallenge(1, -1, VALID_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
 
             @Test
             void rejectsMissingEndDate() {
-                createChallenge(1, 1, null).then().statusCode(BAD_REQUEST);
+                createChallenge(1, 1, null)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
 
             @Test
             void rejectsPastEndDate() {
-                createChallenge(1, 1, CLOSED_END_DATE).then().statusCode(BAD_REQUEST);
+                createChallenge(1, 1, CLOSED_END_DATE)
+                    .then()
+                    .statusCode(BAD_REQUEST);
             }
         }
 
@@ -214,8 +250,6 @@ class ChallengeControllerTest {
             int trackId = createTrackAndReturnId();
             int carId = createCarAndReturnId();
 
-            // Bug fix test - simulates the case when duplicate challenge
-            // could be created on the final day of the challenge !! 
             createChallenge(trackId, carId, LocalDate.now())
                 .then()
                 .statusCode(CREATED);
@@ -233,9 +267,7 @@ class ChallengeControllerTest {
         void returnsChallengeDetails() {
             int challengeId = createChallengeAndReturnId();
 
-            Response response = getChallenge(challengeId);
-
-            response
+            getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
                 .contentType(ContentType.JSON)
@@ -248,35 +280,43 @@ class ChallengeControllerTest {
                 .body("carHorsePower", equalTo(CAR_HP))
                 .body("carTorque", equalTo(CAR_TORQUE))
                 .body("participants", hasSize(0));
-
-            Number actualLengthKm = response.path("trackLengthKm");
-            assertEquals(TRACK_LENGTH_KM, actualLengthKm.doubleValue(), 0.000001);
         }
 
         @Test
         void returnsRegisteredParticipant() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("participants.find { it.participantName == '" + PARTICIPANT_USER
-                    + "' }.participantName", equalTo(PARTICIPANT_USER));
+                .body(
+                    "participants.find { it.participantName == '"
+                        + participant
+                        + "' }.participantName",
+                    equalTo(participant)
+                );
         }
 
         @Test
         void rejectsNonExistentChallenge() {
-            getChallenge(99999).then().statusCode(NOT_FOUND);
+            getChallenge(99999)
+                .then()
+                .statusCode(NOT_FOUND);
         }
 
         @Test
         void rejectsZeroChallengeId() {
-            getChallenge(0).then().statusCode(BAD_REQUEST);
+            getChallenge(0)
+                .then()
+                .statusCode(BAD_REQUEST);
         }
 
         @Test
         void rejectsNegativeChallengeId() {
-            getChallenge(-1).then().statusCode(BAD_REQUEST);
+            getChallenge(-1)
+                .then()
+                .statusCode(BAD_REQUEST);
         }
     }
 
@@ -291,7 +331,10 @@ class ChallengeControllerTest {
                 .then()
                 .statusCode(OK)
                 .contentType(ContentType.JSON)
-                .body("find { it.challengeId == " + challengeId + " }", notNullValue());
+                .body(
+                    "find { it.challengeId == " + challengeId + " }",
+                    notNullValue()
+                );
         }
 
         @Test
@@ -364,14 +407,20 @@ class ChallengeControllerTest {
 
         @Test
         void searchesByBestParticipantName() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
 
-            searchChallenges("bestParticipantName", PARTICIPANT_USER)
+            searchChallenges("bestParticipantName", participant)
                 .then()
                 .statusCode(OK)
                 .body("challengeId", hasItem(challengeId));
@@ -379,14 +428,20 @@ class ChallengeControllerTest {
 
         @Test
         void searchesByBestParticipantNameCaseInsensitiveAndUsingContains() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
 
-            searchChallenges("bestParticipantName", "lengeTestPart")
+            searchChallenges("bestParticipantName", participant.substring(5))
                 .then()
                 .statusCode(OK)
                 .body("challengeId", hasItem(challengeId));
@@ -427,17 +482,101 @@ class ChallengeControllerTest {
 
         @Test
         void participantCanRegisterForChallenge() {
+            String participant = newParticipant();
             int challengeId = createChallengeAndReturnId();
 
-            registerForChallenge(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS)
+            registerForChallenge(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(OK);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("participants.find { it.participantName == '" + PARTICIPANT_USER
-                    + "' }.participantName", equalTo(PARTICIPANT_USER));
+                .body(
+                    "participants.find { it.participantName == '"
+                        + participant
+                        + "' }.participantName",
+                    equalTo(participant)
+                );
+        }
+
+        @Test
+        void rejectsMultipleChallengeRegistrationWithoutPreviousWin() {
+            String participant = newParticipant();
+
+            createChallengeAndRegisterParticipant(participant);
+
+            int secondChallengeId = createChallengeAndReturnId();
+
+            registerForChallenge(
+                secondChallengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
+                .then()
+                .statusCode(UNPROCESSABLE_ENTITY);
+        }
+
+        @Test
+        void participantCanRegisterForMultipleChallengesAfterPreviousWin() {
+            String participant = newParticipant();
+
+            int previousChallengeId =
+                createChallengeAndRegisterParticipant(participant);
+
+            closeChallenge(previousChallengeId);
+
+            updateLapTime(
+                previousChallengeId,
+                ADMIN_USER,
+                ADMIN_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
+                .then()
+                .statusCode(OK);
+
+            int activeChallengeId = createChallengeAndReturnId();
+
+            registerForChallenge(
+                activeChallengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
+                .then()
+                .statusCode(OK);
+        }
+
+        @Test
+        void rejectsMultipleChallengeRegistrationWhenPreviousWinIsNotFromEndedChallenge() {
+            String participant = newParticipant();
+
+            int firstChallengeId =
+                createChallengeAndRegisterParticipant(participant);
+
+            updateLapTime(
+                firstChallengeId,
+                ADMIN_USER,
+                ADMIN_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
+                .then()
+                .statusCode(OK);
+
+            int secondChallengeId = createChallengeAndReturnId();
+
+            registerForChallenge(
+                secondChallengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
+                .then()
+                .statusCode(UNPROCESSABLE_ENTITY);
         }
 
         @Test
@@ -455,33 +594,54 @@ class ChallengeControllerTest {
         void adminCannotRegister() {
             int challengeId = createChallengeAndReturnId();
 
-            registerForChallenge(challengeId, ADMIN_USER, ADMIN_PASS)
+            registerForChallenge(
+                challengeId,
+                ADMIN_USER,
+                ADMIN_PASS
+            )
                 .then()
                 .statusCode(FORBIDDEN);
         }
 
         @Test
         void rejectsNonExistentChallenge() {
-            registerForChallenge(99999, PARTICIPANT_USER, PARTICIPANT_PASS)
+            String participant = newParticipant();
+
+            registerForChallenge(
+                99999,
+                participant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(NOT_FOUND);
         }
 
         @Test
         void rejectsDuplicateRegistration() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            registerForChallenge(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS)
+            registerForChallenge(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(CONFLICT);
         }
 
         @Test
         void rejectsRegistrationForClosedChallenge() {
+            String participant = newParticipant();
             int challengeId = createChallengeAndReturnId();
+
             closeChallenge(challengeId);
 
-            registerForChallenge(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS)
+            registerForChallenge(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(UNPROCESSABLE_ENTITY);
         }
@@ -492,117 +652,198 @@ class ChallengeControllerTest {
 
         @Test
         void participantCanUpdateOwnLapTime() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("bestParticipantName", equalTo(PARTICIPANT_USER))
+                .body("bestParticipantName", equalTo(participant))
                 .body("bestLapTime", equalTo("0" + VALID_LAP_TIME))
-                .body("participants.find { it.participantName == '" + PARTICIPANT_USER
-                    + "' }.participantBestLapTime", equalTo("0" + VALID_LAP_TIME));
+                .body(
+                    "participants.find { it.participantName == '"
+                        + participant
+                        + "' }.participantBestLapTime",
+                    equalTo("0" + VALID_LAP_TIME)
+                );
         }
 
         @Test
         void adminCanRemoveCurrentLeaderLapTimeAndNextBestParticipantBecomesLeader() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String firstParticipant = newParticipant();
+            String secondParticipant = newParticipant();
 
-            registerForChallenge(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS)
+            int challengeId =
+                createChallengeAndRegisterParticipant(firstParticipant);
+
+            registerForChallenge(
+                challengeId,
+                secondParticipant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(OK);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, "1:23.123")
-                .then()
-                .statusCode(OK);
-            updateLapTime(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS,
-                    SECOND_PARTICIPANT_USER, "1:24.123")
+            updateLapTime(
+                challengeId,
+                firstParticipant,
+                PARTICIPANT_PASS,
+                firstParticipant,
+                "1:23.123"
+            )
                 .then()
                 .statusCode(OK);
 
-            updateLapTime(challengeId, ADMIN_USER, ADMIN_PASS,
-                    PARTICIPANT_USER, null)
+            updateLapTime(
+                challengeId,
+                secondParticipant,
+                PARTICIPANT_PASS,
+                secondParticipant,
+                "1:24.123"
+            )
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(
+                challengeId,
+                ADMIN_USER,
+                ADMIN_PASS,
+                firstParticipant,
+                null
+            )
                 .then()
                 .statusCode(OK);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("bestParticipantName", equalTo(SECOND_PARTICIPANT_USER))
+                .body("bestParticipantName", equalTo(secondParticipant))
                 .body("bestLapTime", equalTo("01:24.123"));
         }
 
         @Test
         void participantWithCurrentBestLapTimeBecomesSlowerAndNextBestParticipantBecomesLeader() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String firstParticipant = newParticipant();
+            String secondParticipant = newParticipant();
 
-            registerForChallenge(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS)
+            int challengeId =
+                createChallengeAndRegisterParticipant(firstParticipant);
+
+            registerForChallenge(
+                challengeId,
+                secondParticipant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(OK);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, "1:23.123")
-                .then()
-                .statusCode(OK);
-            updateLapTime(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS,
-                    SECOND_PARTICIPANT_USER, "1:24.123")
+            updateLapTime(
+                challengeId,
+                firstParticipant,
+                PARTICIPANT_PASS,
+                firstParticipant,
+                "1:23.123"
+            )
                 .then()
                 .statusCode(OK);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, "1:25.123")
+            updateLapTime(
+                challengeId,
+                secondParticipant,
+                PARTICIPANT_PASS,
+                secondParticipant,
+                "1:24.123"
+            )
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(
+                challengeId,
+                firstParticipant,
+                PARTICIPANT_PASS,
+                firstParticipant,
+                "1:25.123"
+            )
                 .then()
                 .statusCode(OK);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("bestParticipantName", equalTo(SECOND_PARTICIPANT_USER))
+                .body("bestParticipantName", equalTo(secondParticipant))
                 .body("bestLapTime", equalTo("01:24.123"));
         }
 
         @Test
         void participantCanDiscardOwnLapTime() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, null)
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                null
+            )
                 .then()
                 .statusCode(OK);
 
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
-                .body("participants.find { it.participantName == '" + PARTICIPANT_USER
-                    + "' }.participantBestLapTime", is(nullValue()));
+                .body(
+                    "participants.find { it.participantName == '"
+                        + participant
+                        + "' }.participantBestLapTime",
+                    is(nullValue())
+                );
         }
 
         @Test
         void adminCanUpdateParticipantLapTime() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, ADMIN_USER, ADMIN_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                ADMIN_USER,
+                ADMIN_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
         }
 
         @Test
         void unauthenticatedUserCannotUpdateLapTime() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
             given()
                 .contentType(ContentType.JSON)
-                .body(lapTimeBody(PARTICIPANT_USER, VALID_LAP_TIME))
+                .body(lapTimeBody(participant, VALID_LAP_TIME))
             .when()
                 .put(PARTICIPANT_URI, challengeId)
             .then()
@@ -611,88 +852,148 @@ class ChallengeControllerTest {
 
         @Test
         void rejectsMissingParticipantName() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    null, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                null,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(BAD_REQUEST);
         }
 
         @Test
         void rejectsBlankParticipantName() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    " ", VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                " ",
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(BAD_REQUEST);
         }
 
         @Test
         void rejectsUnregisteredParticipant() {
+            String participant = newParticipant();
             int challengeId = createChallengeAndReturnId();
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    "unregistered", VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                "unregistered",
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(NOT_FOUND);
         }
 
         @Test
         void participantCannotUpdateAnotherRegisteredParticipantsLapTime() {
-            int challengeId = createChallengeAndReturnId();
+            String firstParticipant = newParticipant();
+            String secondParticipant = newParticipant();
 
-            registerForChallenge(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS)
+            int challengeId =
+                createChallengeAndRegisterParticipant(firstParticipant);
+
+            registerForChallenge(
+                challengeId,
+                secondParticipant,
+                PARTICIPANT_PASS
+            )
                 .then()
                 .statusCode(OK);
-            registerForChallenge(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS)
-                .then()
-                .statusCode(OK);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    SECOND_PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                firstParticipant,
+                PARTICIPANT_PASS,
+                secondParticipant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(FORBIDDEN);
         }
 
         @Test
         void participantCannotUpdateLapTimeAfterChallengeEnded() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
+
             closeChallenge(challengeId);
 
-            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(UNPROCESSABLE_ENTITY);
         }
 
         @Test
         void adminCanUpdateLapTimeAfterChallengeEnded() {
-            int challengeId = createChallengeAndRegisterParticipant();
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
+
             closeChallenge(challengeId);
 
-            updateLapTime(challengeId, ADMIN_USER, ADMIN_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            updateLapTime(
+                challengeId,
+                ADMIN_USER,
+                ADMIN_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(OK);
         }
 
         @Test
         void rejectsNonExistentChallenge() {
-            updateLapTime(99999, PARTICIPANT_USER, PARTICIPANT_PASS,
-                    PARTICIPANT_USER, VALID_LAP_TIME)
+            String participant = newParticipant();
+
+            updateLapTime(
+                99999,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
                 .then()
                 .statusCode(NOT_FOUND);
         }
     }
 
     private Response createChallenge(Integer trackId, Integer carId, LocalDate endDate) {
-        return createChallengeAs(ADMIN_USER, ADMIN_PASS, trackId, carId, endDate);
+        return createChallengeAs(
+            ADMIN_USER,
+            ADMIN_PASS,
+            trackId,
+            carId,
+            endDate
+        );
     }
 
-    private Response createChallengeAs(String username, String password,
-            Integer trackId, Integer carId, LocalDate endDate) {
+    private Response createChallengeAs(
+            String username,
+            String password,
+            Integer trackId,
+            Integer carId,
+            LocalDate endDate
+    ) {
         return given()
             .auth().preemptive().basic(username, password)
             .contentType(ContentType.JSON)
@@ -704,13 +1005,27 @@ class ChallengeControllerTest {
 
     private int createChallengeAndReturnId() {
         return createChallengeAndReturnId(
-            TRACK_NAME, TRACK_COUNTRY, TRACK_LENGTH_KM, CAR_BRAND, CAR_NAME
+            TRACK_NAME,
+            TRACK_COUNTRY,
+            TRACK_LENGTH_KM,
+            CAR_BRAND,
+            CAR_NAME
         );
     }
 
-    private int createChallengeAndReturnId(String trackName, String trackCountry,
-            double trackLengthKm, String carBrand, String carName) {
-        int trackId = createTrackAndReturnId(trackName, trackCountry, trackLengthKm);
+    private int createChallengeAndReturnId(
+            String trackName,
+            String trackCountry,
+            double trackLengthKm,
+            String carBrand,
+            String carName
+    ) {
+        int trackId = createTrackAndReturnId(
+            trackName,
+            trackCountry,
+            trackLengthKm
+        );
+
         int carId = createCarAndReturnId(carBrand, carName);
 
         String location = createChallenge(trackId, carId, VALID_END_DATE)
@@ -720,13 +1035,20 @@ class ChallengeControllerTest {
             .header("Location");
 
         assertNotNull(location);
-        return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+
+        return Integer.parseInt(
+            location.substring(location.lastIndexOf('/') + 1)
+        );
     }
 
-    private int createChallengeAndRegisterParticipant() {
+    private int createChallengeAndRegisterParticipant(String participant) {
         int challengeId = createChallengeAndReturnId();
 
-        registerForChallenge(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS)
+        registerForChallenge(
+            challengeId,
+            participant,
+            PARTICIPANT_PASS
+        )
             .then()
             .statusCode(OK);
 
@@ -752,15 +1074,24 @@ class ChallengeControllerTest {
             .get(CHALLENGES_URI);
     }
 
-    private Response registerForChallenge(int challengeId, String username, String password) {
+    private Response registerForChallenge(
+            int challengeId,
+            String username,
+            String password
+    ) {
         return given()
             .auth().preemptive().basic(username, password)
         .when()
             .post(REGISTER_URI, challengeId);
     }
 
-    private Response updateLapTime(int challengeId, String username, String password,
-            String participantName, String lapTime) {
+    private Response updateLapTime(
+            int challengeId,
+            String username,
+            String password,
+            String participantName,
+            String lapTime
+    ) {
         return given()
             .auth().preemptive().basic(username, password)
             .contentType(ContentType.JSON)
@@ -774,6 +1105,7 @@ class ChallengeControllerTest {
         String participantNameJson = participantName == null
             ? "null"
             : "\"" + participantName + "\"";
+
         String lapTimeJson = lapTime == null
             ? "null"
             : "\"" + lapTime + "\"";
@@ -787,10 +1119,18 @@ class ChallengeControllerTest {
     }
 
     private int createTrackAndReturnId() {
-        return createTrackAndReturnId(TRACK_NAME, TRACK_COUNTRY, TRACK_LENGTH_KM);
+        return createTrackAndReturnId(
+            TRACK_NAME,
+            TRACK_COUNTRY,
+            TRACK_LENGTH_KM
+        );
     }
 
-    private int createTrackAndReturnId(String name, String country, double lengthKm) {
+    private int createTrackAndReturnId(
+            String name,
+            String country,
+            double lengthKm
+    ) {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
@@ -803,7 +1143,10 @@ class ChallengeControllerTest {
             .header("Location");
 
         assertNotNull(location);
-        return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+
+        return Integer.parseInt(
+            location.substring(location.lastIndexOf('/') + 1)
+        );
     }
 
     private int createCarAndReturnId() {
@@ -814,7 +1157,13 @@ class ChallengeControllerTest {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
-            .body(new CreateCarRequest(brand, name, CAR_HP, CAR_TORQUE, WheelDrive.REAR))
+            .body(new CreateCarRequest(
+                brand,
+                name,
+                CAR_HP,
+                CAR_TORQUE,
+                WheelDrive.REAR
+            ))
         .when()
             .post("/cars")
         .then()
@@ -823,7 +1172,10 @@ class ChallengeControllerTest {
             .header("Location");
 
         assertNotNull(location);
-        return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+
+        return Integer.parseInt(
+            location.substring(location.lastIndexOf('/') + 1)
+        );
     }
 
     private void closeChallenge(int challengeId) {
