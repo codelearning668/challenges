@@ -54,6 +54,7 @@ public class ChallengeService {
 		criteria.setCarName(Text.normalizeForSearch(criteria.getCarName()));
 		criteria.setTrackCountry(Text.normalizeForSearch(criteria.getTrackCountry()));
 		criteria.setTrackName(Text.normalizeForSearch(criteria.getTrackName()));
+		criteria.setBestParticipantName(Text.normalizeForSearch(criteria.getBestParticipantName()));
 	}
 
 	@Transactional
@@ -87,6 +88,9 @@ public class ChallengeService {
 		String participant = getCurrentUserName();
 
 		verifyChallengeIsActive(challenge);
+		// when adding logic around registering to multiple challenges
+		// this check will need to be broader as it needs to verify the participant
+		// is not currently participating in any other active challenges
 		verifyNotAlreadyRegistered(participant, challenge);
 
 		participantService.registerParticipant(participant, challenge);

@@ -363,6 +363,36 @@ class ChallengeControllerTest {
         }
 
         @Test
+        void searchesByBestParticipantName() {
+            int challengeId = createChallengeAndRegisterParticipant();
+
+            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
+                    PARTICIPANT_USER, VALID_LAP_TIME)
+                .then()
+                .statusCode(OK);
+
+            searchChallenges("bestParticipantName", PARTICIPANT_USER)
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(challengeId));
+        }
+
+        @Test
+        void searchesByBestParticipantNameCaseInsensitiveAndUsingContains() {
+            int challengeId = createChallengeAndRegisterParticipant();
+
+            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
+                    PARTICIPANT_USER, VALID_LAP_TIME)
+                .then()
+                .statusCode(OK);
+
+            searchChallenges("bestParticipantName", "lengeTestPart")
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(challengeId));
+        }
+
+        @Test
         void searchesUsingMultipleCriteria() {
             int challengeId = createChallengeAndReturnId();
 

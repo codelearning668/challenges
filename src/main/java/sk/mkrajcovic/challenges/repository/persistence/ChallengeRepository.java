@@ -26,6 +26,8 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 	@Query("""
         SELECT ch.id as id,
                ch.endDate as endDate,
+               ch.bestParticipantName as bestParticipantName,
+               ch.bestLapTime as bestLapTime,
                tr.name as trackName,
                tr.country as trackCountry,
                c.brand as carBrand,
@@ -38,6 +40,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         AND (:#{#criteria.trackCountry} IS NULL OR tr.countrySearch LIKE %:#{#criteria.trackCountry}%)
         AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
         AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
+        AND (:#{#criteria.bestParticipantName} IS NULL OR ch.bestParticipantNameSearch LIKE %:#{#criteria.bestParticipantName}%)
     """)
 	public List<ChallengeDetail> findChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 
