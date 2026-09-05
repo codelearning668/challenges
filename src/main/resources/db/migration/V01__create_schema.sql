@@ -19,6 +19,8 @@ create table car (
     wheel_drive varchar(255),
     brand_search varchar(100) not null,
     name_search varchar(100) not null,
+    created_at timestamp not null,
+    modified_at timestamp,
     primary key (id)
 );
 
@@ -30,6 +32,8 @@ create table track (
     length_km real,
     country_search varchar(100),
     name_search varchar(100) not null,
+    created_at timestamp not null,
+    modified_at timestamp,
     primary key (id)
 );
 
@@ -39,6 +43,10 @@ create table challenge (
     end_date date,
     track_id integer,
     car_id integer,
+    best_participant_name varchar(100),
+    best_lap_time interval,
+    created_at timestamp not null,
+    modified_at timestamp,
     primary key (id),
     constraint FK_challenge_track foreign key (track_id) references track,
     constraint FK_challenge_car foreign key (car_id) references car
@@ -51,6 +59,8 @@ create table participant (
     best_lap_time interval,
     challenge_id integer not null,
     name_search varchar(100) not null,
+    created_at timestamp not null,
+    modified_at timestamp,
     primary key (id),
     constraint FK_participant_challenge foreign key (challenge_id) references challenge
 );

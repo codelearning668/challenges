@@ -9,7 +9,8 @@ insert into track (
     length_km,
     version,
     country_search,
-    name_search
+    name_search,
+    created_at
 )
 select
     country,
@@ -17,7 +18,8 @@ select
     length_km,
     version,
     lower(unaccent(country)),
-    lower(unaccent(name))
+    lower(unaccent(name)),
+    now()
 from (
     values
         ('Spain', 'Barcelona - GP', 4.655, 1),
@@ -69,7 +71,8 @@ insert into car (
     wheel_drive,
     brand_search,
     name_search,
-    version
+    version,
+    created_at
 )
 select
     brand,
@@ -79,7 +82,8 @@ select
     wheel_drive,
     lower(unaccent(brand)),
     lower(unaccent(name)),
-    version
+    version,
+    now()
 from (
     values
     	('Abarth', '500 Assetto Corse', 195, 302, 'FRONT', 1),
