@@ -44,6 +44,7 @@ create table challenge (
     track_id integer,
     car_id integer,
     best_participant_name varchar(100),
+    best_participant_name_search varchar(100),
     best_lap_time interval,
     created_at timestamp not null,
     modified_at timestamp,

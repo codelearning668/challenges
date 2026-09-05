@@ -19,7 +19,7 @@ import sk.mkrajcovic.challenges.util.Text;
 
 @Entity
 @Getter @Setter
-@EqualsAndHashCode(callSuper = false, exclude = {"challenge" })
+@EqualsAndHashCode(callSuper = false, exclude = { "challenge" })
 public class Participant extends BaseEntity {
 
 	/*

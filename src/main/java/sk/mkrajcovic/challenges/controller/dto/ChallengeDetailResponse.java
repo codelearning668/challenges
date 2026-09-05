@@ -1,5 +1,6 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,8 @@ public class ChallengeDetailResponse {
 
 	private Integer challengeId;
 	private LocalDate challengeEndDate;
+	private String bestParticipantName;
+	private Duration bestLapTime;
 
 	private Integer trackId;
 	private String trackName;

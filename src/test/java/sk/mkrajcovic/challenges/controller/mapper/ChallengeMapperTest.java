@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.model.Car;
@@ -37,6 +38,8 @@ class ChallengeMapperTest {
 		challenge.setEndDate(LocalDate.of(2026, 9, 30));
 		challenge.setTrack(track);
 		challenge.setCar(car);
+		challenge.setBestParticipantName("John");
+		challenge.setBestLapTime(null);
 		challenge.setParticipants(Set.of(participant));
 
 		var response = ChallengeMapper.toDetailResponse(challenge);
@@ -52,6 +55,8 @@ class ChallengeMapperTest {
 			() -> assertEquals("M3", response.getCarName()),
 			() -> assertEquals(510, response.getCarHorsePower()),
 			() -> assertEquals(650, response.getCarTorque()),
+			() -> assertEquals("John", response.getBestParticipantName()),
+			() -> Assertions.assertNull(response.getBestLapTime()),
 			() -> assertEquals(1, response.getParticipants().size()),
 			() -> assertEquals(30, response.getParticipants().getFirst().participantId()),
 			() -> assertEquals("John", response.getParticipants().getFirst().participantName()),
@@ -115,6 +120,16 @@ class ChallengeMapperTest {
 			public LocalDate getEndDate() {
 				return LocalDate.of(2026, 9, 30);
 			}
+			
+			@Override
+			public String getBestParticipantName() {
+				return "John";
+			}
+
+			@Override
+			public Duration getBestLapTime() {
+				return null;
+			}
 
 			@Override
 			public String getTrackName() {
@@ -142,6 +157,8 @@ class ChallengeMapperTest {
 		assertAll(
 			() -> assertEquals(1, response.challengeId()),
 			() -> assertEquals(LocalDate.of(2026, 9, 30), response.challengeEndDate()),
+			() -> assertEquals("John", response.bestParticipantName()),
+			() -> Assertions.assertNull(response.bestLapTime()),
 			() -> assertEquals("Slovakia Ring", response.trackName()),
 			() -> assertEquals("Slovakia", response.trackCountry()),
 			() -> assertEquals("BMW", response.carBrand()),

@@ -472,8 +472,68 @@ class ChallengeControllerTest {
             getChallenge(challengeId)
                 .then()
                 .statusCode(OK)
+                .body("bestParticipantName", equalTo(PARTICIPANT_USER))
+                .body("bestLapTime", equalTo("0" + VALID_LAP_TIME))
                 .body("participants.find { it.participantName == '" + PARTICIPANT_USER
                     + "' }.participantBestLapTime", equalTo("0" + VALID_LAP_TIME));
+        }
+
+        @Test
+        void adminCanRemoveCurrentLeaderLapTimeAndNextBestParticipantBecomesLeader() {
+            int challengeId = createChallengeAndRegisterParticipant();
+
+            registerForChallenge(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS)
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
+                    PARTICIPANT_USER, "1:23.123")
+                .then()
+                .statusCode(OK);
+            updateLapTime(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS,
+                    SECOND_PARTICIPANT_USER, "1:24.123")
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(challengeId, ADMIN_USER, ADMIN_PASS,
+                    PARTICIPANT_USER, null)
+                .then()
+                .statusCode(OK);
+
+            getChallenge(challengeId)
+                .then()
+                .statusCode(OK)
+                .body("bestParticipantName", equalTo(SECOND_PARTICIPANT_USER))
+                .body("bestLapTime", equalTo("01:24.123"));
+        }
+
+        @Test
+        void participantWithCurrentBestLapTimeBecomesSlowerAndNextBestParticipantBecomesLeader() {
+            int challengeId = createChallengeAndRegisterParticipant();
+
+            registerForChallenge(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS)
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
+                    PARTICIPANT_USER, "1:23.123")
+                .then()
+                .statusCode(OK);
+            updateLapTime(challengeId, SECOND_PARTICIPANT_USER, PARTICIPANT_PASS,
+                    SECOND_PARTICIPANT_USER, "1:24.123")
+                .then()
+                .statusCode(OK);
+
+            updateLapTime(challengeId, PARTICIPANT_USER, PARTICIPANT_PASS,
+                    PARTICIPANT_USER, "1:25.123")
+                .then()
+                .statusCode(OK);
+
+            getChallenge(challengeId)
+                .then()
+                .statusCode(OK)
+                .body("bestParticipantName", equalTo(SECOND_PARTICIPANT_USER))
+                .body("bestLapTime", equalTo("01:24.123"));
         }
 
         @Test

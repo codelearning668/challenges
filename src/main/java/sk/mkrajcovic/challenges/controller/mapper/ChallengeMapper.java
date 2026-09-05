@@ -20,6 +20,8 @@ public final class ChallengeMapper {
 		var challengeDetail = new ChallengeDetailResponse();
 		challengeDetail.setChallengeId(challenge.getId());
 		challengeDetail.setChallengeEndDate(challenge.getEndDate());
+		challengeDetail.setBestParticipantName(challenge.getBestParticipantName());
+		challengeDetail.setBestLapTime(challenge.getBestLapTime());
 
 		// TODO: handle NPEs here or ensure there are none
 
@@ -61,6 +63,8 @@ public final class ChallengeMapper {
 		return new ChallengeSummaryResponse(
 			challengeDetail.getId(),
 			challengeDetail.getEndDate(),
+			challengeDetail.getBestParticipantName(),
+			challengeDetail.getBestLapTime(),
 			challengeDetail.getTrackCountry(),
 			challengeDetail.getTrackName(),
 			challengeDetail.getCarBrand(),
