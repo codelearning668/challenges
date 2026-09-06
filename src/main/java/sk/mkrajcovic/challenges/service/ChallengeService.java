@@ -126,19 +126,13 @@ public class ChallengeService {
 	@Transactional
 	public void registerForChallenge(Integer challengeId) {
 		var challenge = EntityUtils.getExistingEntityById(repository, challengeId);
-		String participantName = getCurrentUserName();
+		String participantName = callContext.getCurrentUser();
 
 		verifyChallengeIsActive(challenge);
 		verifyNotAlreadyRegistered(participantName, challenge);
 		verifyCanRegisterForMultipleChallenges(participantName);
 
 		participantService.registerParticipant(participantName, challenge);
-	}
-
-	private String getCurrentUserName() {
-		String username = callContext.getCurrentUser();
-		assert username != null : "user calling this should always be present in the security context";
-		return username;
 	}
 
 	private void verifyChallengeIsActive(Challenge challenge) {
