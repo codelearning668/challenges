@@ -68,8 +68,8 @@ class CarMapperTest {
 			}
 
 			@Override
-			public String getWheelDrive() {
-				return "ALL";
+			public WheelDrive getWheelDrive() {
+				return WheelDrive.ALL;
 			}
 		};
 
