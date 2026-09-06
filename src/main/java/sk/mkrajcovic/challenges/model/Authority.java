@@ -9,7 +9,6 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.model.Authority.AuthorityId;
 
@@ -34,8 +33,7 @@ public class Authority {
 	}
 
 	// composite key class required for the default schema
-	@SuppressWarnings("serial")
-	@EqualsAndHashCode(callSuper = false)
+	@SuppressWarnings({"serial", "unused"}) // the usage is framework internal
 	@NoArgsConstructor
 	static class AuthorityId implements Serializable {
 		private String user;
