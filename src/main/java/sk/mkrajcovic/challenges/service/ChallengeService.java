@@ -6,6 +6,7 @@ import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.MULTI_CHALLENG
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +137,7 @@ public class ChallengeService {
 	}
 
 	private void verifyChallengeIsActive(Challenge challenge) {
-		var today = LocalDate.now();
+		var today = LocalDate.now(ZoneOffset.UTC);
 		var endDate = challenge.getEndDate();
 
 		if (endDate.isBefore(today)) {

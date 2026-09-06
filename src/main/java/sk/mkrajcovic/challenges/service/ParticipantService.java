@@ -8,6 +8,7 @@ import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +141,7 @@ public class ParticipantService {
 	// TODO: code duplication, move this method from this and challengeService
 	// in different class like ChallengeValidator..
 	private void verifyChallengeIsActive(Challenge challenge) {
-		var today = LocalDate.now();
+		var today = LocalDate.now(ZoneOffset.UTC);
 		if (challenge.getEndDate().isBefore(today)) {
 			throw new BusinessViolation(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
 		}
