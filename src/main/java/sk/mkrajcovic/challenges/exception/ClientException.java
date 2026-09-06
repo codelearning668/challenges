@@ -1,14 +1,12 @@
 package sk.mkrajcovic.challenges.exception;
 
 import java.util.Arrays;
-
-import lombok.EqualsAndHashCode;
+import java.util.Objects;
 
 /**
  * Exception representing a client error. Intended for use as validation errors
  * or any error tied to user input.
  */
-@EqualsAndHashCode(callSuper = false)
 public class ClientException extends RuntimeException {
 
 	private static final long serialVersionUID = -1413853990238635218L;
@@ -36,6 +34,25 @@ public class ClientException extends RuntimeException {
 
 	public Object[] getArgs() {
 		return args != null ? Arrays.copyOf(args, args.length) : new Object[0];
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ClientException that = (ClientException) o;
+		return Objects.equals(code, that.code) && Arrays.equals(args, that.args);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(code);
+		result = 31 * result + Arrays.hashCode(args);
+		return result;
 	}
 
 }
