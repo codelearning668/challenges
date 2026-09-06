@@ -107,7 +107,6 @@ public class ParticipantService {
 	}
 
 	private void recomputeChallengeLeader(Challenge challenge) {
-		// TODO: update the comparator to resolve ties
 		var quickestParticipant = challenge.getParticipants().stream()
 			.filter(participant -> participant.getBestLapTime() != null)
 			.min(Comparator.comparing(Participant::getBestLapTime));
