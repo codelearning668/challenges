@@ -20,7 +20,8 @@ public final class CarMapper {
 			car.getBrand(),
 			car.getName(),
 			car.getHorsePower(),
-			car.getTorque()
+			car.getTorque(),
+			car.getWheelDrive()
 		);
 	}
 
@@ -32,7 +33,8 @@ public final class CarMapper {
 			carDetail.getBrand(),
 			carDetail.getName(),
 			carDetail.getHorsePower(),
-			carDetail.getTorque()
+			carDetail.getTorque(),
+			carDetail.getWheelDrive()
 		);
 	}
 
