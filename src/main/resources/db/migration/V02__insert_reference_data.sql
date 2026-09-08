@@ -62,7 +62,6 @@ from (
 ) as data(country, name, length_km, version);
 
 
--- all assetto corsa ultimate edition cars
 insert into car (
     brand,
     name,
@@ -86,6 +85,8 @@ select
     now()
 from (
     values
+    	-- all assetto corsa ultimate edition cars
+    
     	('Abarth', '500 Assetto Corse', 195, 302, 'FRONT', 1),
 	('Abarth', '500 EsseEsse', 160, 230, 'FRONT', 1),
 	('Abarth', '500 EsseEsse Step 1', 175, 245, 'FRONT', 1),
@@ -286,7 +287,44 @@ from (
 	('Toyota', 'Supra MKIV', 280, 458, 'REAR', 1),
 	('Toyota', 'Supra MKIV Drift', 624, 756, 'REAR', 1),
 	('Toyota', 'Supra MKIV Time Attack', 690, 756, 'REAR', 1),
-	('Toyota', 'TS040 Hybrid 2014', 1000, null, 'ALL', 1)
+	('Toyota', 'TS040 Hybrid 2014', 1000, null, 'ALL', 1),
 	
+	
+    	-- all WRC Generations cars
+
+	('Toyota', 'GR Yaris Rally 1', 380, 500, 'ALL', 1),
+	('Ford', 'Puma Rally 1', 380, 500, 'ALL', 1),
+	('Hyundai', 'i20 N Rally 1', 380, 500, 'ALL', 1),
+	('Citroën', 'C3 Rally 2', 290, 440, 'ALL', 1),
+	('Škoda', 'Fabia Evo Rally 2', 290, 440, 'ALL', 1),
+	('Ford', 'Fiesta Rally 2', 290, 440, 'ALL', 1),
+	('Hyundai', 'i20 N Rally 2', 290, 440, 'ALL', 1),
+	('Volkswagen', 'Polo Gti Rally 2', 290, 440, 'ALL', 1),
+	('Lancia', 'Fulvia HF', 165, 172, 'FRONT', 1),
+	('Alpine', 'A110', 180, 190, 'REAR', 1),
+	('Lancia', 'Stratos HF', 285, 280, 'REAR', 1),
+	('Fiat', '131 Abarth', 230, 230, 'REAR', 1),
+	('Audi', 'Quattro A1', 300, 420, 'ALL', 1),
+	('Lancia', '037', 325, 320, 'REAR', 1),
+	('Audi', 'Quattro A2', 370, 450, 'ALL', 1),
+	('Peugeot', '205 Turbo 16 Evo 1', 340, 460, 'ALL', 1),
+	('Peugeot', '205 Turbo 16 Evo 2', 550, 520, 'ALL', 1),
+	('Lancia', 'Delta HF 4WD', 350, 535, 'ALL', 1),
+	('Lancia', 'Delta HF Integrale Evoluzione', 350, 535, 'ALL', 1),
+	('Toyota', 'Celica Turbo 4WD', 300, 460, 'ALL', 1),
+	('Subaru', 'Impreza WRC', 315, 490, 'ALL', 1),
+	('Mitsubishi', 'Lancer Evo V', 320, 510, 'ALL', 1),
+	('Toyota', 'Corolla', 305, 530, 'ALL', 1),
+	('Citroën', 'Xsara WRC', 320, 540, 'ALL', 1),
+	('Ford', 'Focus RS WRC', 315, 520, 'ALL', 1),
+	('Citroën', 'DS3 WRC', 320, 460, 'ALL', 1),
+	('Volkswagen', 'Polo R WRC', 315, 425, 'ALL', 1),
+	('Ford', 'Fiesta WRC', 380, 500, 'ALL', 1),
+	('Toyota', 'Yaris WRC', 380, 500, 'ALL', 1),
+	('Porsche', '911 GT3 RS RGT (997)', 365, 450, 'REAR', 1),
+	('Citroën', 'C3 WRC', 380, 500, 'ALL', 1),
+	('Ford', 'Fiesta Rally 3', 220, 290, 'ALL', 1),
+	('Volkswagen', 'Polo Gti Rally 2', 290, 440, 'ALL', 1)
+
 ) as data(brand, name, horse_power, torque, wheel_drive, version);
 
