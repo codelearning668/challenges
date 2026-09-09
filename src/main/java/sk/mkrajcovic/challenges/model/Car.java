@@ -1,15 +1,13 @@
 package sk.mkrajcovic.challenges.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
+
 import static lombok.AccessLevel.NONE;
 import lombok.Getter;
 import lombok.Setter;
 import sk.mkrajcovic.challenges.util.Text;
+
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -27,6 +25,12 @@ public class Car extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	private WheelDrive wheelDrive;
+
+	@ManyToOne(optional = false)
+	private Simulator simulator;
+
+	@Column(nullable = false)
+	boolean fromDlc;
 
 	/*
 	 * Denormalized search representation maintained

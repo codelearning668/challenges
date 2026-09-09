@@ -40,6 +40,9 @@ public class Challenge extends BaseEntity {
 	@Column(length = 100)
 	private String bestParticipantName;
 
+	@ManyToOne(optional = false)
+	private Simulator simulator;
+
 	@JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
 	private Duration bestLapTime;
 

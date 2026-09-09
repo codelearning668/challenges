@@ -2,10 +2,7 @@ package sk.mkrajcovic.challenges.model;
 
 import static lombok.AccessLevel.NONE;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import sk.mkrajcovic.challenges.util.Text;
@@ -35,6 +32,12 @@ public class Track extends BaseEntity {
 	@Setter(NONE)
 	@Column(nullable = false, length = 100)
 	private String nameSearch;
+
+	@ManyToOne(optional = false)
+	private Simulator simulator;
+
+	@Column(nullable = false)
+	boolean fromDlc;
 
 	@PrePersist
 	@PreUpdate
