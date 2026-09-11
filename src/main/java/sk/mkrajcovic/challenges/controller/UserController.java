@@ -2,9 +2,8 @@ package sk.mkrajcovic.challenges.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
@@ -14,12 +13,14 @@ import sk.mkrajcovic.challenges.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
 	private final UserService userService;
 
 	@PermitAll
-	@PostMapping(path = "/users/register", consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/register", consumes = APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void registerUser(@Valid @RequestBody UserRegistrationRequest registrationRequest) {
 		userService.registerNewUser(
 			registrationRequest.username(),

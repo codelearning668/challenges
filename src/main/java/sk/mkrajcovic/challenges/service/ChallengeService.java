@@ -159,4 +159,22 @@ public class ChallengeService {
 			throw new BusinessViolation(MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN);
 		}
 	}
+
+	@Transactional
+	public Integer updateChallengeEndDate(Integer challengeId, LocalDate endDate){
+		Challenge challenge = getChallenge(challengeId);
+
+		verifyChallengeIsActive(challenge);
+
+		challenge.setEndDate(endDate);
+
+		return repository.save(challenge).getId();
+	}
+
+
+	public void deleteChallenge(Integer challengeId){
+		Challenge challenge = getChallenge(challengeId);
+
+		repository.delete(challenge);
+	}
 }

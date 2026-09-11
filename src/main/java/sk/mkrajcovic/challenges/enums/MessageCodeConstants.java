@@ -24,6 +24,7 @@ public class MessageCodeConstants {
 	public static final String PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE = "participantNotRegisteredForChallenge";
 	public static final String MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN = "multiChallengeRegistrationRequiresPreviousWin";
 	public static final String CHALLENGE_ALREADY_ACTIVE = "challengeAlreadyActive";
+	public static final String CAR_OR_TRACK_ALREADY_ASSIGNED = "carOrTrackAlreadyAssigned";
 
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 

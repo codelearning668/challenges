@@ -23,6 +23,9 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
     """)
 	public boolean existsActiveChallengeForTrackAndCar(Integer trackId, Integer carId);
 
+	boolean existsByTrackId(Integer trackId);
+	boolean existsByCarId(Integer carId);
+
 	@Query("""
         SELECT ch.id as id,
                ch.endDate as endDate,

@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
+import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 import sk.mkrajcovic.challenges.util.Text;
@@ -18,6 +20,7 @@ import sk.mkrajcovic.challenges.util.Text;
 public class CarService {
 
 	private final CarRepository repository;
+	private final ChallengeRepository challengeRepo;
 
 	@Transactional
 	public Integer createCar(Car car) {
@@ -42,4 +45,32 @@ public class CarService {
 		criteria.setName(Text.normalizeForSearch(criteria.getName()));
 	}
 
+
+	@Transactional
+	public Integer updateCar(Integer carId, Car carToSave){
+		Car car = getCar(carId);
+
+		car.setBrand(carToSave.getBrand());
+		car.setName(carToSave.getName());
+		car.setHorsePower(carToSave.getHorsePower());
+		car.setTorque(carToSave.getTorque());
+		car.setWheelDrive(carToSave.getWheelDrive());
+
+		return repository.save(car).getId();
+	}
+
+	@Transactional
+	public void deleteCar(Integer carId){
+		Car car = getCar(carId);
+
+		if(!verifyCarIsNotAlreadyAssignedToChallenge(carId)){
+			throw new BusinessViolation("carOrTrackAlreadyAssigned");
+		}
+
+		repository.delete(car);
+	}
+
+	private boolean verifyCarIsNotAlreadyAssignedToChallenge(Integer carId){
+		return !challengeRepo.existsByCarId(carId);
+	}
 }

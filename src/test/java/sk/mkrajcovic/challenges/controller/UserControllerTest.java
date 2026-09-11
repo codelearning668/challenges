@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import sk.mkrajcovic.challenges.controller.dto.UserRegistrationRequest;
+import sk.mkrajcovic.challenges.test.util.HttpCodes;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserControllerTest {
@@ -48,7 +49,7 @@ class UserControllerTest {
 			void anyoneCanRegister() {
 				register(VALID_USERNAME, VALID_PASSWORD)
 					.then()
-						.statusCode(OK);
+						.statusCode(HttpCodes.NO_CONTENT);
 			}
 		}
 

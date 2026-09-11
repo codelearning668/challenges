@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
+import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
@@ -18,6 +20,7 @@ import sk.mkrajcovic.challenges.util.Text;
 public class TrackService {
 
 	private final TrackRepository repository;
+	private final ChallengeRepository challengeRepository;
 
 	@Transactional
 	public Integer createTrack(Track track) {
@@ -40,5 +43,32 @@ public class TrackService {
 	private void normalizeSearchCriteria(SearchTracksCriteria criteria) {
 		criteria.setCountry(Text.normalizeForSearch(criteria.getCountry()));
 		criteria.setName(Text.normalizeForSearch(criteria.getName()));
+	}
+
+	@Transactional
+	public Integer updateTrack(Integer trackId, Track trackToSave){
+		Track track = getTrack(trackId);
+
+		track.setCountry(trackToSave.getCountry());
+		track.setName(trackToSave.getName());
+		track.setLengthKm(trackToSave.getLengthKm());
+
+		return repository.save(track).getId();
+	}
+
+	@Transactional
+	public void deleteTrack(Integer trackId){
+		Track track = getTrack(trackId);
+
+		if(!verifyTrackIsNotAssignedToChallenge(trackId)){
+			throw new BusinessViolation("carOrTrackAlreadyAssigned");
+		}
+
+		repository.delete(track);
+	}
+
+	//Returns true if track is unassigned
+	private boolean verifyTrackIsNotAssignedToChallenge(Integer trackId){
+		return !challengeRepository.existsByTrackId(trackId);
 	}
 }
