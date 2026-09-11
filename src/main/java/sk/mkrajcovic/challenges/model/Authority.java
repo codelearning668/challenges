@@ -9,6 +9,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.model.Authority.AuthorityId;
 
@@ -25,6 +26,7 @@ public class Authority {
 
 	@Id
 	@Column(name = "authority", length = 50, nullable = false)
+	@Getter
 	private String role;
 
 	public Authority(User user, String role) {
