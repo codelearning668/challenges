@@ -46,19 +46,19 @@ public class TrackService {
 	}
 
 	@Transactional
-	public Integer updateTrack(Integer trackId, Track trackToSave){
-		Track track = getTrack(trackId);
+	public void updateTrack(Integer trackId, Track trackToSave){
+		var track = getTrack(trackId);
 
 		track.setCountry(trackToSave.getCountry());
 		track.setName(trackToSave.getName());
 		track.setLengthKm(trackToSave.getLengthKm());
 
-		return repository.save(track).getId();
+		repository.save(track);
 	}
 
 	@Transactional
 	public void deleteTrack(Integer trackId){
-		Track track = getTrack(trackId);
+		var track = getTrack(trackId);
 
 		if(!verifyTrackIsNotAssignedToChallenge(trackId)){
 			throw new BusinessViolation("carOrTrackAlreadyAssigned");

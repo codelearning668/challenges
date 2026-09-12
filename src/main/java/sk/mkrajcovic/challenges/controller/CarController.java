@@ -35,8 +35,8 @@ public class CarController {
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
 	List<CarDetailResponse> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
 		return service.searchCars(searchCriteria).stream()
-				.map(CarMapper::toDetailResponse)
-				.toList();
+			.map(CarMapper::toDetailResponse)
+			.toList();
 	}
 
 	@RolesAllowed(ADMIN)
@@ -48,8 +48,8 @@ public class CarController {
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{carId}", consumes = APPLICATION_JSON_VALUE)
-	Integer updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody CreateCarRequest request) {
-		return service.updateCar(carId, CarMapper.toCar(request));
+	void updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody CreateCarRequest request) {
+		service.updateCar(carId, CarMapper.toCar(request));
 	}
 
 	@RolesAllowed(ADMIN)

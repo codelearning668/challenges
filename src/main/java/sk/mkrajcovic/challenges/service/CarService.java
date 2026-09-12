@@ -47,8 +47,8 @@ public class CarService {
 
 
 	@Transactional
-	public Integer updateCar(Integer carId, Car carToSave){
-		Car car = getCar(carId);
+	public void updateCar(Integer carId, Car carToSave){
+		var car = getCar(carId);
 
 		car.setBrand(carToSave.getBrand());
 		car.setName(carToSave.getName());
@@ -56,12 +56,12 @@ public class CarService {
 		car.setTorque(carToSave.getTorque());
 		car.setWheelDrive(carToSave.getWheelDrive());
 
-		return repository.save(car).getId();
+		repository.save(car);
 	}
 
 	@Transactional
 	public void deleteCar(Integer carId){
-		Car car = getCar(carId);
+		var car = getCar(carId);
 
 		if(!verifyCarIsNotAlreadyAssignedToChallenge(carId)){
 			throw new BusinessViolation("carOrTrackAlreadyAssigned");

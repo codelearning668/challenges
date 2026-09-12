@@ -48,8 +48,8 @@ public class TrackController {
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{trackId}", consumes = APPLICATION_JSON_VALUE)
-	Integer updateTrack(@PathVariable @Positive Integer trackId, @Valid @RequestBody CreateTrackRequest request){
-		return service.updateTrack(trackId, TrackMapper.toTrack(request));
+	void updateTrack(@PathVariable @Positive Integer trackId, @Valid @RequestBody CreateTrackRequest request){
+		service.updateTrack(trackId, TrackMapper.toTrack(request));
 	}
 
 	@RolesAllowed(ADMIN)
