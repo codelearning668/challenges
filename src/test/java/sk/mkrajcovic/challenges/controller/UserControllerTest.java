@@ -3,7 +3,6 @@ package sk.mkrajcovic.challenges.controller;
 import static io.restassured.RestAssured.given;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.CONFLICT;
-import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -49,7 +48,7 @@ class UserControllerTest {
 			void anyoneCanRegister() {
 				register(VALID_USERNAME, VALID_PASSWORD)
 					.then()
-						.statusCode(HttpCodes.NO_CONTENT);
+						.statusCode(HttpCodes.CREATED);
 			}
 		}
 
