@@ -107,6 +107,6 @@ class CarMapperTest {
 
 	@Test
 	void shouldRejectNullCreateCarRequest() {
-		assertThrows(NullPointerException.class, () -> CarMapper.toCar(null));
+		assertThrows(NullPointerException.class, () -> CarMapper.toCar((CreateCarRequest) null));
 	}
 }

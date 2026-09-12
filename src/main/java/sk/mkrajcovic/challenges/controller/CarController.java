@@ -6,7 +6,16 @@ import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -14,6 +23,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.controller.mapper.CarMapper;
 import sk.mkrajcovic.challenges.controller.util.CreatedResponseEntity;
 import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
@@ -48,7 +58,7 @@ public class CarController {
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{carId}", consumes = APPLICATION_JSON_VALUE)
-	void updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody CreateCarRequest request) {
+	void updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody UpdateCarRequest request) {
 		service.updateCar(carId, CarMapper.toCar(request));
 	}
 

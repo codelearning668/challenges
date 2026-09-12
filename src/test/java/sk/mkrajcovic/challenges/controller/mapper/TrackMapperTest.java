@@ -92,7 +92,7 @@ class TrackMapperTest {
 
 	@Test
 	void shouldRejectNullCreateTrackRequest() {
-		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack(null));
+		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack((CreateTrackRequest) null));
 		assertEquals("input request cannot be null in order to map its values", exception.getMessage());
 	}
 }

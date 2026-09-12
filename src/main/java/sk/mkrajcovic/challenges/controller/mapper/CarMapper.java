@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
 
@@ -39,6 +40,19 @@ public final class CarMapper {
 	}
 
 	public static Car toCar(CreateCarRequest createRequest) {
+		Objects.requireNonNull(createRequest, "input request cannot be null in order to map its values");
+
+		var car = new Car();
+		car.setBrand(createRequest.brand());
+		car.setName(createRequest.name());
+		car.setHorsePower(createRequest.hp());
+		car.setTorque(createRequest.torque());
+		car.setWheelDrive(createRequest.drive());
+
+		return car;
+	}
+
+	public static Car toCar(UpdateCarRequest createRequest) {
 		Objects.requireNonNull(createRequest, "input request cannot be null in order to map its values");
 
 		var car = new Car();
