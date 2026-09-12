@@ -1,9 +1,12 @@
 package sk.mkrajcovic.challenges.service;
 
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CHALLENGE_ALREADY_ACTIVE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
+import static sk.mkrajcovic.challenges.repository.util.EntityUtils.getExistingEntityById;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -21,7 +24,6 @@ import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
-import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
 import sk.mkrajcovic.challenges.util.Text;
 
@@ -109,7 +111,43 @@ public class ChallengeService {
 	 * @throws ResourceNotFound if no challenge exists with the specified ID
 	 */
 	public Challenge getChallenge(Integer challengeId) {
-		return EntityUtils.getExistingEntityById(repository, challengeId);
+		return getExistingEntityById(repository, challengeId);
+	}
+
+	/**
+	 * Changes the end date of a challenge that is currently active.
+	 * Closed challenges cannot have their end date modified.
+	 *
+	 * @param challengeId ID of the challenge whose end date is being changed
+	 * @param endDate new end date for the challenge
+	 * @throws ResourceNotFound if no challenge exists with the specified ID
+	 * @throws BusinessViolation if the challenge is already closed
+	 */
+	@Transactional
+	public void updateChallengeEndDate(Integer challengeId, LocalDate endDate) {
+		var challenge = getExistingEntityById(repository, challengeId);
+
+		verifyChallengeIsActive(challenge, CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE);
+
+		challenge.setEndDate(endDate);
+
+		repository.save(challenge);
+	}
+
+	/**
+	 * Deletes a challenge that is currently active.
+	 * Once a challenge has been closed, it cannot be deleted.
+	 *
+	 * @param challengeId ID of the challenge to delete
+	 * @throws ResourceNotFound if no challenge exists with the specified ID
+	 * @throws BusinessViolation if the challenge is already closed
+	 */
+	public void deleteChallenge(Integer challengeId){
+		var challenge = getExistingEntityById(repository, challengeId);
+
+		verifyChallengeIsActive(challenge, CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE);
+
+		repository.delete(challenge);
 	}
 
 	/**
@@ -126,22 +164,22 @@ public class ChallengeService {
 	 */
 	@Transactional
 	public void registerForChallenge(Integer challengeId) {
-		var challenge = EntityUtils.getExistingEntityById(repository, challengeId);
+		var challenge = getExistingEntityById(repository, challengeId);
 		String participantName = callContext.getCurrentUser();
 
-		verifyChallengeIsActive(challenge);
+		verifyChallengeIsActive(challenge, CANNOT_REGISTER_ON_CLOSED_CHALLENGE);
 		verifyNotAlreadyRegistered(participantName, challenge);
 		verifyCanRegisterForMultipleChallenges(participantName);
 
 		participantService.registerParticipant(participantName, challenge);
 	}
 
-	private void verifyChallengeIsActive(Challenge challenge) {
+	private void verifyChallengeIsActive(Challenge challenge, String messageCode) {
 		var today = LocalDate.now(ZoneOffset.UTC);
 		var endDate = challenge.getEndDate();
 
 		if (endDate.isBefore(today)) {
-			throw new BusinessViolation(CANNOT_REGISTER_ON_CLOSED_CHALLENGE, endDate);
+			throw new BusinessViolation(messageCode, endDate);
 		}
 	}
 
@@ -160,21 +198,4 @@ public class ChallengeService {
 		}
 	}
 
-	@Transactional
-	public Integer updateChallengeEndDate(Integer challengeId, LocalDate endDate){
-		Challenge challenge = getChallenge(challengeId);
-
-		verifyChallengeIsActive(challenge);
-
-		challenge.setEndDate(endDate);
-
-		return repository.save(challenge).getId();
-	}
-
-
-	public void deleteChallenge(Integer challengeId){
-		Challenge challenge = getChallenge(challengeId);
-
-		repository.delete(challenge);
-	}
 }

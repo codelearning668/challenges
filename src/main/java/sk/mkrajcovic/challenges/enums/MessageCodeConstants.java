@@ -25,7 +25,9 @@ public class MessageCodeConstants {
 	public static final String MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN = "multiChallengeRegistrationRequiresPreviousWin";
 	public static final String CHALLENGE_ALREADY_ACTIVE = "challengeAlreadyActive";
 	public static final String CAR_OR_TRACK_ALREADY_ASSIGNED = "carOrTrackAlreadyAssigned";
-
+	public static final String CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE = "cannotUpdateEndDateOnClosedChallenge";
+	public static final String CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE = "cannotDeleteAlreadyClosedChallenge";
+	
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 
 }

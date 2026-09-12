@@ -5,8 +5,14 @@ import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -53,10 +59,4 @@ public class TrackController {
 		service.updateTrack(trackId, TrackMapper.toTrack(request));
 	}
 
-	@RolesAllowed(ADMIN)
-	@DeleteMapping(path = "/{trackId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void deleteTrack(@PathVariable @Positive Integer trackId){
-		service.deleteTrack(trackId);
-	}
 }

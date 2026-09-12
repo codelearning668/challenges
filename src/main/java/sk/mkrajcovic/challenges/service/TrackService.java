@@ -6,10 +6,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
-import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
 import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
@@ -20,7 +18,6 @@ import sk.mkrajcovic.challenges.util.Text;
 public class TrackService {
 
 	private final TrackRepository repository;
-	private final ChallengeRepository challengeRepository;
 
 	@Transactional
 	public Integer createTrack(Track track) {
@@ -56,19 +53,4 @@ public class TrackService {
 		repository.save(track);
 	}
 
-	@Transactional
-	public void deleteTrack(Integer trackId){
-		var track = getTrack(trackId);
-
-		if(!verifyTrackIsNotAssignedToChallenge(trackId)){
-			throw new BusinessViolation("carOrTrackAlreadyAssigned");
-		}
-
-		repository.delete(track);
-	}
-
-	//Returns true if track is unassigned
-	private boolean verifyTrackIsNotAssignedToChallenge(Integer trackId){
-		return !challengeRepository.existsByTrackId(trackId);
-	}
 }

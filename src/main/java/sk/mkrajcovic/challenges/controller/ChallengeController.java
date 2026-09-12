@@ -66,8 +66,8 @@ public class ChallengeController {
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{challengeId}", consumes = APPLICATION_JSON_VALUE)
-	Integer updateChallengeEndDate(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateChallengeEndDateRequest request){
-		return challengeService.updateChallengeEndDate(challengeId, request.endDate());
+	void updateChallengeEndDate(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateChallengeEndDateRequest request) {
+		challengeService.updateChallengeEndDate(challengeId, request.endDate());
 	}
 
 	@RolesAllowed(ADMIN)
