@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
@@ -93,6 +94,23 @@ class TrackMapperTest {
 	@Test
 	void shouldRejectNullCreateTrackRequest() {
 		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack((CreateTrackRequest) null));
+		assertEquals("input request cannot be null in order to map its values", exception.getMessage());
+	}
+
+	@Test
+	void shouldMapUpdateTrackRequestToTrack() {
+		var request = new UpdateTrackRequest("Slovakia Ring", "Slovakia", 5.922);
+		var track = TrackMapper.toTrack(request);
+
+		assertAll(
+			() -> assertEquals("Slovakia Ring", track.getName()),
+			() -> assertEquals("Slovakia", track.getCountry()),
+			() -> assertEquals(5.922, track.getLengthKm()));
+	}
+
+	@Test
+	void shouldRejectNullUpdateTrackRequest() {
+		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack((UpdateTrackRequest) null));
 		assertEquals("input request cannot be null in order to map its values", exception.getMessage());
 	}
 }
