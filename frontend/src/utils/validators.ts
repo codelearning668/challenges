@@ -20,12 +20,24 @@ export const challengeSchema = z.object({
   endDate: z.string().min(1, 'End date is required'),
 })
 
-export const userSchema = z.object({
-  username: z.string().min(3).max(100),
-  password: z.string().min(6).max(500),
+/** Login: no length checks — the backend is the authority. */
+export const loginSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required'),
 })
+
+/** Register: keep backend-aligned limits (username 100, password 500). */
+export const registerSchema = z.object({
+  username: z.string().min(1, 'Username is required').max(100),
+  password: z.string().min(1, 'Password is required').max(500),
+})
+
+/** Kept for backward compatibility where a single schema was imported. */
+export const userSchema = loginSchema
 
 export type CarFormData = z.infer<typeof carSchema>
 export type TrackFormData = z.infer<typeof trackSchema>
 export type ChallengeFormData = z.infer<typeof challengeSchema>
+export type LoginFormData = z.infer<typeof loginSchema>
+export type RegisterFormData = z.infer<typeof registerSchema>
 export type UserFormData = z.infer<typeof userSchema>

@@ -3,16 +3,18 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { challengeSchema, type ChallengeFormData } from '@/utils/validators'
 import { Button } from '@/components/shared/Button'
 import { Input } from '@/components/shared/Input'
 import { Select } from '@/components/shared/Select'
 import { Card } from '@/components/shared/Card'
 import { carApi, trackApi, challengeApi } from '@/services/api'
+import { toast } from '@/stores/useToastStore'
 
 export function ChallengeForm() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -32,7 +34,6 @@ export function ChallengeForm() {
   } = useForm<ChallengeFormData>({
     resolver: zodResolver(challengeSchema),
     defaultValues: {
-      // Empty strings so the DOM renders blank; zod coerces to number on submit.
       trackId: '' as unknown as number,
       carId: '' as unknown as number,
       endDate: '',
@@ -48,8 +49,12 @@ export function ChallengeForm() {
         carId: data.carId,
         endDate: data.endDate,
       })
+      await queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      toast.success('Challenge created')
       navigate('/challenges')
     } catch (err) {
+      // The axios interceptor already surfaced a toast for the HTTP error;
+      // keep a small inline fallback in case something non-HTTP failed.
       setFormError(err instanceof Error ? err.message : 'Failed to create challenge')
     } finally {
       setIsLoading(false)
@@ -112,11 +117,7 @@ export function ChallengeForm() {
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button
-                  type="submit"
-                  isLoading={isLoading}
-                  disabled={optionsLoading}
-              >
+              <Button type="submit" isLoading={isLoading} disabled={optionsLoading}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Challenge
               </Button>

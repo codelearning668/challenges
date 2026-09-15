@@ -24,3 +24,5 @@ export interface CreateCarRequest {
   torque?: number
   drive?: WheelDrive
 }
+
+export type UpdateCarRequest = CreateCarRequest

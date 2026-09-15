@@ -16,3 +16,5 @@ export interface CreateTrackRequest {
   country?: string
   lengthKm?: number
 }
+
+export interface UpdateTrackRequest extends CreateTrackRequest {}

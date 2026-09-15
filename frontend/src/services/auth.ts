@@ -1,20 +1,43 @@
 import { useAuthStore } from '@/stores/useAuthStore'
+import type { UserInfoResponse } from '@/types/user'
+
+const stripRolePrefix = (authority: string): string =>
+    authority.startsWith('ROLE_') ? authority.slice(5) : authority
+
+const normalizeAuthorities = (roles: unknown): string[] => {
+  if (!Array.isArray(roles)) return []
+  return roles
+      .filter((r): r is string => typeof r === 'string')
+      .map(stripRolePrefix)
+}
 
 export const authApi = {
   login: async (username: string, password: string) => {
     const authorizationHeader = `Basic ${btoa(`${username}:${password}`)}`
 
-    // The backend exposes no protected GET endpoint (all GETs are public)
-    // and no /users/me endpoint, so credentials cannot be verified here and
-    // authorities cannot be fetched. We accept the credentials optimistically
-    // and let the first protected write (POST/PUT/DELETE) reveal a 401,
-    // which the api.ts response interceptor turns into a logout.
+    const response = await fetch('/api/users/info', {
+      headers: { Authorization: authorizationHeader },
+    })
+
+    if (!response.ok) throw new Error('Authentication failed')
+
+    const data: UserInfoResponse = await response.json()
+    const authorities = normalizeAuthorities(data?.roles)
+
+    if (import.meta.env.DEV) {
+      // Dev-only: lets you confirm what the app actually stored after login.
+      // Open DevTools → Console, look for "auth.login: stored".
+      console.info('auth.login: stored', {
+        username: data?.username ?? username,
+        rawRoles: data?.roles,
+        authorities,
+      })
+    }
+
     return {
       user: {
-        username,
-        // Unknown until a write is attempted; grant both so the UI is usable.
-        // The backend still enforces real authorization on writes.
-        authorities: ['ADMIN', 'PARTICIPANT'],
+        username: data?.username ?? username,
+        authorities,
       },
       authorizationHeader,
     }

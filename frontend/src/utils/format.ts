@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import type { DurationJson } from '@/types/challenge'
+import type { DurationJson, DurationPayload } from '@/types/challenge'
 
 export const formatDate = (date: Date | string): string =>
     format(new Date(date), 'MMM dd, yyyy')
@@ -14,15 +14,6 @@ export const formatDuration = (minutes: number): string => {
   return `${mins}m`
 }
 
-export const formatLapTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  const ms = Math.floor((seconds * 1000) % 1000)
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms
-      .toString()
-      .padStart(3, '0')}`
-}
-
 export const formatNumber = (num: number): string => num.toLocaleString()
 
 export const truncate = (str: string, maxLength: number): string => {
@@ -30,14 +21,52 @@ export const truncate = (str: string, maxLength: number): string => {
   return str.slice(0, maxLength - 3) + '...'
 }
 
-// ---------- Duration helpers ----------
+// ---------- lap-time parsing & formatting ----------
 
+/**
+ * Parse "mm:ss.mmm", "m:ss.mmm", or plain seconds into total seconds.
+ * Returns NaN on unparseable input.
+ *
+ *   "1:22.555" → 82.555
+ *   "0:45.2"   → 45.2
+ *   "82.555"   → 82.555
+ *   "1:22"     → 82
+ *   "1:22,555" → 82.555   (comma tolerated)
+ *   "1:75"     → NaN      (seconds ≥ 60 rejected)
+ */
+export const parseLapTime = (input: string): number => {
+  const trimmed = input.trim().replace(',', '.')
+  if (!trimmed) return NaN
 
+  if (!trimmed.includes(':')) {
+    const n = Number(trimmed)
+    return Number.isFinite(n) ? n : NaN
+  }
+
+  const parts = trimmed.split(':')
+  if (parts.length !== 2) return NaN
+  const mins = Number(parts[0])
+  const secs = Number(parts[1])
+  if (!Number.isFinite(mins) || !Number.isFinite(secs)) return NaN
+  if (mins < 0 || secs < 0 || secs >= 60) return NaN
+  return mins * 60 + secs
+}
+
+/** Format total seconds as "MM:SS.mmm". */
+export const formatLapTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  const ms = Math.round((seconds - Math.floor(seconds)) * 1000)
+  return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`
+}
+
+/** Convert any DurationJson (POJO or ISO string) to total seconds. */
 export const durationToSeconds = (d: DurationJson | null | undefined): number | null => {
   if (d == null) return null
 
   if (typeof d === 'string') {
-    // Parse ISO-8601 like "PT1H2M3.456S" or "PT92.5S"
     const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?$/.exec(d)
     if (!m) return null
     const h = Number(m[1] ?? 0)
@@ -51,9 +80,20 @@ export const durationToSeconds = (d: DurationJson | null | undefined): number | 
   return secs + nano / 1_000_000_000
 }
 
+/** Format a DurationJson as "MM:SS.mmm", or "—" when missing. */
 export const formatDurationJson = (d: DurationJson | null | undefined): string => {
   const s = durationToSeconds(d)
   return s == null ? '—' : formatLapTime(s)
 }
 
-export const secondsToIsoDuration = (seconds: number): string => `PT${seconds}S`
+/**
+ * Convert total seconds into the POJO the backend expects.
+ *
+ *   82.555 → { seconds: 82, nano: 555_000_000 }
+ *   45     → { seconds: 45, nano: 0 }
+ */
+export const secondsToDurationPayload = (seconds: number): DurationPayload => {
+  const whole = Math.floor(seconds)
+  const nano = Math.round((seconds - whole) * 1_000_000_000)
+  return { seconds: whole, nano }
+}

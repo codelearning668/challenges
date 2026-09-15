@@ -7,11 +7,13 @@ import { Button } from '@/components/shared/Button'
 import { Card } from '@/components/shared/Card'
 import MediaCard from '@/components/shared/MediaCard'
 import { formatNumber } from '@/utils/format'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { CarDetailResponse, SearchCarsCriteria } from '@/types/car'
 
 export function CarList() {
     const navigate = useNavigate()
     const [search, setSearch] = useState('')
+    const { isAdmin } = usePermissions()
 
     const criteria: SearchCarsCriteria = search.trim() ? { name: search.trim() } : {}
 
@@ -28,10 +30,12 @@ export function CarList() {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cars</h1>
-                <Button onClick={() => navigate('/cars/new')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Car
-                </Button>
+                {isAdmin && (
+                    <Button onClick={() => navigate('/cars/new')}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Car
+                    </Button>
+                )}
             </div>
 
             <div className="mb-4">

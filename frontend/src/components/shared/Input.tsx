@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       try {
         ;(e.currentTarget as HTMLInputElement).showPicker()
       } catch {
-        // Safari < 16, cross-origin, or not user-activated — fall back to native
+        // Safari < 16 / cross-origin — silently fall back
       }
     }
     onClick?.(e)
@@ -53,8 +53,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
               id={inputId || undefined}
               type={type}
               onClick={handleClick}
-              // Chrome aggressively autofills date inputs from history; opting out
-              // keeps a fresh form actually empty.
               autoComplete={autoComplete ?? (isPicker ? 'off' : undefined)}
               className={cn(
                   'w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-lg',

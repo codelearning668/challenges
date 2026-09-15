@@ -7,16 +7,19 @@ import { Button } from '@/components/shared/Button'
 import { Card } from '@/components/shared/Card'
 import { Table } from '@/components/shared/Table'
 import { formatDate, formatDurationJson } from '@/utils/format'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { ChallengeSummaryResponse } from '@/types/challenge'
 
 export function ChallengeList() {
     const [search, setSearch] = useState('')
     const navigate = useNavigate()
+    const { isAdmin } = usePermissions()
 
     const { data, isLoading } = useQuery({
         queryKey: ['challenges', search],
         queryFn: () =>
             challengeApi.search(search.trim() ? { trackName: search.trim() } : {}),
+        refetchOnMount: 'always',
     })
 
     const rows = data?.data ?? []
@@ -25,10 +28,12 @@ export function ChallengeList() {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Challenges</h1>
-                <Button onClick={() => navigate('/challenges/new')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Challenge
-                </Button>
+                {isAdmin && (
+                    <Button onClick={() => navigate('/challenges/new')}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Challenge
+                    </Button>
+                )}
             </div>
 
             <div className="mb-4">
@@ -50,11 +55,7 @@ export function ChallengeList() {
                         { key: 'carBrand', label: 'Brand' },
                         { key: 'carName', label: 'Car' },
                         { key: 'challengeEndDate', label: 'End Date', render: (v) => formatDate(v) },
-                        {
-                            key: 'bestLapTime',
-                            label: 'Best Lap',
-                            render: (v) => formatDurationJson(v),
-                        },
+                        { key: 'bestLapTime', label: 'Best Lap', render: (v) => formatDurationJson(v) },
                         { key: 'bestParticipantName', label: 'Best Driver' },
                     ]}
                     rows={rows}

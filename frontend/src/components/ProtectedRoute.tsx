@@ -16,8 +16,16 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
 
   if (requiredRoles && requiredRoles.length > 0) {
-    const hasRole = requiredRoles.some((role) => user?.authorities?.includes(role))
+    const authorities = user?.authorities ?? []
+    const hasRole = requiredRoles.some((role) => authorities.includes(role))
     if (!hasRole) {
+      if (import.meta.env.DEV) {
+        console.warn('ProtectedRoute: access denied', {
+          requiredRoles,
+          authorities,
+          pathname: location.pathname,
+        })
+      }
       return <Navigate to="/" replace />
     }
   }

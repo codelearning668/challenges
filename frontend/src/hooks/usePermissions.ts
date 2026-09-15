@@ -1,11 +1,13 @@
 import { useAuthStore } from '@/stores/useAuthStore'
 
 export function usePermissions() {
-  const { user, isAuthenticated } = useAuthStore()
-  
-  const isAdmin = user?.authorities?.includes('ADMIN')
-  const isParticipant = user?.authorities?.includes('PARTICIPANT')
-  
+  const user = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  const authorities = user?.authorities ?? []
+  const isAdmin = isAuthenticated && authorities.includes('ADMIN')
+  const isParticipant = isAuthenticated && authorities.includes('PARTICIPANT')
+
   return {
     isAuthenticated,
     isAdmin,
