@@ -2,7 +2,6 @@
 -- activate unaccent function
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
--- all assetto corsa ultimate edition tracks (will be potentially differently structured when the simulator dependency is implemented)
 insert into track (
     country,
     name,
@@ -22,6 +21,8 @@ select
     now()
 from (
     values
+    	-- all assetto corsa ultimate edition tracks
+
         ('Spain', 'Barcelona - GP', 4.655, 1),
         ('Spain', 'Barcelona - Moto', 4.727, 1),
         ('USA', 'Black Cat County', 6.478, 1),
@@ -58,7 +59,197 @@ from (
         ('Italy', 'Vallelunga', 4.085, 1),
         ('Italy', 'Vallelunga - Classic', 3.222, 1),
         ('Italy', 'Vallelunga - Club', 1.746, 1),
-        ('Netherlands', 'Zandvoort', 4.307, 1)
+        ('Netherlands', 'Zandvoort', 4.307, 1),
+
+
+        -- all WRC Generations tracks (comments behind values are elevations in meters -> future update of Track entity)
+
+	('Monte Carlo', 'Monte Carlo Shakedown', 1.97, 1), -- 97
+	('Monte Carlo', 'Agniéres-en-Devoluy', 7.47, 1), -- 404
+	('Monte Carlo', 'Agniéres-en-Devoluy reverse', 7.44, 1), -- 398
+	('Monte Carlo', 'Luceram', 5.94, 1), -- 328
+	('Monte Carlo', 'Luceram reverse', 6.03, 1), -- 332
+	('Monte Carlo', 'Col De Braus', 7.20, 1), -- 485
+	('Monte Carlo', 'Col De Braus reverse', 7.24, 1), -- 488
+	('Monte Carlo', 'La Bolléne-Vésuble', 20.97, 1), -- 1189
+	('Monte Carlo', 'La Bolléne-Vésuble reverse', 20.97, 1), -- 1173
+
+	('Sweden', 'Sweden Shakedown (PTSD)', 3.18, 1), -- 128
+	('Sweden', 'Sävar', 7.89, 1), -- 248
+	('Sweden', 'Sävar reverse', 7.89, 1), -- 247
+	('Sweden', 'Brattby', 7.36, 1), -- 341
+	('Sweden', 'Brattby reverse', 7.36, 1), -- 342
+	('Sweden', 'Kroksjö', 8.30, 1), -- 360
+	('Sweden', 'Kroksjö reverse', 8.30, 1), -- 363
+	('Sweden', 'Örträsk', 25.90, 1), -- 1044
+	('Sweden', 'Örträsk reverse', 25.90, 1), -- 1045
+
+	('Croatia', 'Croatia Shakedown', 3.22, 1), -- 162
+	('Croatia', 'Grdanjci', 6.02, 1), -- 315
+	('Croatia', 'Grdanjci reverse', 6.10, 1), -- 312
+	('Croatia', 'Jaškovo', 5.53, 1), -- 269
+	('Croatia', 'Jaškovo reverse', 5.54, 1), -- 270
+	('Croatia', 'Rude', 7.09, 1), -- 318
+	('Croatia', 'Rude reverse', 7.09, 1), -- 318
+	('Croatia', 'Kostanjevac', 19.88, 1), -- 941
+	('Croatia', 'Kostanjevac reverse', 19.96, 1), -- 939
+
+	('Portugal', 'Portugal Shakedown', 2.73, 1), -- 183
+	('Portugal', 'Felgveiras', 8.46, 1), -- 443
+	('Portugal', 'Felgveiras reverse', 8.46, 1), -- 440
+	('Portugal', 'Arganil', 9.66, 1), -- 583
+	('Portugal', 'Arganil reverse', 9.67, 1), -- 586
+	('Portugal', 'Cabeceiras de Basto', 20.07, 1), -- 1111
+	('Portugal', 'Cabeceiras de Basto reverse', 20.07, 1), -- 1113
+	('Portugal', 'Lousada', 3.58, 1), -- 47
+
+	('Italy-Sardinia', 'Sardinia Shakedown', 1.81, 1), -- 162
+	('Italy-Sardinia', 'Baranta', 5.17, 1), -- 330
+	('Italy-Sardinia', 'Baranta reverse', 5.26, 1), -- 340
+	('Italy-Sardinia', 'Lerno', 4.13, 1), -- 365
+	('Italy-Sardinia', 'Lerno reverse', 4.15, 1), -- 366
+	('Italy-Sardinia', 'Monti di Ala', 13.21, 1), -- 956
+	('Italy-Sardinia', 'Monti di Ala reverse', 13.22, 1), -- 960
+	('Italy-Sardinia', 'Ittiri Arena', 2.08, 1), -- 41
+
+	('Kenya', 'Kenya Shakedown', 3.36, 1), -- 61
+	('Kenya', 'Ngema', 7.71, 1), -- 138
+	('Kenya', 'Ngema reverse', 7.71, 1), -- 138
+	('Kenya', 'Seyabei', 6.25, 1), -- 153
+	('Kenya', 'Seyabei reverse', 6.25, 1), -- 153
+	('Kenya', 'Nitulele', 14.32, 1), -- 296
+	('Kenya', 'Nitulele reverse', 14.31, 1), -- 292
+	('Kenya', 'Kasarani', 4.45, 1), -- 36
+
+	('Estonia', 'Estonia Shakedown', 1.57, 1), -- 53
+	('Estonia', 'Elva', 8.35, 1), -- 506
+	('Estonia', 'Elva reverse', 8.36, 1), -- 509
+	('Estonia', 'Otepää', 5.70, 1), -- 260
+	('Estonia', 'Otepää reverse', 5.70, 1), -- 261
+	('Estonia', 'Kanepi', 14.04, 1), -- 755
+	('Estonia', 'Kanepi reverse', 14.04, 1), -- 757
+	('Estonia', 'Tartu', 0.97, 1), -- 31
+
+	('Finland', 'Finland Shakedown', null, 1), -- 64
+	('Finland', 'Arvaja', 9.65, 1), -- 386
+	('Finland', 'Arvaja reverse', 9.65, 1), -- 379
+	('Finland', 'Pihlajakoski', 9.79, 1), -- 579
+	('Finland', 'Pihlajakoski reverse', 9.79, 1), -- 578
+	('Finland', 'Laukaa', 21.10, 1), -- 1048
+	('Finland', 'Laukaa reverse', 21.09, 1), -- 1044
+	('Finland', 'Harju', 2.27, 1), -- 82
+
+	('Belgium', 'Belgium Shakedown', 1.63, 1), -- 99
+	('Belgium', 'Dikkebus', 5.26, 1), -- 155
+	('Belgium', 'Dikkebus reverse', 5.27, 1), -- 154
+	('Belgium', 'Kemmelberg', 6.78, 1), -- 320
+	('Belgium', 'Kemmelberg reverse', 6.78, 1), -- 320
+	('Belgium', 'ZonneBeke', 12.23, 1), -- 477
+	('Belgium', 'ZonneBeke reverse', 12.24, 1), -- 477
+
+	('Greece', 'Acropolis Shakedown', 2.65, 1), -- 109
+	('Greece', 'Psatha', 6.93, 1), -- 404
+	('Greece', 'Psatha reverse', 6.94, 1), -- 405
+	('Greece', 'Amfissa', 6.91, 1), -- 562
+	('Greece', 'Amfissa reverse', 6.91, 1), -- 562
+	('Greece', 'Paleohori', 4.87, 1), -- 584
+	('Greece', 'Paleohori reverse', 4.87, 1), -- 577
+	('Greece', 'Mendenitsa', 19.01, 1), -- 1565
+	('Greece', 'Mendenitsa reverse', 19.02, 1), -- 1561
+
+	('New Zeland', 'New Zeland Shakedown', 2.84, 1), -- 129
+	('New Zeland', 'Te Hutewai', 8.35, 1), -- 353
+	('New Zeland', 'Te Hutewai reverse', 8.35, 1), -- 356
+	('New Zeland', 'Batley', 6.83, 1), -- 332
+	('New Zeland', 'Batley reverse', 6.83, 1), -- 328
+	('New Zeland', 'Brooks', 6.92, 1), -- 285
+	('New Zeland', 'Brooks reverse', 6.93, 1), -- 287
+	('New Zeland', 'Te Akau South', 22.00, 1), -- 998
+	('New Zeland', 'Te Akau South reverse', 21.99, 1), -- 1007
+
+	('Spain', 'Spain Shakedown', 2.67, 1), -- 174
+	('Spain', 'Riudecanyes', 7.04, 1), -- 357
+	('Spain', 'Riudecanyes reverse', 7.04, 1), -- 361
+	('Spain', 'Savallá', 5.74, 1), -- 181
+	('Spain', 'Savallá reverse', 5.74, 1), -- 181
+	('Spain', 'Querol', 14.39, 1), -- 679
+	('Spain', 'Querol reverse', 14.38, 1), -- 681
+	('Spain', 'Barcelona', 3.38, 1), -- 68
+
+	('Japan', 'Japan Shakedown', 2.87, 1), -- 94
+	('Japan', 'Okazaki', 8.08, 1), -- 347
+	('Japan', 'Okazaki reverse', 7.91, 1), -- 329
+	('Japan', 'Nagakute', 7.14, 1), -- 391
+	('Japan', 'Nagakute reverse', 7.16, 1), -- 391
+	('Japan', 'Shinshiro', 7.32, 1), -- 324
+	('Japan', 'Shinshiro reverse', 7.32, 1), -- 323
+	('Japan', 'Shitara', 22.60, 1), -- 1052
+	('Japan', 'Shitara reverse', 22.59, 1), -- 1054
+
+	('Argentina', 'Argentina Shakedown', 2.23, 1), -- 149
+	('Argentina', 'El Condor', 7.14, 1), -- 406
+	('Argentina', 'El Condor reverse', 7.11, 1), -- 404
+	('Argentina', 'Cuchilla Nevada', 6.88, 1), -- 398
+	('Argentina', 'Cuchilla Nevada reverse', 6.69, 1), -- 382
+	('Argentina', 'Cantera', 14.74, 1), -- 853
+	('Argentina', 'Cantera reverse', 14.71, 1), -- 851
+	('Argentina', 'Parque Tematico', 6.60, 1), -- 127
+
+	('Chile', 'Chile Shakedown', 2.82, 1), -- 228
+	('Chile', 'Licay', 6.38, 1), -- 458
+	('Chile', 'Licay reverse', 6.41, 1), -- 465
+	('Chile', 'Biobio', 6.28, 1), -- 351
+	('Chile', 'Biobio reverse', 6.29, 1), -- 350
+	('Chile', 'Pelún', 8.11, 1), -- 467
+	('Chile', 'Pelún reverse', 8.03, 1), -- 460
+	('Chile', 'El Puma', 21.03, 1), -- 1286
+	('Chile', 'El Puma reverse', 21.02, 1), -- 1280
+
+	('Germany', 'Germany Shakedown', 3.01, 1), -- 136
+	('Germany', 'Moselland', 7.86, 1), -- 413
+	('Germany', 'Moselland reverse', 7.87, 1), -- 411
+	('Germany', 'Freisen', 6.87, 1), -- 315
+	('Germany', 'Freisen reverse', 6.85, 1), -- 314
+	('Germany', 'Mittelmosel', 15.61, 1), -- 765
+	('Germany', 'Mittelmosel reverse', 15.63, 1), -- 764
+	('Germany', 'Arena Panzerplatte', 2.88, 1), -- 124
+
+	('Mexico', 'Mexico Shakedown', 2.22, 1), -- 213
+	('Mexico', 'Media Luna', 3.98, 1), -- 213
+	('Mexico', 'Media Luna reverse', 3.93, 1), -- 212
+	('Mexico', 'Ibarrilla', 8.26, 1), -- 485
+	('Mexico', 'Ibarrilla reverse', 8.25, 1), -- 484
+	('Mexico', 'El Chocolate', 18.30, 1), -- 1197
+	('Mexico', 'El Chocolate reverse', 18.32, 1), -- 1199
+	('Mexico', 'Autódromo de León', 2.58, 1), -- 12
+
+	('Italy-Sanremo', 'Sanremo Shakedown', 2.01, 1), -- 74
+	('Italy-Sanremo', 'Ronde', 7.24, 1), -- 497
+	('Italy-Sanremo', 'Ronde reverse', 7.24, 1), -- 494
+
+	('France-Corsica', 'Corse Shakedown', 2.82, 1), -- 67
+	('France-Corsica', 'Pietrosella', 7.54, 1), -- 287
+	('France-Corsica', 'Pietrosella reverse', 7.50, 1), -- 286
+
+	('Turkey', 'Turkey Shakedown', 2.29, 1), -- 123
+	('Turkey', 'Datca', 6.62, 1), -- 383
+	('Turkey', 'Datca reverse', 6.53, 1), -- 380
+	('Turkey', 'Cicekli', 6.53, 1), -- 383
+	('Turkey', 'Cicekli reverse', 6.53, 1), -- 376
+	('Turkey', 'Yesilbelde', 14.55, 1), -- 855
+	('Turkey', 'Yesilbelde reverse', 14.52, 1), -- 848
+	('Turkey', 'Marmaris', 2.20, 1), -- 1
+
+	('Wales', 'Wales Shakedown', 1.75, 1), -- 114
+	('Wales', 'Hafren', 6.01, 1), -- 379
+	('Wales', 'Hafren reverse', 6.06, 1), -- 399
+	('Wales', 'Great Orme', 4.58, 1), -- 160
+	('Wales', 'Great Orme reverse', 4.52, 1), -- 161
+	('Wales', 'Brenig', 6.40, 1), -- 360
+	('Wales', 'Brenig reverse', 6.40, 1), -- 368
+	('Wales', 'Dyfi', 17.49, 1), -- 1022
+	('Wales', 'Dyfi', 17.43, 1) -- 1019
+
 ) as data(country, name, length_km, version);
 
 

@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.TrackDetailResponse;
+import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
 
@@ -35,6 +36,17 @@ public final class TrackMapper {
 	}
 
 	public static Track toTrack(CreateTrackRequest trackRequest) {
+		Objects.requireNonNull(trackRequest, "input request cannot be null in order to map its values");
+
+		var track = new Track();
+		track.setCountry(trackRequest.country());
+		track.setName(trackRequest.name());
+		track.setLengthKm(trackRequest.lengthKm());
+
+		return track;
+	}
+
+	public static Track toTrack(UpdateTrackRequest trackRequest) {
 		Objects.requireNonNull(trackRequest, "input request cannot be null in order to map its values");
 
 		var track = new Track();

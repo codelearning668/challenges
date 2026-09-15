@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
@@ -107,6 +108,24 @@ class CarMapperTest {
 
 	@Test
 	void shouldRejectNullCreateCarRequest() {
-		assertThrows(NullPointerException.class, () -> CarMapper.toCar(null));
+		assertThrows(NullPointerException.class, () -> CarMapper.toCar((CreateCarRequest) null));
+	}
+
+	@Test
+	void shouldMapUpdateCarRequestToCar() {
+		var request = new UpdateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL);
+		var car = CarMapper.toCar(request);
+
+		assertAll(
+			() -> assertEquals("BMW", car.getBrand()),
+			() -> assertEquals("M3", car.getName()),
+			() -> assertEquals(510, car.getHorsePower()),
+			() -> assertEquals(650, car.getTorque()),
+			() -> assertEquals(WheelDrive.ALL, car.getWheelDrive()));
+	}
+
+	@Test
+	void shouldRejectNullUpdateCarRequest() {
+		assertThrows(NullPointerException.class, () -> CarMapper.toCar((UpdateCarRequest) null));
 	}
 }
