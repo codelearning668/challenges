@@ -30,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
 import sk.mkrajcovic.challenges.security.UserRoles;
@@ -417,6 +418,266 @@ class TrackControllerTest {
 				))
 			.when()
 				.post(TRACK_URI);
+	}
+
+	@Nested
+	class UpdateTrackTest {
+
+		@Nested
+		class Positive {
+
+			@Test
+			void adminCanUpdateTrack() {
+				int id = createTrackAndReturnId();
+
+				given()
+					.auth()
+						.preemptive()
+						.basic(ADMIN_USER, ADMIN_PASS)
+					.contentType(ContentType.JSON)
+					.accept(ContentType.JSON)
+					.body(new UpdateTrackRequest(
+						"Updated Slovakia Ring",
+						"Czech Republic",
+						6.123
+					))
+				.when()
+					.put(TRACK_URI_WITH_ID, id)
+				.then()
+					.statusCode(OK);
+
+				getTrack(id)
+					.then()
+						.statusCode(OK)
+						.contentType(ContentType.JSON)
+						.body("id", equalTo(id))
+						.body("name", equalTo("Updated Slovakia Ring"))
+						.body("country", equalTo("Czech Republic"))
+						.body("lengthKm", equalTo(6.123F));
+			}
+
+			@Test
+			void updatePersistsSearchableValues() {
+				int id = createTrackAndReturnId();
+
+				given()
+					.auth()
+						.preemptive()
+						.basic(ADMIN_USER, ADMIN_PASS)
+					.contentType(ContentType.JSON)
+					.accept(ContentType.JSON)
+					.body(new UpdateTrackRequest(
+						"Autodrom Česká republika",
+						"Česká republika",
+						5.432
+					))
+				.when()
+					.put(TRACK_URI_WITH_ID, id)
+				.then()
+					.statusCode(OK);
+
+				assertSearchContainsTrack(
+					searchTracks("ceska", "autodrom ces", null),
+					id
+				);
+			}
+
+			@Test
+			void canUpdateCountryToNull() {
+				int id = createTrackAndReturnId();
+
+				given()
+					.auth()
+						.preemptive()
+						.basic(ADMIN_USER, ADMIN_PASS)
+					.contentType(ContentType.JSON)
+					.accept(ContentType.JSON)
+					.body(new UpdateTrackRequest(
+						"Updated Track",
+						null,
+						4.321
+					))
+				.when()
+					.put(TRACK_URI_WITH_ID, id)
+				.then()
+					.statusCode(OK);
+
+				getTrack(id)
+					.then()
+						.statusCode(OK)
+						.body("name", equalTo("Updated Track"))
+						.body("country", equalTo(null))
+						.body("lengthKm", equalTo(4.321F));
+			}
+		}
+
+		@Nested
+		class Negative {
+
+			@Nested
+			class Security {
+
+				@Test
+				void unauthenticatedCannotUpdateTrack() {
+					int id = createTrackAndReturnId();
+
+					given()
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateTrackRequest(
+							"Updated Track",
+							VALID_COUNTRY,
+							VALID_LENGTH_KM
+						))
+					.when()
+						.put(TRACK_URI_WITH_ID, id)
+					.then()
+						.statusCode(UNAUTHORIZED);
+				}
+
+				@Test
+				void unauthorizedCannotUpdateTrack() {
+					int id = createTrackAndReturnId();
+
+					given()
+						.auth()
+							.preemptive()
+							.basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateTrackRequest(
+							"Updated Track",
+							VALID_COUNTRY,
+							VALID_LENGTH_KM
+						))
+					.when()
+						.put(TRACK_URI_WITH_ID, id)
+					.then()
+						.statusCode(FORBIDDEN);
+				}
+			}
+
+			@Nested
+			class Validation {
+
+				@Test
+				void withoutName() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						null,
+						VALID_COUNTRY,
+						VALID_LENGTH_KM
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withEmptyName() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						" ",
+						VALID_COUNTRY,
+						VALID_LENGTH_KM
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withNameTooLong() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						"x".repeat(101),
+						VALID_COUNTRY,
+						VALID_LENGTH_KM
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withCountryTooLong() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						VALID_NAME,
+						"x".repeat(101),
+						VALID_LENGTH_KM
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withNegativeLength() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						VALID_NAME,
+						VALID_COUNTRY,
+						-1.0
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withZeroLength() {
+					int id = createTrackAndReturnId();
+
+					updateTrack(
+						id,
+						VALID_NAME,
+						VALID_COUNTRY,
+						0.0
+					)
+						.then()
+							.statusCode(BAD_REQUEST);
+				}
+			}
+
+			@Test
+			void cannotUpdateNonExistentTrack() {
+				updateTrack(
+					NON_EXISTENT_TRACK_ID,
+					VALID_NAME,
+					VALID_COUNTRY,
+					VALID_LENGTH_KM
+				)
+					.then()
+						.statusCode(NOT_FOUND);
+			}
+		}
+	}
+
+	private Response updateTrack(
+		int trackId,
+		String name,
+		String country,
+		Double lengthKm
+	) {
+		return given()
+				.auth()
+					.preemptive()
+					.basic(ADMIN_USER, ADMIN_PASS)
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.body(new UpdateTrackRequest(
+					name,
+					country,
+					lengthKm
+				))
+			.when()
+				.put(TRACK_URI_WITH_ID, trackId);
 	}
 
 	private Response createValidTrack() {
