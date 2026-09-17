@@ -30,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
@@ -502,6 +503,121 @@ class CarControllerTest {
 					.then()
 						.statusCode(OK)
 						.body("size()", is(0));
+			}
+		}
+	}
+
+	@Nested
+	class UpdateCarTest {
+
+		@Nested
+		class Positive {
+
+			@Test
+			void adminCanUpdateCar() {
+				int id = createCarAndReturnId();
+
+				given()
+					.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+					.contentType(ContentType.JSON)
+					.accept(ContentType.JSON)
+					.body(new UpdateCarRequest("Audi", "RS6", 600, 800, WheelDrive.ALL))
+				.when()
+					.put(CAR_URI_WITH_ID, id)
+				.then()
+					.statusCode(OK);
+
+				// verify the update took effect
+				getCar(id)
+					.then()
+						.statusCode(OK)
+						.body("brand", equalTo("Audi"))
+						.body("name", equalTo("RS6"))
+						.body("horsePower", equalTo(600))
+						.body("torque", equalTo(800));
+			}
+		}
+
+		@Nested
+		class Negative {
+
+			@Nested
+			class Security {
+
+				@Test
+				void unauthenticatedCannotUpdateCar() {
+					int id = createCarAndReturnId();
+
+					given()
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+					.when()
+						.put(CAR_URI_WITH_ID, id)
+					.then()
+						.statusCode(UNAUTHORIZED);
+				}
+
+				@Test
+				void participantCannotUpdateCar() {
+					int id = createCarAndReturnId();
+
+					given()
+						.auth().preemptive().basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+					.when()
+						.put(CAR_URI_WITH_ID, id)
+					.then().statusCode(FORBIDDEN);
+				}
+			}
+
+			@Nested
+			class Validation {
+
+				@Test
+				void cannotUpdateNonExistentCar() {
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+					.when()
+						.put(CAR_URI_WITH_ID, NON_EXISTENT_CAR_ID)
+					.then()
+						.statusCode(NOT_FOUND);
+				}
+
+				@Test
+				void withBlankBrand() {
+					int id = createCarAndReturnId();
+
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateCarRequest(" ", VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+					.when()
+						.put(CAR_URI_WITH_ID, id)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withNegativeHp() {
+					int id = createCarAndReturnId();
+
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, -100, VALID_TORQUE, VALID_DRIVE))
+					.when()
+						.put(CAR_URI_WITH_ID, id)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
 			}
 		}
 	}

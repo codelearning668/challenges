@@ -42,4 +42,17 @@ public class CarService {
 		criteria.setName(Text.normalizeForSearch(criteria.getName()));
 	}
 
+	@Transactional
+	public void updateCar(Integer carId, Car carToSave){
+		var car = getCar(carId);
+
+		car.setBrand(carToSave.getBrand());
+		car.setName(carToSave.getName());
+		car.setHorsePower(carToSave.getHorsePower());
+		car.setTorque(carToSave.getTorque());
+		car.setWheelDrive(carToSave.getWheelDrive());
+
+		repository.save(car);
+	}
+
 }

@@ -15,6 +15,7 @@ import static sk.mkrajcovic.challenges.test.util.HttpCodes.CONFLICT;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.CREATED;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.FORBIDDEN;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.NOT_FOUND;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.NO_CONTENT;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNAUTHORIZED;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNPROCESSABLE_ENTITY;
@@ -38,6 +39,7 @@ import io.restassured.response.Response;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
+import sk.mkrajcovic.challenges.controller.dto.UpdateChallengeEndDateRequest;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
@@ -975,6 +977,273 @@ class ChallengeControllerTest {
                 .then()
                 .statusCode(NOT_FOUND);
         }
+    }
+
+    @Nested
+    class UpdateChallengeTest {
+
+    	@Nested
+    	class Positive {
+
+    		@Test
+    		void adminCanUpdateChallengeEndDate() {
+    			int challengeId = createChallengeAndReturnId();
+    			LocalDate newEndDate = LocalDate.now().plusDays(60);
+
+    			updateChallengeEndDate(
+    				challengeId,
+    				newEndDate
+    			)
+    				.then()
+    					.statusCode(OK);
+
+    			getChallenge(challengeId)
+    				.then()
+    					.statusCode(OK)
+    					.body(
+    						"challengeEndDate",
+    						equalTo(newEndDate.toString())
+    					);
+    		}
+    	}
+
+    	@Nested
+    	class Negative {
+
+    		@Nested
+    		class Security {
+
+    			@Test
+    			void unauthenticatedCannotUpdateChallenge() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				given()
+    					.contentType(ContentType.JSON)
+    					.accept(ContentType.JSON)
+    					.body(new UpdateChallengeEndDateRequest(
+    						LocalDate.now().plusDays(60)
+    					))
+    				.when()
+    					.put(CHALLENGES_URI + "/{challengeId}", challengeId)
+    				.then()
+    					.statusCode(UNAUTHORIZED);
+    			}
+
+    			@Test
+    			void participantCannotUpdateChallenge() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				given()
+    					.auth()
+    						.preemptive()
+    						.basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+    					.contentType(ContentType.JSON)
+    					.accept(ContentType.JSON)
+    					.body(new UpdateChallengeEndDateRequest(
+    						LocalDate.now().plusDays(60)
+    					))
+    				.when()
+    					.put(CHALLENGES_URI + "/{challengeId}", challengeId)
+    				.then()
+    					.statusCode(FORBIDDEN);
+    			}
+    		}
+
+    		@Nested
+    		class Validation {
+
+    			@Test
+    			void rejectsMissingEndDate() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				updateChallengeEndDate(
+    					challengeId,
+    					null
+    				)
+    					.then()
+    						.statusCode(BAD_REQUEST);
+    			}
+
+    			@Test
+    			void rejectsPastEndDate() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				updateChallengeEndDate(
+    					challengeId,
+    					LocalDate.now().minusDays(1)
+    				)
+    					.then()
+    						.statusCode(BAD_REQUEST);
+    			}
+    		}
+
+    		@Test
+    		void rejectsNonExistentChallenge() {
+    			updateChallengeEndDate(
+    				99999,
+    				LocalDate.now().plusDays(60)
+    			)
+    				.then()
+    					.statusCode(NOT_FOUND);
+    		}
+
+    		@Test
+    		void cannotUpdateClosedChallenge() {
+    			int challengeId = createChallengeAndReturnId();
+
+    			closeChallenge(challengeId);
+
+    			updateChallengeEndDate(
+    				challengeId,
+    				LocalDate.now().plusDays(60)
+    			)
+    				.then()
+    					.statusCode(UNPROCESSABLE_ENTITY);
+    		}
+
+    		@Test
+    		void rejectsZeroChallengeId() {
+    			updateChallengeEndDate(
+    				0,
+    				LocalDate.now().plusDays(60)
+    			)
+    				.then()
+    					.statusCode(BAD_REQUEST);
+    		}
+
+    		@Test
+    		void rejectsNegativeChallengeId() {
+    			updateChallengeEndDate(
+    				-1,
+    				LocalDate.now().plusDays(60)
+    			)
+    				.then()
+    					.statusCode(BAD_REQUEST);
+    		}
+    	}
+    }
+
+    @Nested
+    class DeleteChallengeTest {
+
+    	@Nested
+    	class Positive {
+
+    		@Test
+    		void adminCanDeleteActiveChallenge() {
+    			int challengeId = createChallengeAndReturnId();
+
+    			deleteChallenge(challengeId)
+    				.then()
+    					.statusCode(NO_CONTENT);
+
+    			getChallenge(challengeId)
+    				.then()
+    					.statusCode(NOT_FOUND);
+    		}
+    	}
+
+    	@Nested
+    	class Negative {
+
+    		@Nested
+    		class Security {
+
+    			@Test
+    			void unauthenticatedCannotDeleteChallenge() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				given()
+    				.when()
+    					.delete(CHALLENGES_URI + "/{challengeId}", challengeId)
+    				.then()
+    					.statusCode(UNAUTHORIZED);
+    			}
+
+    			@Test
+    			void participantCannotDeleteChallenge() {
+    				int challengeId = createChallengeAndReturnId();
+
+    				given()
+    					.auth()
+    						.preemptive()
+    						.basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+    				.when()
+    					.delete(CHALLENGES_URI + "/{challengeId}", challengeId)
+    				.then()
+    					.statusCode(FORBIDDEN);
+    			}
+    		}
+
+    		@Test
+    		void deletingNonExistentChallengeReturnsNotFound() {
+    			deleteChallenge(99999)
+    				.then()
+    					.statusCode(NOT_FOUND);
+    		}
+
+    		@Test
+    		void deletingAlreadyDeletedChallengeReturnsNotFound() {
+    			int challengeId = createChallengeAndReturnId();
+
+    			deleteChallenge(challengeId)
+    				.then()
+    					.statusCode(NO_CONTENT);
+
+    			deleteChallenge(challengeId)
+    				.then()
+    					.statusCode(NOT_FOUND);
+    		}
+
+    		@Test
+    		void cannotDeleteClosedChallenge() {
+    			int challengeId = createChallengeAndReturnId();
+
+    			closeChallenge(challengeId);
+
+    			deleteChallenge(challengeId)
+    				.then()
+    					.statusCode(UNPROCESSABLE_ENTITY);
+    		}
+
+    		@Test
+    		void rejectsZeroChallengeId() {
+    			deleteChallenge(0)
+    				.then()
+    					.statusCode(BAD_REQUEST);
+    		}
+
+    		@Test
+    		void rejectsNegativeChallengeId() {
+    			deleteChallenge(-1)
+    				.then()
+    					.statusCode(BAD_REQUEST);
+    		}
+    	}
+    }
+
+    private Response updateChallengeEndDate(
+    	int challengeId,
+    	LocalDate endDate
+    ) {
+    	return given()
+    			.auth()
+    				.preemptive()
+    				.basic(ADMIN_USER, ADMIN_PASS)
+    			.contentType(ContentType.JSON)
+    			.accept(ContentType.JSON)
+    			.body(new UpdateChallengeEndDateRequest(endDate))
+    		.when()
+    			.put(CHALLENGES_URI + "/{challengeId}", challengeId);
+    }
+
+    private Response deleteChallenge(int challengeId) {
+    	return given()
+    			.auth()
+    				.preemptive()
+    				.basic(ADMIN_USER, ADMIN_PASS)
+    		.when()
+    			.delete(CHALLENGES_URI + "/{challengeId}", challengeId);
     }
 
     private Response createChallenge(Integer trackId, Integer carId, LocalDate endDate) {
