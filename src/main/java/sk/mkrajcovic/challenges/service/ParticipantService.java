@@ -40,6 +40,9 @@ public class ParticipantService {
 	 * Registers a participant for the specified challenge.
 	 * <p>
 	 * The participant is identified by name and initially has no recorded lap time.
+	 * <p>
+	 * The caller is responsible for verifying that the participant is not already
+	 * registered for the challenge and that registration is otherwise permitted.
 	 *
 	 * @param name the name of the participant to register
 	 * @param challenge the challenge for which the participant is registered
@@ -47,9 +50,12 @@ public class ParticipantService {
 	 */
 	@Transactional
 	public void registerParticipant(String name, Challenge challenge) {
-		var participant = new Participant();
-		participant.setName(requireNonNull(name, "cannot create participant without a name"));
-		participant.setChallenge(requireNonNull(challenge, "cannot register for non-existent challenge"));
+		requireNonNull(name, "cannot create participant without a name");
+		requireNonNull(challenge, "cannot register for non-existent challenge");
+
+		var participant = repository.findByChallengeIdAndName(challenge.getId(), name).orElseGet(Participant::new);
+		participant.setName(name);
+		participant.setChallenge(challenge);
 
 		repository.save(participant);
 	}
