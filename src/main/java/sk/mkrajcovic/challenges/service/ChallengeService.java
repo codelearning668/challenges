@@ -1,11 +1,13 @@
 package sk.mkrajcovic.challenges.service;
 
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_QUIT_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CHALLENGE_ALREADY_ACTIVE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE;
 import static sk.mkrajcovic.challenges.repository.util.EntityUtils.getExistingEntityById;
 
 import java.time.LocalDate;
@@ -184,17 +186,46 @@ public class ChallengeService {
 	}
 
 	private void verifyNotAlreadyRegistered(String newParticipantName, Challenge challenge) {
-		boolean alreadyAssigned = challenge.getParticipants().stream()
-				.anyMatch(participant -> participant.getName().equals(newParticipantName));
-
-		if (alreadyAssigned) {
+		if (isRegistered(newParticipantName, challenge)) {
 			throw new Conflict(PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE);
 		}
+	}
+
+	private boolean isRegistered(String participantName, Challenge challenge) {
+		return challenge.getParticipants().stream()
+				.anyMatch(participant -> participant.getName().equals(participantName));
 	}
 
 	private void verifyCanRegisterForMultipleChallenges(String participantName) {
 		if (repository.hasActiveChallengeWithoutPreviousWin(participantName)) {
 			throw new BusinessViolation(MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN);
+		}
+	}
+
+	/**
+	 * Removes the current participant from the specified active challenge.
+	 * <p>
+	 * A participant may quit only while the challenge is active and only when they
+	 * are currently registered for it.
+	 *
+	 * @param challengeId ID of the challenge to quit
+	 * @throws ResourceNotFound if no challenge exists with the specified ID
+	 * @throws Conflict if the participant is not registered for the challenge
+	 * @throws BusinessViolation if the challenge is already closed
+	 */
+	public void quitChallenge(Integer challengeId) {
+		var challenge = getExistingEntityById(repository, challengeId);
+		var participantName = callContext.getCurrentUser();
+
+		verifyChallengeIsActive(challenge, CANNOT_QUIT_CLOSED_CHALLENGE);
+		verifyAlreadyRegistered(participantName, challenge);
+
+		participantService.unregisterParticipant(participantName, challenge);
+	}
+
+	private void verifyAlreadyRegistered(String participantName, Challenge challenge) {
+		if (!isRegistered(participantName, challenge)) {
+			throw new Conflict(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE);
 		}
 	}
 

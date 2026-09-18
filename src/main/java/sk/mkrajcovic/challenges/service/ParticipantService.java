@@ -61,6 +61,24 @@ public class ParticipantService {
 	}
 
 	/**
+	 * Removes the participant's registration from the specified challenge.
+	 * <p>
+	 * The caller is responsible for verifying that leaving the challenge is
+	 * currently permitted.
+	 *
+	 * @param name the participant's name
+	 * @param challenge the challenge from which the participant is removed
+	 * @throws NullPointerException if {@code name} or {@code challenge} is {@code null}
+	 */
+	@Transactional
+	public void unregisterParticipant(String name, Challenge challenge) {
+		requireNonNull(name, "cannot unregister participant without a name");
+		requireNonNull(challenge, "cannot unregister from non-existent challenge");
+
+		repository.deleteByChallengeIdAndName(challenge.getId(), name);
+	}
+
+	/**
 	 * Updates the participant's lap time and updates the challenge's current leader
 	 * when the new time changes the best result.
 	 * <p>
