@@ -50,7 +50,7 @@ import sk.mkrajcovic.challenges.security.UserRoles;
 class ChallengeControllerTest {
 
     private static final String CHALLENGES_URI = "/challenges";
-    private static final String REGISTER_URI = CHALLENGES_URI + "/{challengeId}/register";
+    private static final String REGISTER_URI = CHALLENGES_URI + "/{challengeId}/registration";
     private static final String PARTICIPANT_URI = CHALLENGES_URI + "/{challengeId}/participant";
 
     private static final String ADMIN_USER = "challengeTestAdmin";
@@ -320,7 +320,163 @@ class ChallengeControllerTest {
                 .then()
                 .statusCode(BAD_REQUEST);
         }
-    }
+	}
+
+	@Nested
+	class QuitChallengeTest {
+
+		@Nested
+		class Positive {
+
+			@Test
+			void participantCanQuitChallenge() {
+				String participant = newParticipant();
+				int challengeId = createChallengeAndRegisterParticipant(participant);
+
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, challengeId)
+				.then()
+					.statusCode(NO_CONTENT);
+
+				getChallenge(challengeId).then().statusCode(OK)
+					.body("participants.find { it.participantName == '" + participant + "' }", nullValue());
+			}
+
+			@Test
+			void participantCanRegisterForAnotherChallengeAfterQuittingPreviousChallenge() {
+				String participant = newParticipant();
+
+				int firstChallengeId = createChallengeAndRegisterParticipant(participant);
+
+				given().auth().preemptive().basic(participant, PARTICIPANT_PASS).when()
+						.delete(REGISTER_URI, firstChallengeId).then().statusCode(NO_CONTENT);
+
+				int secondChallengeId = createChallengeAndReturnId();
+
+				registerForChallenge(secondChallengeId, participant, PARTICIPANT_PASS).then().statusCode(OK);
+			}
+		}
+
+		@Nested
+		class Negative {
+
+			@Nested
+			class Security {
+
+				@Test
+				void unauthenticatedCannotQuitChallenge() {
+					int challengeId = createChallengeAndReturnId();
+
+					given()
+					.when()
+						.delete(REGISTER_URI, challengeId)
+					.then()
+						.statusCode(UNAUTHORIZED);
+				}
+
+				@Test
+				void adminCannotQuitChallenge() {
+					String participant = newParticipant();
+					int challengeId = createChallengeAndRegisterParticipant(participant);
+
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+					.when()
+						.delete(REGISTER_URI, challengeId)
+					.then()
+						.statusCode(FORBIDDEN);
+				}
+			}
+
+			@Nested
+			class Validation {
+
+				@Test
+				void rejectsZeroChallengeId() {
+					given()
+						.auth().preemptive().basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+					.when()
+						.delete(REGISTER_URI, 0)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void rejectsNegativeChallengeId() {
+					given()
+						.auth().preemptive().basic(PARTICIPANT_USER, PARTICIPANT_PASS)
+					.when()
+						.delete(REGISTER_URI, -1)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
+			}
+
+			@Test
+			void rejectsNonExistentChallenge() {
+				String participant = newParticipant();
+
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, 99999)
+				.then()
+					.statusCode(NOT_FOUND);
+			}
+
+			@Test
+			void rejectsQuitWhenParticipantIsNotRegistered() {
+				String participant = newParticipant();
+				int challengeId = createChallengeAndReturnId();
+
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, challengeId)
+				.then()
+					.statusCode(CONFLICT);
+			}
+
+			@Test
+			void rejectsQuitFromClosedChallenge() {
+				String participant = newParticipant();
+				int challengeId = createChallengeAndRegisterParticipant(participant);
+
+				closeChallenge(challengeId);
+
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, challengeId)
+				.then()
+					.statusCode(UNPROCESSABLE_ENTITY);
+			}
+
+			@Test
+			void rejectsQuittingSameChallengeTwice() {
+				String participant = newParticipant();
+				int challengeId = createChallengeAndRegisterParticipant(participant);
+
+				// first unregister
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, challengeId)
+				.then()
+					.statusCode(NO_CONTENT);
+
+				// already quit, cannot unregister twice
+				given()
+					.auth().preemptive().basic(participant, PARTICIPANT_PASS)
+				.when()
+					.delete(REGISTER_URI, challengeId)
+				.then()
+					.statusCode(CONFLICT);
+			}
+		}
+	}
 
     @Nested
     class SearchChallengesTest {

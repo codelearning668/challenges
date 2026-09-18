@@ -53,9 +53,16 @@ public class ChallengeController {
 	}
 
 	@RolesAllowed(PARTICIPANT)
-	@PostMapping(path = "/{challengeId}/register")
+	@PostMapping(path = "/{challengeId}/registration")
 	void registerForChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.registerForChallenge(challengeId);
+	}
+
+	@RolesAllowed(PARTICIPANT)
+	@DeleteMapping(path = "/{challengeId}/registration")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void quitChallenge(@PathVariable @Positive Integer challengeId) {
+		challengeService.quitChallenge(challengeId);
 	}
 
 	@RolesAllowed({ADMIN, PARTICIPANT})
