@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+import sk.mkrajcovic.challenges.exception.ClientException;
+
 @Configuration
 public class JacksonConfig {
 
@@ -101,14 +103,20 @@ public class JacksonConfig {
 			String value = parser.getValueAsString();
 
 			if (value == null) {
+				if (parser.hasCurrentToken()) {
+					throw new ClientException(
+						"Expected duration in format m:ss.S, m:ss.SS or m:ss.SSS, e.g. 1:23.456, found {}",
+						parser.getCurrentToken().asString());
+				}
 				return null;
 			}
 
 			Matcher matcher = PATTERN.matcher(value);
 
 			if (!matcher.matches()) {
-				throw context.weirdStringException(value, Duration.class,
-						"Expected duration in format m:ss.S, m:ss.SS or m:ss.SSS, e.g. 1:23.456");
+				throw new ClientException(
+					"Expected duration in format m:ss.S, m:ss.SS or m:ss.SSS, e.g. 1:23.456, found {}",
+					value);
 			}
 
 			long minutes = Long.parseLong(matcher.group(1));
