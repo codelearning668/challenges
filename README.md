@@ -35,13 +35,20 @@ SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 
 The service starts at `http://localhost:8790/challenges/svc`. Flyway applies the schema and reference-data migrations at startup.
 
+## API documentation
+
+Springdoc generates the OpenAPI documentation from the application. It is a work in progress and the generated operations are not yet fully documented.
+
+- [OpenAPI specification (JSON)](http://localhost:8790/challenges/svc/v3/api-docs)
+- [Swagger UI](http://localhost:8790/challenges/svc/swagger-ui/index.html)
+
 ## Tests
 
 ```bash
 ./mvnw test
 ```
 
-This runs the test suite with H2 and generates the JaCoCo report at `target/site/jacoco/index.html`.
+This runs the test suite against H2 in-memory database and generates the JaCoCo report at `target/site/jacoco/index.html`.
 
 ## Architecture and design
 
