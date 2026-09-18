@@ -27,7 +27,8 @@ public class MessageCodeConstants {
 	public static final String CAR_OR_TRACK_ALREADY_ASSIGNED = "carOrTrackAlreadyAssigned";
 	public static final String CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE = "cannotUpdateEndDateOnClosedChallenge";
 	public static final String CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE = "cannotDeleteAlreadyClosedChallenge";
-	
+	public static final String CANNOT_QUIT_CLOSED_CHALLENGE = "cannotQuitClosedChallenge";
+
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 
 }

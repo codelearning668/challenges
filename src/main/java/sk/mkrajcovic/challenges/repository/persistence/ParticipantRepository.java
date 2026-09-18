@@ -12,4 +12,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Intege
 
 	public Optional<Participant> findByChallengeIdAndName(Integer challengeId, String participantName);
 
+	public void deleteByChallengeIdAndName(Integer challengeId, String name);
+
 }
