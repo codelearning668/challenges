@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
@@ -14,13 +16,15 @@ import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class TrackMapperTest {
 
+	private static final BigDecimal VALID_LENGTH_KM = new BigDecimal("5.922");
+
 	@Test
 	void shouldMapTrackToDetailResponse() {
 		var track = new Track();
 		EntityTestUtils.setId(track, 42);
 		track.setName("Slovakia Ring");
 		track.setCountry("Slovakia");
-		track.setLengthKm(5.922);
+		track.setLengthKm(VALID_LENGTH_KM);
 
 		var response = TrackMapper.toDetailResponse(track);
 
@@ -28,13 +32,18 @@ class TrackMapperTest {
 			() -> assertEquals(42, response.id()),
 			() -> assertEquals("Slovakia Ring", response.name()),
 			() -> assertEquals("Slovakia", response.country()),
-			() -> assertEquals(5.922, response.lengthKm()));
+			() -> assertEquals(VALID_LENGTH_KM, response.lengthKm()));
 	}
 
 	@Test
 	void shouldRejectNullTrackWhenMappingToDetailResponse() {
-		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toDetailResponse((Track)null));
-		assertEquals("track cannot be null in order to map its values", exception.getMessage());
+		var exception = assertThrows(
+			NullPointerException.class,
+			() -> TrackMapper.toDetailResponse((Track) null));
+
+		assertEquals(
+			"track cannot be null in order to map its values",
+			exception.getMessage());
 	}
 
 	@Test
@@ -57,8 +66,8 @@ class TrackMapperTest {
 			}
 
 			@Override
-			public Double getLengthKm() {
-				return 5.922;
+			public BigDecimal getLengthKm() {
+				return VALID_LENGTH_KM;
 			}
 		};
 
@@ -68,7 +77,7 @@ class TrackMapperTest {
 			() -> assertEquals(42, response.id()),
 			() -> assertEquals("Slovakia Ring", response.name()),
 			() -> assertEquals("Slovakia", response.country()),
-			() -> assertEquals(5.922, response.lengthKm()));
+			() -> assertEquals(VALID_LENGTH_KM, response.lengthKm()));
 	}
 
 	@Test
@@ -77,40 +86,60 @@ class TrackMapperTest {
 			NullPointerException.class,
 			() -> TrackMapper.toDetailResponse((TrackDetail) null));
 
-		assertEquals("trackDetail cannot be null in order to map its values", exception.getMessage());
+		assertEquals(
+			"trackDetail cannot be null in order to map its values",
+			exception.getMessage());
 	}
 
 	@Test
 	void shouldMapCreateTrackRequestToTrack() {
-		var request = new CreateTrackRequest("Slovakia Ring", "Slovakia", 5.922);
+		var request = new CreateTrackRequest(
+			"Slovakia Ring",
+			"Slovakia",
+			VALID_LENGTH_KM);
+
 		var track = TrackMapper.toTrack(request);
 
 		assertAll(
 			() -> assertEquals("Slovakia Ring", track.getName()),
 			() -> assertEquals("Slovakia", track.getCountry()),
-			() -> assertEquals(5.922, track.getLengthKm()));
+			() -> assertEquals(VALID_LENGTH_KM, track.getLengthKm()));
 	}
 
 	@Test
 	void shouldRejectNullCreateTrackRequest() {
-		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack((CreateTrackRequest) null));
-		assertEquals("input request cannot be null in order to map its values", exception.getMessage());
+		var exception = assertThrows(
+			NullPointerException.class,
+			() -> TrackMapper.toTrack((CreateTrackRequest) null));
+
+		assertEquals(
+			"input request cannot be null in order to map its values",
+			exception.getMessage());
 	}
 
 	@Test
 	void shouldMapUpdateTrackRequestToTrack() {
-		var request = new UpdateTrackRequest("Slovakia Ring", "Slovakia", 5.922);
+		var request = new UpdateTrackRequest(
+			"Slovakia Ring",
+			"Slovakia",
+			VALID_LENGTH_KM);
+
 		var track = TrackMapper.toTrack(request);
 
 		assertAll(
 			() -> assertEquals("Slovakia Ring", track.getName()),
 			() -> assertEquals("Slovakia", track.getCountry()),
-			() -> assertEquals(5.922, track.getLengthKm()));
+			() -> assertEquals(VALID_LENGTH_KM, track.getLengthKm()));
 	}
 
 	@Test
 	void shouldRejectNullUpdateTrackRequest() {
-		var exception = assertThrows(NullPointerException.class, () -> TrackMapper.toTrack((UpdateTrackRequest) null));
-		assertEquals("input request cannot be null in order to map its values", exception.getMessage());
+		var exception = assertThrows(
+			NullPointerException.class,
+			() -> TrackMapper.toTrack((UpdateTrackRequest) null));
+
+		assertEquals(
+			"input request cannot be null in order to map its values",
+			exception.getMessage());
 	}
 }

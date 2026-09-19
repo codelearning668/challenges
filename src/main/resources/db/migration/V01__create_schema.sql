@@ -41,7 +41,7 @@ create table track (
     version integer not null,
     country varchar(100),
     name varchar(100) not null,
-    length_km real,
+    length_km numeric(10,3),
     country_search varchar(100),
     name_search varchar(100) not null,
     created_at timestamp not null,

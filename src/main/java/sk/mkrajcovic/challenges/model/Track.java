@@ -2,7 +2,13 @@ package sk.mkrajcovic.challenges.model;
 
 import static lombok.AccessLevel.NONE;
 
-import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import sk.mkrajcovic.challenges.util.Text;
@@ -17,7 +23,8 @@ public class Track extends BaseEntity {
 	@Column(nullable = false, length = 100)
 	private String name;
 
-	private Double lengthKm;
+	@Column(precision = 10, scale = 3)
+	private BigDecimal lengthKm;
 
 	/*
 	 * Denormalized search representation maintained

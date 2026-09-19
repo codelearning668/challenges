@@ -1,5 +1,6 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class ChallengeDetailResponse {
 	private Integer trackId;
 	private String trackName;
 	private String trackCountry;
-	private Double trackLengthKm;
+	private BigDecimal trackLengthKm;
 
 	private Integer carId;
 	private String carBrand;
