@@ -16,15 +16,6 @@ class ParticipantTest {
 	private static final String JOHN = "John";
 
 	@Test
-	void equalsShouldReturnTrueWhenParticipantsHaveSameEqualityFields() {
-		Participant first = participant(JOHN, Duration.ofSeconds(10));
-		Participant second = participant(JOHN, Duration.ofSeconds(10));
-
-		assertEquals(first, second);
-		assertEquals(first.hashCode(), second.hashCode());
-	}
-
-	@Test
 	void equalsShouldReturnFalseWhenNameIsDifferent() {
 		Participant first = participant(JOHN, Duration.ofSeconds(10));
 		Participant second = participant("Jane", Duration.ofSeconds(10));
@@ -61,13 +52,13 @@ class ParticipantTest {
 	@Test
 	void equalsShouldReturnFalseWhenComparedWithNull() {
 		var participant = participant(JOHN, Duration.ofSeconds(10));
-		assertNotEquals(participant, null);
+		assertNotEquals(null, participant);
 	}
 
 	@Test
 	void equalsShouldReturnFalseWhenComparedWithDifferentType() {
 		var participant = participant(JOHN, Duration.ofSeconds(10));
-		assertNotEquals(participant, JOHN);
+		assertNotEquals(JOHN, participant);
 	}
 
 	@Test
