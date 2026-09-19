@@ -200,6 +200,7 @@
 					<reportFormat>plain</reportFormat>
 
 					<consoleOutputReporter>
+						<!-- disables console logs ..enable locally for tests that need temporary debugging -->
 						<disable>true</disable>
 					</consoleOutputReporter>
 
