@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
@@ -49,7 +50,7 @@ class ChallengeMapperTest {
 			() -> assertEquals(10, response.getTrackId()),
 			() -> assertEquals("Slovakia", response.getTrackCountry()),
 			() -> assertEquals("Slovakia Ring", response.getTrackName()),
-			() -> assertEquals(5.922, response.getTrackLengthKm()),
+			() -> assertEquals(BigDecimal.valueOf(5.922), response.getTrackLengthKm()),
 			() -> assertEquals(20, response.getCarId()),
 			() -> assertEquals("BMW", response.getCarBrand()),
 			() -> assertEquals("M3", response.getCarName()),
@@ -176,7 +177,7 @@ class ChallengeMapperTest {
 		EntityTestUtils.setId(track, 10);
 		track.setCountry("Slovakia");
 		track.setName("Slovakia Ring");
-		track.setLengthKm(5.922);
+		track.setLengthKm(BigDecimal.valueOf(5.922));
 		return track;
 	}
 

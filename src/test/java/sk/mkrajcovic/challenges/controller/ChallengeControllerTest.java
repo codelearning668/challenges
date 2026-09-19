@@ -20,6 +20,7 @@ import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNAUTHORIZED;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNPROCESSABLE_ENTITY;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -1559,7 +1560,7 @@ class ChallengeControllerTest {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
-            .body(new CreateTrackRequest(name, country, lengthKm))
+            .body(new CreateTrackRequest(name, country, BigDecimal.valueOf(lengthKm)))
         .when()
             .post("/tracks")
         .then()
