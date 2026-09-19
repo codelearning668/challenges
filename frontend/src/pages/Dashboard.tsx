@@ -1,321 +1,163 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Car as CarIcon, Flag, Calendar, ImageOff } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { carApi, trackApi, challengeApi } from '@/services/api'
-import { Modal } from '@/components/shared/Modal'
-import { formatDate, formatDurationJson, formatNumber } from '@/utils/format'
-import type { CarDetailResponse } from '@/types/car'
-import type { TrackDetailResponse } from '@/types/track'
-import type { ChallengeSummaryResponse } from '@/types/challenge'
+import { useQueries, useQuery } from '@tanstack/react-query'
+import { Flag, Timer, Clock, ArrowRight } from 'lucide-react'
+import { challengeApi } from '@/services/api'
+import { Card } from '@/components/shared/Card'
+import { Table } from '@/components/shared/Table'
+import {
+    durationToSeconds,
+    formatDate,
+    formatDurationJson,
+    formatLapTime,
+} from '@/utils/format'
+import { useAuthStore } from '@/stores/useAuthStore'
+import type { ChallengeDetailResponse, ChallengeSummaryResponse } from '@/types/challenge'
 
-type Category = 'cars' | 'tracks' | 'challenges'
-
-type Selection =
-    | { type: 'cars'; item: CarDetailResponse }
-    | { type: 'tracks'; item: TrackDetailResponse }
-    | { type: 'challenges'; item: ChallengeSummaryResponse }
-
-// ---------- shared bits ----------
-
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
-    return (
-        <div className="flex items-start justify-between gap-4 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-right break-words">
-        {value ?? '—'}
-      </span>
-        </div>
-    )
+interface StatProps {
+    icon: React.ElementType
+    label: string
+    value: React.ReactNode
+    tone: 'blue' | 'green' | 'orange'
 }
 
-function CarDetails({ car }: { car: CarDetailResponse }) {
-    return (
-        <div>
-            <DetailRow label="Name" value={car.name} />
-            <DetailRow label="Brand" value={car.brand} />
-            <DetailRow
-                label="Horsepower"
-                value={car.horsePower != null ? `${formatNumber(car.horsePower)} hp` : null}
-            />
-            <DetailRow
-                label="Torque"
-                value={car.torque != null ? `${formatNumber(car.torque)} Nm` : null}
-            />
-            <DetailRow label="Drive" value={car.wheelDrive} />
+const TONE: Record<StatProps['tone'], string> = {
+    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    green: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+    orange: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
+}
 
-            <div className="mt-4 flex justify-end">
-                <Link
-                    to={`/cars/${car.id}`}
-                    className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                >
-                    View full details →
-                </Link>
+function Stat({ icon: Icon, label, value, tone }: StatProps) {
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${TONE[tone]}`}>
+                <Icon className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
+                    {value}
+                </p>
             </div>
         </div>
     )
 }
-
-function TrackDetails({ track }: { track: TrackDetailResponse }) {
-    return (
-        <div>
-            <DetailRow label="Name" value={track.name} />
-            <DetailRow label="Country" value={track.country} />
-            <DetailRow
-                label="Length"
-                value={track.lengthKm != null ? `${formatNumber(track.lengthKm)} km` : null}
-            />
-
-            <div className="mt-4 flex justify-end">
-                <Link
-                    to={`/tracks/${track.id}`}
-                    className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                >
-                    View full details →
-                </Link>
-            </div>
-        </div>
-    )
-}
-
-function ChallengeDetails({ challenge }: { challenge: ChallengeSummaryResponse }) {
-    return (
-        <div>
-            <DetailRow label="Track" value={challenge.trackName} />
-            <DetailRow label="Country" value={challenge.trackCountry} />
-            <DetailRow
-                label="Car"
-                value={`${challenge.carBrand} ${challenge.carName}`.trim()}
-            />
-            <DetailRow
-                label="End Date"
-                value={challenge.challengeEndDate ? formatDate(challenge.challengeEndDate) : null}
-            />
-            <DetailRow label="Best Lap" value={formatDurationJson(challenge.bestLapTime)} />
-            <DetailRow label="Best Driver" value={challenge.bestParticipantName} />
-
-            <div className="mt-4 flex justify-end">
-                <Link
-                    to={`/challenges/${challenge.challengeId}`}
-                    className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                >
-                    View full details →
-                </Link>
-            </div>
-        </div>
-    )
-}
-
-function DetailPanel({ selection }: { selection: Selection }) {
-    if (selection.type === 'cars') return <CarDetails car={selection.item} />
-    if (selection.type === 'tracks') return <TrackDetails track={selection.item} />
-    return <ChallengeDetails challenge={selection.item} />
-}
-
-function DetailModalBody({ selection }: { selection: Selection }) {
-    const img = (selection.item as { imageUrl?: string | null }).imageUrl ?? undefined
-    const title =
-        selection.type === 'cars'
-            ? selection.item.name
-            : selection.type === 'tracks'
-                ? selection.item.name
-                : selection.item.trackName
-
-    return (
-        <div>
-            <div className="w-full h-56 mb-4 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
-                {img ? (
-                    <img src={img} alt={title} className="w-full h-full object-cover" />
-                ) : (
-                    <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                        <ImageOff className="w-10 h-10" />
-                        <span className="text-xs mt-1">No image</span>
-                    </div>
-                )}
-            </div>
-
-            <DetailPanel selection={selection} />
-        </div>
-    )
-}
-
-// ---------- generic grid ----------
-
-interface GridProps<T> {
-    items: T[]
-    getKey: (item: T) => React.Key
-    getTitle: (item: T) => string
-    getSubtitle: (item: T) => string
-    onSelect: (item: T) => void
-}
-
-function Grid<T>({ items, getKey, getTitle, getSubtitle, onSelect }: GridProps<T>) {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item) => {
-                const subtitle = getSubtitle(item)
-                return (
-                    <button
-                        key={getKey(item)}
-                        onClick={() => onSelect(item)}
-                        className="text-left bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-700 transition-all"
-                    >
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {getTitle(item)}
-                        </h3>
-                        {subtitle && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">{subtitle}</p>
-                        )}
-                    </button>
-                )
-            })}
-        </div>
-    )
-}
-
-// ---------- main ----------
-
-const byName = (a: { name?: string | null }, b: { name?: string | null }) =>
-    (a.name ?? '').localeCompare(b.name ?? '')
 
 export function Dashboard() {
-    const [activeCategory, setActiveCategory] = useState<Category>('cars')
-    const [selection, setSelection] = useState<Selection | null>(null)
+    const user = useAuthStore((s) => s.user)
 
-    const { data: cars, isLoading: carsLoading } = useQuery({
-        queryKey: ['cars'],
-        queryFn: () => carApi.search(),
-        refetchOnMount: 'always',
-    })
-    const { data: tracks, isLoading: tracksLoading } = useQuery({
-        queryKey: ['tracks'],
-        queryFn: () => trackApi.search(),
-        refetchOnMount: 'always',
-    })
-    const { data: challenges, isLoading: challengesLoading } = useQuery({
+    // 1) fetch the challenge list
+    const { data: listData, isLoading: listLoading } = useQuery({
         queryKey: ['challenges'],
         queryFn: () => challengeApi.search(),
         refetchOnMount: 'always',
     })
 
-    const carsList = [...(cars?.data ?? [])].sort(byName)
-    const tracksList = [...(tracks?.data ?? [])].sort(byName)
-    const challengesList = [...(challenges?.data ?? [])].sort((a, b) =>
-        (a.trackName ?? '').localeCompare(b.trackName ?? ''),
-    )
+    const summaries: ChallengeSummaryResponse[] = listData?.data ?? []
 
-    const tabs = [
-        { key: 'cars' as const, label: 'Cars', icon: CarIcon, count: carsList.length },
-        { key: 'tracks' as const, label: 'Tracks', icon: Flag, count: tracksList.length },
-        { key: 'challenges' as const, label: 'Challenges', icon: Calendar, count: challengesList.length },
-    ]
+    // 2) fetch details in parallel to know who's in each challenge
+    const detailQueries = useQueries({
+        queries: summaries.map((s) => ({
+            queryKey: ['challenge', s.challengeId] as const,
+            queryFn: () => challengeApi.get(s.challengeId),
+            refetchOnMount: 'always' as const,
+        })),
+    })
 
-    const isLoading =
-        activeCategory === 'cars'
-            ? carsLoading
-            : activeCategory === 'tracks'
-                ? tracksLoading
-                : challengesLoading
+    const detailsLoading = detailQueries.some((q) => q.isLoading)
+    const isLoading = listLoading || detailsLoading
+
+    // 3) keep only challenges where the current user appears in participants
+    const myChallenges: ChallengeDetailResponse[] = detailQueries
+        .map((q) => q.data?.data)
+        .filter((c): c is ChallengeDetailResponse => {
+            if (!c || !user) return false
+            return (c.participants ?? []).some((p) => p.participantName === user.username)
+        })
+        .sort(
+            (a, b) =>
+                new Date(a.challengeEndDate).getTime() - new Date(b.challengeEndDate).getTime(),
+        )
+
+    // 4) stats
+    const joinedCount = myChallenges.length
+
+    const myBestSeconds = myChallenges
+        .flatMap((c) => c.participants ?? [])
+        .filter((p) => p.participantName === user?.username)
+        .map((p) => durationToSeconds(p.participantBestLapTime))
+        .filter((s): s is number => s != null)
+        .reduce<number | null>((min, s) => (min == null || s < min ? s : min), null)
+
+    const now = Date.now()
+    const weekMs = 7 * 24 * 60 * 60 * 1000
+    const endingSoon = myChallenges.filter((c) => {
+        const t = new Date(c.challengeEndDate).getTime()
+        return t >= now && t <= now + weekMs
+    }).length
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Dashboard</h1>
-
-            {/* Tabs */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-                {tabs.map(({ key, label, icon: Icon, count }) => {
-                    const active = activeCategory === key
-                    return (
-                        <button
-                            key={key}
-                            onClick={() => setActiveCategory(key)}
-                            className={
-                                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ' +
-                                (active
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700')
-                            }
-                        >
-                            <Icon className="w-4 h-4" />
-                            <span>{label}</span>
-                            <span
-                                className={
-                                    'text-xs font-semibold px-1.5 py-0.5 rounded ' +
-                                    (active
-                                        ? 'bg-white/20 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300')
-                                }
-                            >
-                {count}
-              </span>
-                        </button>
-                    )
-                })}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    Welcome back{user ? `, ${user.username}` : ''}
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Your personal racing dashboard
+                </p>
             </div>
 
-            {/* Grid */}
-            {isLoading ? (
-                <p className="text-gray-500 dark:text-gray-400">Loading…</p>
-            ) : activeCategory === 'cars' ? (
-                carsList.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">No cars yet.</p>
-                ) : (
-                    <Grid
-                        items={carsList}
-                        getKey={(c) => c.id}
-                        getTitle={(c) => c.name}
-                        getSubtitle={(c) =>
-                            [c.brand, c.horsePower != null ? `${formatNumber(c.horsePower)} hp` : null]
-                                .filter(Boolean)
-                                .join(' · ')
-                        }
-                        onSelect={(item) => setSelection({ type: 'cars', item })}
-                    />
-                )
-            ) : activeCategory === 'tracks' ? (
-                tracksList.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">No tracks yet.</p>
-                ) : (
-                    <Grid
-                        items={tracksList}
-                        getKey={(t) => t.id}
-                        getTitle={(t) => t.name}
-                        getSubtitle={(t) =>
-                            [t.country, t.lengthKm != null ? `${formatNumber(t.lengthKm)} km` : null]
-                                .filter(Boolean)
-                                .join(' · ')
-                        }
-                        onSelect={(item) => setSelection({ type: 'tracks', item })}
-                    />
-                )
-            ) : challengesList.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400">No challenges yet.</p>
-            ) : (
-                <Grid
-                    items={challengesList}
-                    getKey={(c) => c.challengeId}
-                    getTitle={(c) => c.trackName}
-                    getSubtitle={(c) =>
-                        [`${c.carBrand} ${c.carName}`.trim(), formatDate(c.challengeEndDate)]
-                            .filter(Boolean)
-                            .join(' · ')
-                    }
-                    onSelect={(item) => setSelection({ type: 'challenges', item })}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <Stat icon={Flag} label="Challenges joined" value={joinedCount} tone="blue" />
+                <Stat
+                    icon={Timer}
+                    label="My best lap"
+                    value={myBestSeconds != null ? formatLapTime(myBestSeconds) : '—'}
+                    tone="green"
                 />
-            )}
+                <Stat icon={Clock} label="Ending in 7 days" value={endingSoon} tone="orange" />
+            </div>
 
-            <Modal
-                isOpen={!!selection}
-                onClose={() => setSelection(null)}
-                title={
-                    selection?.type === 'challenges'
-                        ? selection.item.trackName
-                        : selection?.item?.name || 'Details'
-                }
-                size="md"
-            >
-                {selection && <DetailModalBody selection={selection} />}
-            </Modal>
+            <Card>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Your challenges
+                    </h2>
+                    <Link
+                        to="/challenges"
+                        className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 inline-flex items-center gap-1"
+                    >
+                        Browse all
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </div>
+
+                {isLoading ? (
+                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                        Loading your challenges…
+                    </p>
+                ) : (
+                    <Table<ChallengeDetailResponse>
+                        columns={[
+                            { key: 'trackName', label: 'Track' },
+                            { key: 'trackCountry', label: 'Country' },
+                            { key: 'carName', label: 'Car', render: (_, c) => `${c.carBrand} ${c.carName}` },
+                            {
+                                key: 'challengeEndDate',
+                                label: 'End Date',
+                                render: (v) => formatDate(v),
+                            },
+                            {
+                                key: 'bestLapTime',
+                                label: 'Best Lap',
+                                render: (v) => formatDurationJson(v),
+                            },
+                            { key: 'bestParticipantName', label: 'Best Driver' },
+                        ]}
+                        rows={myChallenges}
+                        emptyMessage="You haven't joined any challenges yet. Head over to the Challenges page to find one."
+                    />
+                )}
+            </Card>
         </div>
     )
 }

@@ -1,18 +1,15 @@
 import { useState } from 'react'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/shared/Button'
 import { Input } from '@/components/shared/Input'
 import { Card } from '@/components/shared/Card'
+import { useConfirm } from '@/components/shared/ConfirmProvider'
 import { challengeApi } from '@/services/api'
 import { useAuthStore } from '@/stores/useAuthStore'
-import {
-  formatLapTime,
-  parseLapTime,
-  secondsToDurationPayload,
-} from '@/utils/format'
+import { formatLapTime, parseLapTime } from '@/utils/format'
 import { toast } from '@/stores/useToastStore'
 
 interface FormValues {
@@ -23,6 +20,7 @@ export function LapTimeUpdate() {
   const params = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const confirm = useConfirm()
   const user = useAuthStore((s) => s.user)
   const challengeId = Number(params.id)
 
@@ -39,23 +37,23 @@ export function LapTimeUpdate() {
   const previewSeconds = typed ? parseLapTime(typed) : NaN
   const previewValid = Number.isFinite(previewSeconds) && previewSeconds > 0
 
-  const mutation = useMutation({
+  const invalidate = () =>
+      queryClient.invalidateQueries({ queryKey: ['challenge', challengeId] })
+
+  const saveMutation = useMutation({
     mutationFn: async (values: FormValues) => {
       if (!user) throw new Error('Please log in before updating a lap time')
-
       const seconds = parseLapTime(values.lapTime)
       if (!Number.isFinite(seconds) || seconds <= 0) {
-        throw new Error('Enter a lap time like 1:22.555 or 82.555')
+        throw new Error('Enter a lap time like 1:22.555')
       }
-
       await challengeApi.updateLapTime(challengeId, {
         participantName: user.username,
-        // POJO, not an ISO string.
-        newLapTime: secondsToDurationPayload(seconds),
+        newLapTime: formatLapTime(seconds),
       })
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['challenge', challengeId] })
+      await invalidate()
       toast.success('Lap time updated')
       navigate(`/challenges/${challengeId}`)
     },
@@ -64,9 +62,37 @@ export function LapTimeUpdate() {
     },
   })
 
+  const clearMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Please log in before clearing a lap time')
+      await challengeApi.updateLapTime(challengeId, {
+        participantName: user.username,
+        newLapTime: null,
+      })
+    },
+    onSuccess: async () => {
+      await invalidate()
+      toast.success('Lap time cleared')
+      navigate(`/challenges/${challengeId}`)
+    },
+    onError: (err) => {
+      setFormError(err instanceof Error ? err.message : 'Failed to clear lap time')
+    },
+  })
+
   const onSubmit = (values: FormValues) => {
     setFormError(null)
-    mutation.mutate(values)
+    saveMutation.mutate(values)
+  }
+
+  const handleClearLapTime = async () => {
+    const ok = await confirm({
+      title: 'Clear lap time',
+      message: 'Remove your recorded lap time for this challenge?',
+      confirmLabel: 'Clear',
+      variant: 'danger',
+    })
+    if (ok) clearMutation.mutate()
   }
 
   return (
@@ -103,11 +129,11 @@ export function LapTimeUpdate() {
                     const s = parseLapTime(v)
                     return Number.isFinite(s) && s > 0
                         ? true
-                        : 'Use mm:ss.mmm (1:22.555) or plain seconds (82.555)'
+                        : 'Use m:ss.S up to m:ss.SSS — e.g. 1:22.555'
                   },
                 })}
                 error={errors.lapTime?.message}
-                helperText="Format: mm:ss.mmm — for example 1:22.555, or plain seconds like 82.555."
+                helperText="Format: m:ss.S up to m:ss.SSS — e.g. 1:22.555. Plain seconds also accepted."
             />
 
             {typed && (
@@ -117,9 +143,6 @@ export function LapTimeUpdate() {
                         Will save as{' '}
                         <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">
                     {formatLapTime(previewSeconds)}
-                  </span>{' '}
-                        <span className="text-gray-500 dark:text-gray-400">
-                    ({previewSeconds} s)
                   </span>
                       </p>
                   ) : (
@@ -130,8 +153,17 @@ export function LapTimeUpdate() {
                 </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="submit" isLoading={mutation.isPending}>
+            <div className="flex justify-between gap-2 pt-4">
+              <Button
+                  type="button"
+                  variant="danger"
+                  onClick={handleClearLapTime}
+                  isLoading={clearMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Lap Time
+              </Button>
+              <Button type="submit" isLoading={saveMutation.isPending}>
                 <Save className="w-4 h-4 mr-2" />
                 Save Lap Time
               </Button>

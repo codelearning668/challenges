@@ -83,7 +83,6 @@ api.interceptors.response.use(
         useAuthStore.getState().logout()
       }
 
-      // The Login page shows the credential failure inline, so don't also toast it.
       const isLoginProbe = url.endsWith('/users/info')
 
       if (!silent && !isLoginProbe) {
@@ -93,13 +92,6 @@ api.interceptors.response.use(
       return Promise.reject(error)
     },
 )
-
-export interface SearchParams {
-  page?: number
-  size?: number
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-}
 
 export const carApi = {
   search: (criteria: SearchCarsCriteria = {}) =>
@@ -141,7 +133,10 @@ export const challengeApi = {
       api.delete<void>(`/challenges/${challengeId}`),
 
   register: (challengeId: number) =>
-      api.post<void>(`/challenges/${challengeId}/register`),
+      api.post<void>(`/challenges/${challengeId}/registration`),
+
+  quit: (challengeId: number) =>
+      api.delete<void>(`/challenges/${challengeId}/registration`),
 
   updateLapTime: (challengeId: number, body: UpdateLapTimeRequest) =>
       api.put<void>(`/challenges/${challengeId}/participant`, body),

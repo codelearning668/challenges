@@ -1,9 +1,3 @@
-/**
- * java.time.Duration on the wire is either:
- *   - an object { seconds, nano } if JavaTimeModule is not registered, OR
- *   - an ISO-8601 string like "PT1M22.555S" if it is.
- * We accept both and normalise in utils/format.ts.
- */
 export type DurationJson =
     | { seconds: number; nano: number; [k: string]: unknown }
     | string
@@ -62,13 +56,11 @@ export interface UpdateChallengeEndDateRequest {
   endDate: string
 }
 
-/** The backend serialises Duration as a POJO, not an ISO string. */
-export interface DurationPayload {
-  seconds: number
-  nano: number
-}
-
+/**
+ * Backend accepts `m:ss.S` / `m:ss.SS` / `m:ss.SSS` on input.
+ * Send `null` to clear a participant's lap time.
+ */
 export interface UpdateLapTimeRequest {
   participantName: string
-  newLapTime: DurationPayload
+  newLapTime: string | null
 }
