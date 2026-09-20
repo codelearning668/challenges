@@ -195,8 +195,8 @@
 				<version>0.8.11</version> <!-- or latest -->
 				<configuration>
 					<excludes>
-						<exclude>
-							sk/mkrajcovic/challenges/ChallengesApplication.class</exclude>
+						<exclude>sk/mkrajcovic/challenges/ChallengesApplication.class</exclude>
+						<exclude>sk/mkrajcovic/challenges/config/DynamicOpenApi.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>
