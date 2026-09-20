@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import sk.mkrajcovic.challenges.controller.dto.UserRegistrationRequest;
@@ -22,9 +21,8 @@ public interface UserApi {
 		  "password": "choose-a-strong-password"
 		}""")))
 	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "201", description = "User registered and authorized as `PARTICIPANT`."),
-		@ApiResponse(responseCode = "409", description = "The supplied username is already in use.")
-	})
+	@ApiResponse(responseCode = "201", description = "User registered and authorized as `PARTICIPANT`.")
+	@ApiResponse(responseCode = "409", description = "The supplied username is already in use.")
 	void registerUser(@Valid UserRegistrationRequest registrationRequest);
 }
+
