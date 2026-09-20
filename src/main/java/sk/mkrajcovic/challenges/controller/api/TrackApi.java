@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,8 +23,7 @@ import sk.mkrajcovic.challenges.search.SearchTracksCriteria;
 public interface TrackApi {
 
 	@Operation(summary = "Retrieve track details", description = "Returns the selected racing track.")
-	@ApiResponses({
-		@ApiResponse(
+	@ApiResponse(
 			responseCode = "200",
 			description = "Track details.",
 			content = @Content(schema = @Schema(implementation = TrackDetailResponse.class), examples = @ExampleObject(value = """
@@ -35,9 +33,8 @@ public interface TrackApi {
 			  "name": "Monza",
 			  "lengthKm": 5.793
 			}"""))
-		),
-		@ApiResponse(responseCode = "404", description = "No track exists with the supplied ID.")
-	})
+	)
+	@ApiResponse(responseCode = "404", description = "No track exists with the supplied ID.")
 	TrackDetailResponse getTrack(@Positive Integer trackId);
 
 	@Operation(summary = "Search tracks", description = "Returns tracks matching the optional country, name, and length filters. Country and name searches are case- and diacritic-insensitive.")
@@ -84,4 +81,5 @@ public interface TrackApi {
 	@ApiResponse(responseCode = "404", description = "No track exists with the supplied ID.")
 	void updateTrack(@Positive Integer trackId, @Valid UpdateTrackRequest request);
 }
+
 
