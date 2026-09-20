@@ -4,12 +4,20 @@ An application for organising and recording racing-simulator challenges. It prov
 
 ## Business rules
 
+- Unregistered visitors may browse the application and register. Successful registration creates an enabled user authorized as `PARTICIPANT`; an already-used username is rejected.
+- An active challenge has an end date of today or later in UTC. A closed challenge cannot be changed or deleted.
 - Only one active challenge may exist for a given car and track.
-- A participant may register or quit only while a challenge is active.
-- Joining multiple active challenges requires a previous challenge win.
-- Participants may update only their own lap time while a challenge is active; administrators may update any registered participant, including after it closes.
-- Closed challenges cannot be changed or deleted.
+- A participant may register or quit only while a challenge is active, and may not register twice for the same challenge.
+- Joining multiple active challenges requires a win in any earlier challenge.
+- Participants may update or remove only their own lap time while a challenge is active; administrators may update or clear any registered participant's lap time, including after the challenge closes.
+- The leaderboard records the quickest non-null lap time. When its leader's result becomes slower or is cleared, the leader is recalculated; it is cleared if no recorded times remain.
 - Lap times use `m:ss.S`, `m:ss.SS`, or `m:ss.SSS` input (for example, `1:20.1`) and are returned as `mm:ss.SSS`.
+
+## Business flow
+
+The diagram shows public browsing and registration, followed by the separate `ADMIN` and `PARTICIPANT` operational flows. It includes their authorization boundaries, business decisions, successful state changes, and rejection outcomes.
+
+<img src="docs/business-flow/challenges-business-flows.png" alt="Challenges business flow" width="1700">
 
 ## Roles
 
@@ -37,10 +45,33 @@ The service starts at `http://localhost:8790/challenges/svc`. Flyway applies the
 
 ## API documentation
 
-Springdoc generates the OpenAPI documentation from the application. It is a work in progress and the generated operations are not yet fully documented.
+Swagger UI is available at [http://localhost:8790/challenges/svc/swagger-ui/index.html](http://localhost:8790/challenges/svc/swagger-ui/index.html).
 
-- [OpenAPI specification (JSON)](http://localhost:8790/challenges/svc/v3/api-docs)
-- [Swagger UI](http://localhost:8790/challenges/svc/swagger-ui/index.html)
+By default, Swagger UI serves the versioned static specification at `src/main/resources/static/openapi/challenges_api.json`. It documents the available operations, authorization requirements, request and response schemas, examples, and endpoint-specific business errors.
+
+### Regenerate the static OpenAPI specification
+
+1. Start the application locally with the `local` profile. Its Springdoc override enables runtime generation and configures Swagger UI to display the generated document:
+
+   ```bash
+   SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+   ```
+
+   The generated document is available at [http://localhost:8790/challenges/svc/api-docs](http://localhost:8790/challenges/svc/api-docs).
+
+2. While the application is running, download the generated document into the versioned static resource:
+
+   ```bash
+   ./mvnw generate-sources -Papi-docs
+   ```
+
+   This writes `src/main/resources/static/openapi/challenges_api.json`. If the local application runs on a port other than `8790`, specify it explicitly:
+
+   ```bash
+   ./mvnw generate-sources -Papi-docs -Dapp.port=xxxx
+   ```
+
+3. Review and commit the generated JSON with the API-contract changes. To check the default static-document mode locally, comment out the three Springdoc override properties in `application-local.properties`, restart the application, and open Swagger UI again. The base configuration then disables runtime generation and Swagger UI loads `/openapi/challenges_api.json`.
 
 ## Tests
 

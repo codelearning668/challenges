@@ -18,6 +18,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.api.TrackApi;
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.TrackDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
@@ -29,18 +30,18 @@ import sk.mkrajcovic.challenges.service.TrackService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/tracks")
-public class TrackController {
+class TrackController implements TrackApi {
 
 	private final TrackService service;
 
 	@GetMapping(path = "/{trackId}", produces = APPLICATION_JSON_VALUE)
-	TrackDetailResponse getTrack(@PathVariable @Positive Integer trackId) {
+	public TrackDetailResponse getTrack(@PathVariable @Positive Integer trackId) {
 		var track = service.getTrack(trackId);
 		return TrackMapper.toDetailResponse(track);
 	}
 
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
-	List<TrackDetailResponse> searchTracks(@ModelAttribute SearchTracksCriteria searchCriteria) {
+	public List<TrackDetailResponse> searchTracks(@ModelAttribute SearchTracksCriteria searchCriteria) {
 		return service.searchTracks(searchCriteria).stream()
 			.map(TrackMapper::toDetailResponse)
 			.toList();
@@ -48,14 +49,14 @@ public class TrackController {
 
 	@RolesAllowed(ADMIN)
 	@PostMapping(produces = APPLICATION_JSON_VALUE)
-	CreatedResponseEntity createTrack(@Valid @RequestBody CreateTrackRequest request) {
+	public CreatedResponseEntity createTrack(@Valid @RequestBody CreateTrackRequest request) {
 		Integer trackId = service.createTrack(TrackMapper.toTrack(request));
 		return CreatedResponseEntity.create("/tracks/{trackId}", trackId);
 	}
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{trackId}", consumes = APPLICATION_JSON_VALUE)
-	void updateTrack(@PathVariable @Positive Integer trackId, @Valid @RequestBody UpdateTrackRequest request){
+	public void updateTrack(@PathVariable @Positive Integer trackId, @Valid @RequestBody UpdateTrackRequest request){
 		service.updateTrack(trackId, TrackMapper.toTrack(request));
 	}
 

@@ -1,0 +1,85 @@
+digraph ChallengesBusinessFlows {
+  graph [fontname="Arial", bgcolor="#ffffff", pad="0.25", nodesep="0.45", ranksep="0.65", splines=polyline];
+  node [fontname="Arial", fontsize=11, shape=box, style="rounded,filled", color="#1f4e79", fillcolor="#eaf3f8", fontcolor="#102a43", margin="0.16,0.10"];
+  edge [fontname="Arial", fontsize=9, color="#52616b", fontcolor="#334e68", arrowsize=0.7];
+
+  subgraph cluster_access {
+    label="01  Access, browsing, and registration"; labelloc="t"; labeljust="l"; fontsize=17; fontname="Arial Bold"; color="#8aa4b8"; penwidth=1.2; style="rounded";
+    visitor [label="Visitor / unregistered user", fillcolor="#f1f5f9"];
+    browse [label="Browse application\nGET /cars, /tracks, /challenges\nGET detail endpoints", fillcolor="#e8f4fd"];
+    register [label="POST /users/register\nValidate username + password", fillcolor="#fff7df", color="#b7791f"];
+    available [shape=diamond, label="Username\navailable?", fillcolor="#fff7df", color="#b7791f"];
+    conflict [label="Reject registration\nConflict: username already taken", fillcolor="#fde8e8", color="#c53030"];
+    createUser [label="Create enabled user\nBCrypt-encode password\nAssign PARTICIPANT authority", fillcolor="#e4f7ed", color="#2f855a"];
+    participant [label="Known system user\nauthorized as PARTICIPANT", fillcolor="#e4f7ed", color="#2f855a"];
+    login [label="Authenticate\nHTTP Basic (stateless)", fillcolor="#eaf3f8"];
+    roles [label="Role-gated active operations\nPARTICIPANT: compete\nADMIN: administer", fillcolor="#ede9fe", color="#6b46c1"];
+    visitor -> browse [label="all GET requests are permitted"]; visitor -> register [label="registration is permitted to all"];
+    register -> available; available -> conflict [label="No"]; available -> createUser [label="Yes"];
+    createUser -> participant; participant -> login; login -> roles;
+  }
+
+  subgraph cluster_admin {
+    label="02  ADMIN business flow — configure competition and administer results"; labelloc="t"; labeljust="l"; fontsize=17; fontname="Arial Bold"; color="#8aa4b8"; penwidth=1.2; style="rounded";
+    admin [label="Authenticated user\nauthorized as ADMIN", fillcolor="#ede9fe", color="#6b46c1"];
+    catalog [label="Maintain competition catalogue\nCreate / update cars\nCreate / update tracks", fillcolor="#e4f7ed", color="#2f855a"];
+    createChallenge [label="Create challenge\nChoose existing track + car\nSet end date", fillcolor="#e4f7ed", color="#2f855a"];
+    trackCar [shape=diamond, label="Track and car\nexist?", fillcolor="#fff7df", color="#b7791f"];
+    activeDuplicate [shape=diamond, label="Active challenge\nalready exists for\nthis track + car?", fillcolor="#fff7df", color="#b7791f"];
+    challengeCreated [label="Persist challenge\nChallenge is active through its end date", fillcolor="#e4f7ed", color="#2f855a"];
+    rejectMissingTrackOrCar [label="Reject: selected track\nor car not found", fillcolor="#fde8e8", color="#c53030"];
+    conflictAdmin [label="Reject: only one active challenge\nper track + car", fillcolor="#fde8e8", color="#c53030"];
+    changeEnd [label="Update challenge end date", fillcolor="#eaf3f8"];
+    deleteChallenge [label="Delete challenge", fillcolor="#eaf3f8"];
+    activeForAdmin [shape=diamond, label="Challenge\nstill active?", fillcolor="#fff7df", color="#b7791f"];
+    rejectClosedAdmin [label="Reject: closed challenges\ncannot be updated or deleted", fillcolor="#fde8e8", color="#c53030"];
+    saveEnd [label="Save new end date", fillcolor="#e4f7ed", color="#2f855a"];
+    deleteActive [label="Delete active challenge", fillcolor="#e4f7ed", color="#2f855a"];
+    updateAnyTime [label="Correct / clear lap time\nfor any registered participant\n—including after challenge closure", fillcolor="#eaf3f8"];
+    registered [shape=diamond, label="Participant registered\nfor this challenge?", fillcolor="#fff7df", color="#b7791f"];
+    setTime [label="Save lap time\nRecompute or update leader\n(best participant + best time)", fillcolor="#e4f7ed", color="#2f855a"];
+    rejectParticipantNotRegistered [label="Reject: participant\nnot registered", fillcolor="#fde8e8", color="#c53030"];
+    admin -> catalog; catalog -> createChallenge; createChallenge -> trackCar;
+    trackCar -> activeDuplicate [label="Yes"]; trackCar -> rejectMissingTrackOrCar [label="No: not found"];
+    activeDuplicate -> challengeCreated [label="No"]; activeDuplicate -> conflictAdmin [label="Yes"];
+    admin -> changeEnd; admin -> deleteChallenge; changeEnd -> activeForAdmin; deleteChallenge -> activeForAdmin;
+    activeForAdmin -> rejectClosedAdmin [label="No"]; activeForAdmin -> saveEnd [label="Yes: end-date change"]; activeForAdmin -> deleteActive [label="Yes: deletion"];
+    admin -> updateAnyTime; updateAnyTime -> registered; registered -> setTime [label="Yes"]; registered -> rejectParticipantNotRegistered [label="No"];
+  }
+
+  subgraph cluster_participant {
+    label="03  PARTICIPANT business flow — enter, compete, and leave"; labelloc="t"; labeljust="l"; fontsize=17; fontname="Arial Bold"; color="#8aa4b8"; penwidth=1.2; style="rounded";
+    pStart [label="Authenticated known user\nauthorized as PARTICIPANT", fillcolor="#e4f7ed", color="#2f855a"];
+    discover [label="Browse / search challenges\nView challenge, track, car and results", fillcolor="#e8f4fd"];
+    choose [label="Register for chosen challenge", fillcolor="#eaf3f8"];
+    exists [shape=diamond, label="Challenge\nexists and is active?\n(end date ≥ today UTC)", fillcolor="#fff7df", color="#b7791f"];
+    already [shape=diamond, label="Already registered\nfor this challenge?", fillcolor="#fff7df", color="#b7791f"];
+    multi [shape=diamond, label="Competing in another\nactive challenge without\na previous win?", fillcolor="#fff7df", color="#b7791f"];
+    registeredP [label="Create participant registration\nInitial lap time: none", fillcolor="#e4f7ed", color="#2f855a"];
+    rejectState [label="Reject registration\nclosed / missing challenge", fillcolor="#fde8e8", color="#c53030"];
+    rejectDuplicate [label="Reject: already registered", fillcolor="#fde8e8", color="#c53030"];
+    rejectMulti [label="Reject: multiple active challenges\nrequire a win in any earlier challenge", fillcolor="#fde8e8", color="#c53030"];
+    submit [label="Submit or remove own lap time", fillcolor="#eaf3f8"];
+    ownReg [shape=diamond, label="Current user is registered\nunder supplied participant name?", fillcolor="#fff7df", color="#b7791f"];
+    activeP [shape=diamond, label="Challenge\nstill active?", fillcolor="#fff7df", color="#b7791f"];
+    record [label="Save own lap time\nUpdate leader if result changes", fillcolor="#e4f7ed", color="#2f855a"];
+    rejectOwn [label="Reject: cannot update another\nparticipant or unregistered result", fillcolor="#fde8e8", color="#c53030"];
+    rejectClosedP [label="Reject: participants cannot\nupdate lap time after closure", fillcolor="#fde8e8", color="#c53030"];
+    quit [label="Quit challenge", fillcolor="#eaf3f8"];
+    quitActive [shape=diamond, label="Challenge active and\ncurrent user registered?", fillcolor="#fff7df", color="#b7791f"];
+    remove [label="Remove participant registration", fillcolor="#e4f7ed", color="#2f855a"];
+    rejectQuit [label="Reject quit\nclosed challenge or not registered", fillcolor="#fde8e8", color="#c53030"];
+    pStart -> discover; discover -> choose; choose -> exists; exists -> already [label="Yes"]; exists -> rejectState [label="No"];
+    already -> rejectDuplicate [label="Yes"]; already -> multi [label="No"]; multi -> rejectMulti [label="Yes"]; multi -> registeredP [label="No"];
+    registeredP -> submit; submit -> ownReg; ownReg -> activeP [label="Yes"]; ownReg -> rejectOwn [label="No"]; activeP -> record [label="Yes"]; activeP -> rejectClosedP [label="No"];
+    registeredP -> quit; quit -> quitActive; quitActive -> remove [label="Yes"]; quitActive -> rejectQuit [label="No"];
+  }
+
+  subgraph cluster_notes {
+    label="Legend and source-grounded notes"; labelloc="t"; labeljust="l"; fontsize=14; fontname="Arial Bold"; color="#8aa4b8"; penwidth=1.0; style="rounded";
+    note1 [label="Green = persisted successful state\nBlue = caller action / accessible read\nAmber = business decision\nRed = rejected operation", shape=note, fillcolor="#ffffff", color="#8aa4b8"];
+    note2 [label="Authorization is cumulative: a user may be authorized for multiple roles.\nNo role hierarchy is inferred: ADMIN-only and PARTICIPANT-only endpoints require their stated authority.\nAll GET endpoints are publicly permitted by SecurityConfig; /users/info reads the current SecurityContext, so it is useful when authenticated.", shape=note, fillcolor="#ffffff", color="#8aa4b8"];
+    note3 [label="Active means endDate is today or later in UTC.\nThe previous-win rule: a win in any earlier challenge permits concurrent active registrations.\nLeader state is the quickest non-null lap time; clearing/changing the current leader's time triggers recomputation.", shape=note, fillcolor="#ffffff", color="#8aa4b8"];
+    note1 -> note2 [style=invis]; note2 -> note3 [style=invis];
+  }
+}

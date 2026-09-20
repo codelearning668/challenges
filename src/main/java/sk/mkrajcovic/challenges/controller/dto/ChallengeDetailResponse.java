@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,14 @@ public class ChallengeDetailResponse {
 	private Integer challengeId;
 	private LocalDate challengeEndDate;
 	private String bestParticipantName;
+
+	@Schema(
+		description = "Quickest recorded lap time, returned in canonical mm:ss.SSS format.",
+		type = "string",
+		pattern = "^\\d{2}:\\d{2}\\.\\d{3}$",
+		example = "01:20.100",
+		nullable = true
+	)
 	private Duration bestLapTime;
 
 	private Integer trackId;
