@@ -30,6 +30,7 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<app.port>8790</app.port>
 	</properties>
 
 	<dependencies>
@@ -124,6 +125,38 @@
 
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>api-docs</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springdoc</groupId>
+						<artifactId>springdoc-openapi-maven-plugin</artifactId>
+						<version>1.5</version> <!-- Use the latest version -->
+						<executions>
+							<execution>
+								<id>download_challenges-openapi</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+								<configuration>
+									<outputDir>${project.basedir}/src/main/resources/static/openapi</outputDir>
+									<outputFileName>challenges_api.json</outputFileName>
+									<apiDocsUrl>http://localhost:${app.port}/challenges/svc/api-docs</apiDocsUrl>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -209,8 +242,8 @@
 				</configuration>
 			</plugin>
 
-
 		</plugins>
+
 	</build>
 
 </project>

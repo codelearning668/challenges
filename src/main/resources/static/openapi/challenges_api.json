@@ -1,0 +1,1152 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Challenges API",
+    "description" : "REST API for organising and recording racing-simulator challenges. Participants register for car-and-track challenges, submit lap times, and compare results on a live leaderboard.",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "/challenges/svc"
+  } ],
+  "tags" : [ {
+    "name" : "Users",
+    "description" : "Services for registering application users."
+  }, {
+    "name" : "System",
+    "description" : "Services exposing information about the system availability, environment, the authenticated user etc."
+  }, {
+    "name" : "Challenges",
+    "description" : "Services for browsing and administering racing-simulator challenges, including participant registration and lap-time results."
+  }, {
+    "name" : "Tracks",
+    "description" : "Services for browsing and administering racing tracks available for challenges."
+  }, {
+    "name" : "Cars",
+    "description" : "Services for browsing and administering cars available for challenges."
+  } ],
+  "paths" : {
+    "/tracks/{trackId}" : {
+      "get" : {
+        "tags" : [ "Tracks" ],
+        "summary" : "Retrieve track details",
+        "description" : "Returns the selected racing track.",
+        "operationId" : "getTrack",
+        "parameters" : [ {
+          "name" : "trackId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Track details.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackDetailResponse"
+                },
+                "example" : {
+                  "id" : 4,
+                  "country" : "Italy",
+                  "name" : "Monza",
+                  "lengthKm" : 5.793
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No track exists with the supplied ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Tracks" ],
+        "summary" : "Update a track",
+        "description" : "Replaces the mutable properties of the selected track. Requires the `ADMIN` role.",
+        "operationId" : "updateTrack",
+        "parameters" : [ {
+          "name" : "trackId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateTrackRequest"
+              },
+              "example" : {
+                "name" : "Autodromo Nazionale Monza",
+                "country" : "Italy",
+                "lengthKm" : 5.793
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "No track exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}" : {
+      "get" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Retrieve challenge details",
+        "description" : "Returns the selected challenge, its car and track, the current leaderboard, and all registered participants.",
+        "operationId" : "getChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Challenge details.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
+                },
+                "example" : {
+                  "challengeId" : 12,
+                  "challengeEndDate" : "2028-10-31",
+                  "bestParticipantName" : "racer1",
+                  "bestLapTime" : "01:42.537",
+                  "trackId" : 4,
+                  "trackName" : "Monza",
+                  "trackCountry" : "Italy",
+                  "trackLengthKm" : 5.793,
+                  "carId" : 7,
+                  "carBrand" : "Ferrari",
+                  "carName" : "488 GT3",
+                  "carHorsePower" : 550,
+                  "carTorque" : 700,
+                  "participants" : [ {
+                    "participantId" : 31,
+                    "participantName" : "racer1",
+                    "participantBestLapTime" : "01:42.537"
+                  } ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Change a challenge end date",
+        "description" : "Changes the inclusive end date of an active challenge. Closed challenges cannot be changed. Requires the `ADMIN` role.",
+        "operationId" : "updateChallengeEndDate",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The new inclusive challenge end date.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateChallengeEndDateRequest"
+              },
+              "example" : {
+                "endDate" : "2028-11-07"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "422" : {
+            "description" : "The challenge is closed or the submitted end date is invalid."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Delete a challenge",
+        "description" : "Deletes an active challenge. Closed challenges cannot be deleted. Requires the `ADMIN` role.",
+        "operationId" : "deleteChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "422" : {
+            "description" : "The challenge is closed."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          },
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}/participant" : {
+      "put" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Update a participant lap time",
+        "description" : "Records or removes a registered participant's best lap time. A participant may update only their own time while the challenge is active. An administrator may update any registered participant, including after the challenge closes. Requires the `PARTICIPANT` or `ADMIN` role.",
+        "operationId" : "updateLapTime",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The registered participant and their new lap time. Set newLapTime to null to clear the recorded time.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateLapTimeRequest"
+              },
+              "example" : {
+                "participantName" : "racer1",
+                "newLapTime" : "1:42.537"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "422" : {
+            "description" : "A non-administrator attempted to update a lap time after the challenge closed."
+          },
+          "404" : {
+            "description" : "The participant is not registered for the challenge."
+          },
+          "403" : {
+            "description" : "A non-administrator attempted to update another participant's lap time."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/cars/{carId}" : {
+      "get" : {
+        "tags" : [ "Cars" ],
+        "summary" : "Retrieve car details",
+        "description" : "Returns the selected car.",
+        "operationId" : "getCar",
+        "parameters" : [ {
+          "name" : "carId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "No car exists with the supplied ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarDetailResponse"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Car details.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarDetailResponse"
+                },
+                "example" : {
+                  "id" : 7,
+                  "brand" : "Ferrari",
+                  "name" : "488 GT3",
+                  "horsePower" : 550,
+                  "torque" : 700,
+                  "wheelDrive" : "REAR"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Cars" ],
+        "summary" : "Update a car",
+        "description" : "Replaces the mutable properties of the selected car. Requires the `ADMIN` role.",
+        "operationId" : "updateCar",
+        "parameters" : [ {
+          "name" : "carId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCarRequest"
+              },
+              "example" : {
+                "brand" : "Ferrari",
+                "name" : "488 GT3 Evo",
+                "hp" : 550,
+                "torque" : 700,
+                "drive" : "REAR"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "No car exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/users/register" : {
+      "post" : {
+        "tags" : [ "Users" ],
+        "summary" : "Register a user",
+        "description" : "Creates an enabled user authorized as `PARTICIPANT`. The username must be unique. This operation is public.",
+        "operationId" : "registerUser",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserRegistrationRequest"
+              },
+              "example" : {
+                "username" : "racer1",
+                "password" : "choose-a-strong-password"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "User registered and authorized as `PARTICIPANT`."
+          },
+          "409" : {
+            "description" : "The supplied username is already in use."
+          }
+        }
+      }
+    },
+    "/tracks" : {
+      "get" : {
+        "tags" : [ "Tracks" ],
+        "summary" : "Search tracks",
+        "description" : "Returns tracks matching the optional country, name, and length filters. Country and name searches are case- and diacritic-insensitive.",
+        "operationId" : "searchTracks",
+        "parameters" : [ {
+          "name" : "searchCriteria",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/SearchTracksCriteria"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Tracks matching the supplied criteria.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TrackDetailResponse"
+                  }
+                },
+                "example" : [ {
+                  "id" : 4,
+                  "country" : "Italy",
+                  "name" : "Monza",
+                  "lengthKm" : 5.793
+                } ]
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Tracks" ],
+        "summary" : "Create a track",
+        "description" : "Creates a racing track that can be selected for challenges. Requires the `ADMIN` role.",
+        "operationId" : "createTrack",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateTrackRequest"
+              },
+              "example" : {
+                "name" : "Monza",
+                "country" : "Italy",
+                "lengthKm" : 5.793
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Track created. The Location header identifies the new track.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges" : {
+      "get" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Search challenges",
+        "description" : "Returns challenges matching the optional end-date, leaderboard, track, and car filters. Searches by text fields are case- and diacritic-insensitive.",
+        "operationId" : "searchChallenges",
+        "parameters" : [ {
+          "name" : "searchCriteria",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/SearchChallengesCriteria"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Challenges matching the supplied criteria.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ChallengeSummaryResponse"
+                  }
+                },
+                "example" : [ {
+                  "challengeId" : 12,
+                  "challengeEndDate" : "2026-10-31",
+                  "bestParticipantName" : "racer1",
+                  "bestLapTime" : "01:42.537",
+                  "trackCountry" : "Italy",
+                  "trackName" : "Monza",
+                  "carBrand" : "Ferrari",
+                  "carName" : "488 GT3"
+                } ]
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Create a challenge",
+        "description" : "Creates an active challenge for the selected car and track. Only one active challenge may exist for the same car-and-track combination. Requires the `ADMIN` role.",
+        "operationId" : "createChallenge",
+        "requestBody" : {
+          "description" : "The car, track, and inclusive challenge end date.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateChallengeRequest"
+              },
+              "example" : {
+                "trackId" : 4,
+                "carId" : 7,
+                "endDate" : "2028-10-31"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Challenge created. The Location header identifies the new challenge.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The selected car or track does not exist.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "An active challenge already exists for the selected car and track.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "The submitted end date does not satisfy the challenge rules.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}/registration" : {
+      "post" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Register for a challenge",
+        "description" : "Registers the authenticated participant for an active challenge. A participant cannot register twice and needs a previous win before joining multiple active challenges. Requires the `PARTICIPANT` role.",
+        "operationId" : "registerForChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "422" : {
+            "description" : "The challenge is closed, or the participant is not eligible to join multiple active challenges."
+          },
+          "409" : {
+            "description" : "The authenticated participant is already registered for the challenge."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Quit a challenge",
+        "description" : "Removes the authenticated participant from an active challenge. Requires the `PARTICIPANT` role.",
+        "operationId" : "quitChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "409" : {
+            "description" : "The authenticated participant is not registered for the challenge."
+          },
+          "422" : {
+            "description" : "The challenge is closed."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          },
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/cars" : {
+      "get" : {
+        "tags" : [ "Cars" ],
+        "summary" : "Search cars",
+        "description" : "Returns cars matching the optional brand, name, horsepower, torque, and wheel-drive filters. Brand and name searches are case- and diacritic-insensitive.",
+        "operationId" : "search",
+        "parameters" : [ {
+          "name" : "searchCriteria",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/SearchCarsCriteria"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Cars matching the supplied criteria.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CarDetailResponse"
+                  }
+                },
+                "example" : [ {
+                  "id" : 7,
+                  "brand" : "Ferrari",
+                  "name" : "488 GT3",
+                  "horsePower" : 550,
+                  "torque" : 700,
+                  "wheelDrive" : "REAR"
+                } ]
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Cars" ],
+        "summary" : "Create a car",
+        "description" : "Creates a car that can be selected for challenges. Requires the `ADMIN` role.",
+        "operationId" : "createCar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateCarRequest"
+              },
+              "example" : {
+                "brand" : "Ferrari",
+                "name" : "488 GT3",
+                "hp" : 550,
+                "torque" : 700,
+                "drive" : "REAR"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Car created. The Location header identifies the new car.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/users/info" : {
+      "get" : {
+        "tags" : [ "System" ],
+        "summary" : "Retrieve authenticated user information",
+        "description" : "Returns the username and authorization roles of the authenticated user.",
+        "operationId" : "getUserInfo",
+        "responses" : {
+          "200" : {
+            "description" : "Authenticated user information.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserInfoResponse"
+                },
+                "example" : {
+                  "username" : "racer1",
+                  "roles" : [ "PARTICIPANT" ]
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "UpdateTrackRequest" : {
+        "required" : [ "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "country" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "lengthKm" : {
+            "type" : "number"
+          }
+        }
+      },
+      "UpdateChallengeEndDateRequest" : {
+        "required" : [ "endDate" ],
+        "type" : "object",
+        "properties" : {
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "UpdateLapTimeRequest" : {
+        "required" : [ "participantName" ],
+        "type" : "object",
+        "properties" : {
+          "participantName" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "newLapTime" : {
+            "pattern" : "^\\d+:\\d{2}\\.\\d{1,3}$",
+            "type" : "string",
+            "description" : "Lap time in m:ss.S, m:ss.SS, or m:ss.SSS format. Null clears the recorded lap time.",
+            "nullable" : true,
+            "example" : "1:20.1"
+          }
+        }
+      },
+      "UpdateCarRequest" : {
+        "required" : [ "brand", "name" ],
+        "type" : "object",
+        "properties" : {
+          "brand" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "hp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "torque" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "drive" : {
+            "type" : "string",
+            "enum" : [ "FRONT", "REAR", "ALL" ]
+          }
+        }
+      },
+      "UserRegistrationRequest" : {
+        "required" : [ "password", "username" ],
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "password" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }
+      },
+      "CreateTrackRequest" : {
+        "required" : [ "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "country" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "lengthKm" : {
+            "type" : "number"
+          }
+        }
+      },
+      "CreateChallengeRequest" : {
+        "required" : [ "carId", "endDate", "trackId" ],
+        "type" : "object",
+        "properties" : {
+          "trackId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "carId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "CreateCarRequest" : {
+        "required" : [ "brand", "name" ],
+        "type" : "object",
+        "properties" : {
+          "brand" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "hp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "torque" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "drive" : {
+            "type" : "string",
+            "enum" : [ "FRONT", "REAR", "ALL" ]
+          }
+        }
+      },
+      "UserInfoResponse" : {
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "SearchTracksCriteria" : {
+        "type" : "object",
+        "properties" : {
+          "country" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "lengthKm" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "TrackDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "lengthKm" : {
+            "type" : "number"
+          }
+        }
+      },
+      "SearchChallengesCriteria" : {
+        "type" : "object",
+        "properties" : {
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "bestParticipantName" : {
+            "type" : "string"
+          },
+          "trackName" : {
+            "type" : "string"
+          },
+          "trackCountry" : {
+            "type" : "string"
+          },
+          "carBrand" : {
+            "type" : "string"
+          },
+          "carName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ChallengeSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "challengeId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "challengeEndDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "bestParticipantName" : {
+            "type" : "string"
+          },
+          "bestLapTime" : {
+            "pattern" : "^\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Quickest recorded lap time, returned in canonical mm:ss.SSS format.",
+            "nullable" : true,
+            "example" : "01:20.100"
+          },
+          "trackCountry" : {
+            "type" : "string"
+          },
+          "trackName" : {
+            "type" : "string"
+          },
+          "carBrand" : {
+            "type" : "string"
+          },
+          "carName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ChallengeDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "challengeId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "challengeEndDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "bestParticipantName" : {
+            "type" : "string"
+          },
+          "bestLapTime" : {
+            "pattern" : "^\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Quickest recorded lap time, returned in canonical mm:ss.SSS format.",
+            "nullable" : true,
+            "example" : "01:20.100"
+          },
+          "trackId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "trackName" : {
+            "type" : "string"
+          },
+          "trackCountry" : {
+            "type" : "string"
+          },
+          "trackLengthKm" : {
+            "type" : "number"
+          },
+          "carId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "carBrand" : {
+            "type" : "string"
+          },
+          "carName" : {
+            "type" : "string"
+          },
+          "carHorsePower" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "carTorque" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ParticipantDetailResponse"
+            }
+          }
+        }
+      },
+      "ParticipantDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "participantId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "participantName" : {
+            "type" : "string"
+          },
+          "participantBestLapTime" : {
+            "pattern" : "^\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Participant's quickest recorded lap time, returned in canonical mm:ss.SSS format.",
+            "nullable" : true,
+            "example" : "01:20.100"
+          }
+        }
+      },
+      "SearchCarsCriteria" : {
+        "type" : "object",
+        "properties" : {
+          "brand" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "horsePower" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "torque" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "wheelDrive" : {
+            "type" : "string",
+            "enum" : [ "FRONT", "REAR", "ALL" ]
+          }
+        }
+      },
+      "CarDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "brand" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "horsePower" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "torque" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "wheelDrive" : {
+            "type" : "string",
+            "enum" : [ "FRONT", "REAR", "ALL" ]
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "basicAuth" : {
+        "type" : "http",
+        "scheme" : "basic"
+      }
+    }
+  }
+}
