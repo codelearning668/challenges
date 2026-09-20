@@ -18,6 +18,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.api.CarApi;
 import sk.mkrajcovic.challenges.controller.dto.CarDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
@@ -29,18 +30,18 @@ import sk.mkrajcovic.challenges.service.CarService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/cars")
-public class CarController {
+class CarController implements CarApi {
 
 	private final CarService service;
 
 	@GetMapping(path = "/{carId}", produces = APPLICATION_JSON_VALUE)
-	CarDetailResponse getCar(@PathVariable @Positive Integer carId) {
+	public CarDetailResponse getCar(@PathVariable @Positive Integer carId) {
 		var car = service.getCar(carId);
 		return CarMapper.toDetailResponse(car);
 	}
 
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
-	List<CarDetailResponse> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
+	public List<CarDetailResponse> search(@ModelAttribute SearchCarsCriteria searchCriteria) {
 		return service.searchCars(searchCriteria).stream()
 			.map(CarMapper::toDetailResponse)
 			.toList();
@@ -48,14 +49,14 @@ public class CarController {
 
 	@RolesAllowed(ADMIN)
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
-	CreatedResponseEntity createCar(@Valid @RequestBody CreateCarRequest request) {
+	public CreatedResponseEntity createCar(@Valid @RequestBody CreateCarRequest request) {
 		Integer carId = service.createCar(CarMapper.toCar(request));
 		return CreatedResponseEntity.create("/cars/{carId}", carId);
 	}
 
 	@RolesAllowed(ADMIN)
 	@PutMapping(path = "/{carId}", consumes = APPLICATION_JSON_VALUE)
-	void updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody UpdateCarRequest request) {
+	public void updateCar(@PathVariable @Positive Integer carId, @Valid @RequestBody UpdateCarRequest request) {
 		service.updateCar(carId, CarMapper.toCar(request));
 	}
 

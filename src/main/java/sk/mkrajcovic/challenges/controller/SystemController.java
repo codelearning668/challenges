@@ -6,13 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.controller.api.SystemApi;
 import sk.mkrajcovic.challenges.controller.dto.UserInfoResponse;
 import sk.mkrajcovic.challenges.controller.mapper.UserMapper;
 import sk.mkrajcovic.challenges.service.SystemService;
 
 @RestController
 @RequiredArgsConstructor
-public class SystemController {
+class SystemController implements SystemApi {
 
 	private final SystemService systemService;
 
