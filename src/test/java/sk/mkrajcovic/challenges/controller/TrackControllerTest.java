@@ -206,12 +206,17 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
-                @Test
-                void withNegativeLength() {
+                @ParameterizedTest
+                @ValueSource(strings = {
+                    "-1.0",
+                    "5.9221",
+                    "12345678.123"
+                })
+                void rejectsInvalidLength(String lengthKm) {
                     createTrack(
                         VALID_NAME,
                         VALID_COUNTRY,
-                        new BigDecimal("-1.0")
+                        new BigDecimal(lengthKm)
                     )
                         .then()
                             .statusCode(BAD_REQUEST);
@@ -228,19 +233,6 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
-				@Test
-				void withTooManyFractionalDigits() {
-					createTrack(VALID_NAME, VALID_COUNTRY, new BigDecimal("5.9221"))
-					.then()
-						.statusCode(BAD_REQUEST);
-				}
-
-				@Test
-				void withTooManyIntegerDigits() {
-					createTrack(VALID_NAME, VALID_COUNTRY, new BigDecimal("12345678.123"))
-					.then()
-						.statusCode(BAD_REQUEST);
-				}
             }
         }
     }
@@ -646,15 +638,20 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
-                @Test
-                void withNegativeLength() {
+                @ParameterizedTest
+                @ValueSource(strings = {
+                    "-1.0",
+                    "5.9221",
+                    "12345678.123"
+                })
+                void rejectsInvalidLength(String lengthKm) {
                     int id = createTrackAndReturnId();
 
                     updateTrack(
                         id,
                         VALID_NAME,
                         VALID_COUNTRY,
-                        new BigDecimal("-1.0")
+                        new BigDecimal(lengthKm)
                     )
                         .then()
                             .statusCode(BAD_REQUEST);
@@ -674,21 +671,6 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
-				@Test
-				void withTooManyFractionalDigits() {
-					int id = createTrackAndReturnId();
-					updateTrack(id, VALID_NAME, VALID_COUNTRY, new BigDecimal("5.9221"))
-					.then()
-						.statusCode(BAD_REQUEST);
-				}
-
-				@Test
-				void withTooManyIntegerDigits() {
-					int id = createTrackAndReturnId();
-					updateTrack(id, VALID_NAME, VALID_COUNTRY, new BigDecimal("12345678.123"))
-					.then()
-						.statusCode(BAD_REQUEST);
-				}
 
 			}
 

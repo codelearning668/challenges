@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -47,13 +46,12 @@ public interface ChallengeApi {
 			    "carName": "488 GT3"
 			  }
 			]""")
-		)
+	)
 	)
 	List<ChallengeSummaryResponse> searchChallenges(SearchChallengesCriteria searchCriteria);
 
 	@Operation(summary = "Retrieve challenge details", description = "Returns the selected challenge, its car and track, the current leaderboard, and all registered participants.")
-	@ApiResponses({
-		@ApiResponse(
+	@ApiResponse(
 			responseCode = "200",
 			description = "Challenge details.",
 			content = @Content(
@@ -82,9 +80,8 @@ public interface ChallengeApi {
 				  ]
 				}""")
 			)
-		),
-		@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
-	})
+	)
+	@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
 	ChallengeDetailResponse getChallenge(@Positive Integer challengeId);
 
 	@Operation(
@@ -99,30 +96,24 @@ public interface ChallengeApi {
 			  "carId": 7,
 			  "endDate": "2028-10-31"
 			}"""))
-		)
 	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "201", description = "Challenge created. The Location header identifies the new challenge."),
-		@ApiResponse(responseCode = "404", description = "The selected car or track does not exist."),
-		@ApiResponse(responseCode = "409", description = "An active challenge already exists for the selected car and track."),
-		@ApiResponse(responseCode = "422", description = "The submitted end date does not satisfy the challenge rules.")
-	})
+	)
+	@ApiResponse(responseCode = "201", description = "Challenge created. The Location header identifies the new challenge.")
+	@ApiResponse(responseCode = "404", description = "The selected car or track does not exist.")
+	@ApiResponse(responseCode = "409", description = "An active challenge already exists for the selected car and track.")
+	@ApiResponse(responseCode = "422", description = "The submitted end date does not satisfy the challenge rules.")
 	CreatedResponseEntity createChallenge(@Valid CreateChallengeRequest challenge);
 
 	@Operation(security = @SecurityRequirement(name = "basicAuth"), summary = "Register for a challenge", description = "Registers the authenticated participant for an active challenge. A participant cannot register twice and needs a previous win before joining multiple active challenges. Requires the `PARTICIPANT` role.")
-	@ApiResponses({
-		@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID."),
-		@ApiResponse(responseCode = "409", description = "The authenticated participant is already registered for the challenge."),
-		@ApiResponse(responseCode = "422", description = "The challenge is closed, or the participant is not eligible to join multiple active challenges.")
-	})
+	@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
+	@ApiResponse(responseCode = "409", description = "The authenticated participant is already registered for the challenge.")
+	@ApiResponse(responseCode = "422", description = "The challenge is closed, or the participant is not eligible to join multiple active challenges.")
 	void registerForChallenge(@Positive Integer challengeId);
 
 	@Operation(security = @SecurityRequirement(name = "basicAuth"), summary = "Quit a challenge", description = "Removes the authenticated participant from an active challenge. Requires the `PARTICIPANT` role.")
-	@ApiResponses({
-		@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID."),
-		@ApiResponse(responseCode = "409", description = "The authenticated participant is not registered for the challenge."),
-		@ApiResponse(responseCode = "422", description = "The challenge is closed.")
-	})
+	@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
+	@ApiResponse(responseCode = "409", description = "The authenticated participant is not registered for the challenge.")
+	@ApiResponse(responseCode = "422", description = "The challenge is closed.")
 	void quitChallenge(@Positive Integer challengeId);
 
 	@Operation(
@@ -136,13 +127,11 @@ public interface ChallengeApi {
 			  "participantName": "racer1",
 			  "newLapTime": "1:42.537"
 			}"""))
-		)
 	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "403", description = "A non-administrator attempted to update another participant's lap time."),
-		@ApiResponse(responseCode = "404", description = "The participant is not registered for the challenge."),
-		@ApiResponse(responseCode = "422", description = "A non-administrator attempted to update a lap time after the challenge closed.")
-	})
+	)
+	@ApiResponse(responseCode = "403", description = "A non-administrator attempted to update another participant's lap time.")
+	@ApiResponse(responseCode = "404", description = "The participant is not registered for the challenge.")
+	@ApiResponse(responseCode = "422", description = "A non-administrator attempted to update a lap time after the challenge closed.")
 	void updateLapTime(@Positive Integer challengeId, @Valid UpdateLapTimeRequest request);
 
 	@Operation(
@@ -155,19 +144,16 @@ public interface ChallengeApi {
 			{
 			  "endDate": "2028-11-07"
 			}"""))
-		)
 	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID."),
-		@ApiResponse(responseCode = "422", description = "The challenge is closed or the submitted end date is invalid.")
-	})
+	)
+	@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
+	@ApiResponse(responseCode = "422", description = "The challenge is closed or the submitted end date is invalid.")
 	void updateChallengeEndDate(@Positive Integer challengeId, @Valid UpdateChallengeEndDateRequest request);
 
 	@Operation(security = @SecurityRequirement(name = "basicAuth"), summary = "Delete a challenge", description = "Deletes an active challenge. Closed challenges cannot be deleted. Requires the `ADMIN` role.")
-	@ApiResponses({
-		@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID."),
-		@ApiResponse(responseCode = "422", description = "The challenge is closed.")
-	})
+	@ApiResponse(responseCode = "404", description = "No challenge exists with the supplied ID.")
+	@ApiResponse(responseCode = "422", description = "The challenge is closed.")
 	void deleteChallenge(@Positive Integer challengeId);
 }
+
 

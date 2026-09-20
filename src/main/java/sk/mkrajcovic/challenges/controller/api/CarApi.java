@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,8 +23,7 @@ import sk.mkrajcovic.challenges.search.SearchCarsCriteria;
 public interface CarApi {
 
 	@Operation(summary = "Retrieve car details", description = "Returns the selected car.")
-	@ApiResponses({
-		@ApiResponse(
+	@ApiResponse(
 			responseCode = "200",
 			description = "Car details.",
 			content = @Content(schema = @Schema(implementation = CarDetailResponse.class), examples = @ExampleObject(value = """
@@ -37,9 +35,8 @@ public interface CarApi {
 			  "torque": 700,
 			  "wheelDrive": "REAR"
 			}"""))
-		),
-		@ApiResponse(responseCode = "404", description = "No car exists with the supplied ID.")
-	})
+	)
+	@ApiResponse(responseCode = "404", description = "No car exists with the supplied ID.")
 	CarDetailResponse getCar(@Positive Integer carId);
 
 	@Operation(summary = "Search cars", description = "Returns cars matching the optional brand, name, horsepower, torque, and wheel-drive filters. Brand and name searches are case- and diacritic-insensitive.")
@@ -92,4 +89,5 @@ public interface CarApi {
 	@ApiResponse(responseCode = "404", description = "No car exists with the supplied ID.")
 	void updateCar(@Positive Integer carId, @Valid UpdateCarRequest request);
 }
+
 
