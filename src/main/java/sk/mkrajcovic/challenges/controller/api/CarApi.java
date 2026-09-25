@@ -89,6 +89,7 @@ public interface CarApi {
 		  "drive": "REAR"
 		}""")))
 	)
+	@ApiResponse(responseCode = "204", description = "Car updated.")
 	@ApiResponse(responseCode = "404", description = "No car exists with the supplied ID.")
 	void updateCar(@Positive Integer carId, @Valid UpdateCarRequest request);
 }

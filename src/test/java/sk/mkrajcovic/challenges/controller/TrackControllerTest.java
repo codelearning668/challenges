@@ -10,6 +10,7 @@ import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.CREATED;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.FORBIDDEN;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.NOT_FOUND;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.NO_CONTENT;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNAUTHORIZED;
 
@@ -473,7 +474,7 @@ class TrackControllerTest {
                     new BigDecimal("6.123")
                 )
                     .then()
-                        .statusCode(OK);
+                        .statusCode(NO_CONTENT);
 
                 Response response = getTrack(id);
 
@@ -504,7 +505,7 @@ class TrackControllerTest {
                     new BigDecimal("5.432")
                 )
                     .then()
-                        .statusCode(OK);
+                        .statusCode(NO_CONTENT);
 
                 assertSearchContainsTrack(
                     searchTracks("ceska", "autodrom ces", null),
@@ -523,7 +524,7 @@ class TrackControllerTest {
                     new BigDecimal("4.321")
                 )
                     .then()
-                        .statusCode(OK);
+                        .statusCode(NO_CONTENT);
 
                 Response response = getTrack(id);
 
@@ -546,7 +547,7 @@ class TrackControllerTest {
 				int id = createTrackAndReturnId();
 				updateTrack(id, VALID_NAME, VALID_COUNTRY, new BigDecimal("9999999.583"))
 				.then()
-					.statusCode(OK);
+					.statusCode(NO_CONTENT);
 			}
 		}
 

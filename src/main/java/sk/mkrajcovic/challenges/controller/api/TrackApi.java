@@ -81,6 +81,7 @@ public interface TrackApi {
 		  "lengthKm": 5.793
 		}""")))
 	)
+	@ApiResponse(responseCode = "204", description = "Track updated.")
 	@ApiResponse(responseCode = "404", description = "No track exists with the supplied ID.")
 	void updateTrack(@Positive Integer trackId, @Valid UpdateTrackRequest request);
 }

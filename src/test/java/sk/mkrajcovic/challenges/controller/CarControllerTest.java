@@ -10,6 +10,7 @@ import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.CREATED;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.FORBIDDEN;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.NOT_FOUND;
+import static sk.mkrajcovic.challenges.test.util.HttpCodes.NO_CONTENT;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.OK;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.UNAUTHORIZED;
 
@@ -543,7 +544,7 @@ class CarControllerTest {
 				.when()
 					.put(CAR_URI_WITH_ID, id)
 				.then()
-					.statusCode(OK);
+					.statusCode(NO_CONTENT);
 
 				// verify the update took effect
 				getCar(id)

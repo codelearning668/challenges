@@ -1,18 +1,18 @@
 package sk.mkrajcovic.challenges.controller;
 
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 import static sk.mkrajcovic.challenges.security.UserRoles.PARTICIPANT;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -68,32 +68,35 @@ class ChallengeController implements ChallengeApi {
 
 	@RolesAllowed(PARTICIPANT)
 	@PostMapping(path = "/{challengeId}/registration")
+	@ResponseStatus(NO_CONTENT)
 	public void registerForChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.registerForChallenge(challengeId);
 	}
 
 	@RolesAllowed(PARTICIPANT)
 	@DeleteMapping(path = "/{challengeId}/registration")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@ResponseStatus(NO_CONTENT)
 	public void quitChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.quitChallenge(challengeId);
 	}
 
 	@RolesAllowed({ADMIN, PARTICIPANT})
-	@PutMapping(path = "/{challengeId}/participant", consumes = APPLICATION_JSON_VALUE)
+	@PatchMapping(path = "/{challengeId}/participant", consumes = APPLICATION_JSON_VALUE)
+	@ResponseStatus(NO_CONTENT)
 	public void updateLapTime(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateLapTimeRequest request) {
 		participantService.updateLapTime(challengeId, request.participantName(), request.newLapTime());
 	}
 
 	@RolesAllowed(ADMIN)
-	@PutMapping(path = "/{challengeId}", consumes = APPLICATION_JSON_VALUE)
+	@PatchMapping(path = "/{challengeId}", consumes = APPLICATION_JSON_VALUE)
+	@ResponseStatus(NO_CONTENT)
 	public void updateChallengeEndDate(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateChallengeEndDateRequest request) {
 		challengeService.updateChallengeEndDate(challengeId, request.endDate());
 	}
 
 	@RolesAllowed(ADMIN)
 	@DeleteMapping(path = "/{challengeId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@ResponseStatus(NO_CONTENT)
 	public void deleteChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.deleteChallenge(challengeId);
 	}

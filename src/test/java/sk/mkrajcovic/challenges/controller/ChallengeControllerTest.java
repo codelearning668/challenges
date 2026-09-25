@@ -365,15 +365,15 @@ class ChallengeControllerTest {
 
 			registerForChallenge(challengeId, nextBestParticipant, PARTICIPANT_PASS)
 				.then()
-				.statusCode(OK);
+				.statusCode(NO_CONTENT);
 
 			updateLapTime(challengeId, leader, PARTICIPANT_PASS, leader, "1:23.123")
 				.then()
-				.statusCode(OK);
+				.statusCode(NO_CONTENT);
 
 			updateLapTime(challengeId, nextBestParticipant, PARTICIPANT_PASS, nextBestParticipant, "1:24.123")
 				.then()
-				.statusCode(OK);
+				.statusCode(NO_CONTENT);
 
 			getChallenge(challengeId)
 				.then()
@@ -406,7 +406,7 @@ class ChallengeControllerTest {
 
 				int secondChallengeId = createChallengeAndReturnId();
 
-				registerForChallenge(secondChallengeId, participant, PARTICIPANT_PASS).then().statusCode(OK);
+				registerForChallenge(secondChallengeId, participant, PARTICIPANT_PASS).then().statusCode(NO_CONTENT);
 			}
 		}
 
@@ -650,7 +650,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             searchChallenges("bestParticipantName", participant)
                 .then()
@@ -671,7 +671,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             searchChallenges("bestParticipantName", participant.substring(5))
                 .then()
@@ -723,7 +723,7 @@ class ChallengeControllerTest {
                 PARTICIPANT_PASS
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             getChallenge(challengeId)
                 .then()
@@ -770,7 +770,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             int activeChallengeId = createChallengeAndReturnId();
 
@@ -780,7 +780,7 @@ class ChallengeControllerTest {
                 PARTICIPANT_PASS
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
         }
 
         @Test
@@ -798,7 +798,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             int secondChallengeId = createChallengeAndReturnId();
 
@@ -895,7 +895,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             getChallenge(challengeId)
                 .then()
@@ -924,7 +924,7 @@ class ChallengeControllerTest {
                 PARTICIPANT_PASS
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -934,7 +934,7 @@ class ChallengeControllerTest {
                 "1:23.123"
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -944,7 +944,7 @@ class ChallengeControllerTest {
                 "1:24.123"
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -954,7 +954,7 @@ class ChallengeControllerTest {
                 null
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             getChallenge(challengeId)
                 .then()
@@ -977,7 +977,7 @@ class ChallengeControllerTest {
                 PARTICIPANT_PASS
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -987,7 +987,7 @@ class ChallengeControllerTest {
                 "1:23.123"
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -997,7 +997,7 @@ class ChallengeControllerTest {
                 "1:24.123"
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -1007,7 +1007,7 @@ class ChallengeControllerTest {
                 "1:25.123"
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             getChallenge(challengeId)
                 .then()
@@ -1029,7 +1029,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -1039,7 +1039,7 @@ class ChallengeControllerTest {
                 null
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             getChallenge(challengeId)
                 .then()
@@ -1065,7 +1065,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
         }
 
         @Test
@@ -1077,7 +1077,7 @@ class ChallengeControllerTest {
                 .contentType(ContentType.JSON)
                 .body(lapTimeBody(participant, VALID_LAP_TIME))
             .when()
-                .put(PARTICIPANT_URI, challengeId)
+                .patch(PARTICIPANT_URI, challengeId)
             .then()
                 .statusCode(UNAUTHORIZED);
         }
@@ -1144,7 +1144,7 @@ class ChallengeControllerTest {
                 PARTICIPANT_PASS
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
 
             updateLapTime(
                 challengeId,
@@ -1190,7 +1190,7 @@ class ChallengeControllerTest {
                 VALID_LAP_TIME
             )
                 .then()
-                .statusCode(OK);
+                .statusCode(NO_CONTENT);
         }
 
         @Test
@@ -1225,7 +1225,7 @@ class ChallengeControllerTest {
     				newEndDate
     			)
     				.then()
-    					.statusCode(OK);
+					.statusCode(NO_CONTENT);
 
     			getChallenge(challengeId)
     				.then()
@@ -1254,7 +1254,7 @@ class ChallengeControllerTest {
     						LocalDate.now().plusDays(60)
     					))
     				.when()
-    					.put(CHALLENGES_URI + "/{challengeId}", challengeId)
+					.patch(CHALLENGES_URI + "/{challengeId}", challengeId)
     				.then()
     					.statusCode(UNAUTHORIZED);
     			}
@@ -1273,7 +1273,7 @@ class ChallengeControllerTest {
     						LocalDate.now().plusDays(60)
     					))
     				.when()
-    					.put(CHALLENGES_URI + "/{challengeId}", challengeId)
+					.patch(CHALLENGES_URI + "/{challengeId}", challengeId)
     				.then()
     					.statusCode(FORBIDDEN);
     			}
@@ -1464,7 +1464,7 @@ class ChallengeControllerTest {
     			.accept(ContentType.JSON)
     			.body(new UpdateChallengeEndDateRequest(endDate))
     		.when()
-    			.put(CHALLENGES_URI + "/{challengeId}", challengeId);
+			.patch(CHALLENGES_URI + "/{challengeId}", challengeId);
     }
 
     private Response deleteChallenge(int challengeId) {
@@ -1549,7 +1549,7 @@ class ChallengeControllerTest {
             PARTICIPANT_PASS
         )
             .then()
-            .statusCode(OK);
+            .statusCode(NO_CONTENT);
 
         return challengeId;
     }
@@ -1597,7 +1597,7 @@ class ChallengeControllerTest {
             .accept(ContentType.JSON)
             .body(lapTimeBody(participantName, lapTime))
         .when()
-            .put(PARTICIPANT_URI, challengeId);
+            .patch(PARTICIPANT_URI, challengeId);
     }
 
     private String lapTimeBody(String participantName, String lapTime) {
