@@ -18,9 +18,11 @@ import sk.mkrajcovic.challenges.util.Text;
 public class CarService {
 
 	private final CarRepository repository;
+	private final SimulatorService simulatorService;
 
 	@Transactional
-	public Integer createCar(Car car) {
+	public Integer createCar(Car car, Integer simulatorId) {
+		car.setSimulator(simulatorService.getSimulator(simulatorId));
 		return repository.save(car).getId();
 	}
 

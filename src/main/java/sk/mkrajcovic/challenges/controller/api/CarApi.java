@@ -33,7 +33,8 @@ public interface CarApi {
 			  "name": "488 GT3",
 			  "horsePower": 550,
 			  "torque": 700,
-			  "wheelDrive": "REAR"
+			  "wheelDrive": "REAR",
+			  "simulatorName": "Assetto Corsa"
 			}"""))
 	)
 	@ApiResponse(responseCode = "404", description = "No car exists with the supplied ID.")
@@ -51,7 +52,8 @@ public interface CarApi {
 		    "name": "488 GT3",
 		    "horsePower": 550,
 		    "torque": 700,
-		    "wheelDrive": "REAR"
+		    "wheelDrive": "REAR",
+		    "simulatorName": "Assetto Corsa"
 		  }
 		]"""))
 	)
@@ -67,7 +69,8 @@ public interface CarApi {
 		  "name": "488 GT3",
 		  "hp": 550,
 		  "torque": 700,
-		  "drive": "REAR"
+		  "drive": "REAR",
+		  "simulatorId": 1
 		}""")))
 	)
 	@ApiResponse(responseCode = "201", description = "Car created. The Location header identifies the new car.")

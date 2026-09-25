@@ -1,6 +1,7 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import sk.mkrajcovic.challenges.model.WheelDrive;
@@ -19,6 +20,9 @@ public record CreateCarRequest(
 	@Positive
 	Integer torque,
 
-	WheelDrive drive
+	WheelDrive drive,
+
+	@NotNull @Positive
+	Integer simulatorId
 
 ) { }

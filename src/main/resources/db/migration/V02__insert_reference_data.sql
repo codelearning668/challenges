@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 
 INSERT INTO simulator (
     version,
-    name,
+    type,
     created_at
 ) VALUES
     (1, 'ASSETTO_CORSA', now()),

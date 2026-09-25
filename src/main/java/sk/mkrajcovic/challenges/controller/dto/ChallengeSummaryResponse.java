@@ -9,6 +9,7 @@ public record ChallengeSummaryResponse(
 
 	Integer challengeId,
 	LocalDate challengeEndDate,
+	String simulatorName,
 	String bestParticipantName,
 
 	@Schema(

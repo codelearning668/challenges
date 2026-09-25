@@ -53,6 +53,7 @@ class CarControllerTest {
 	private static final int VALID_HP = 510;
 	private static final int VALID_TORQUE = 650;
 	private static final WheelDrive VALID_DRIVE = WheelDrive.REAR;
+	private static final int ASSETTO_CORSA_SIMULATOR_ID = 1;
 
 	private static final String SEARCH_BRAND = "BMW Motorsport";
 	private static final String SEARCH_NAME = "M3 Competition";
@@ -304,7 +305,8 @@ class CarControllerTest {
 						.body("brand", equalTo(VALID_BRAND))
 						.body("name", equalTo(VALID_NAME))
 						.body("horsePower", equalTo(VALID_HP))
-						.body("torque", equalTo(VALID_TORQUE));
+						.body("torque", equalTo(VALID_TORQUE))
+						.body("simulatorName", equalTo("Assetto Corsa"));
 			}
 		}
 
@@ -328,10 +330,26 @@ class CarControllerTest {
 
 			@Test
 			void canListAllCars() {
+				int id = createCarAndReturnId();
+
 				searchCars()
 					.then()
 						.statusCode(OK)
-						.contentType(ContentType.JSON);
+						.contentType(ContentType.JSON)
+						.body("find { it.id == " + id + " }.simulatorName", equalTo("Assetto Corsa"));
+			}
+
+			@Test
+			void canSearchBySimulatorId() {
+				int id = createCarAndReturnId();
+
+				given()
+					.param("simulatorId", ASSETTO_CORSA_SIMULATOR_ID)
+				.when()
+					.get(CAR_URI)
+				.then()
+					.statusCode(OK)
+					.body("find { it.id == " + id + " }", notNullValue());
 			}
 
 			@ParameterizedTest
@@ -640,7 +658,8 @@ class CarControllerTest {
 					name,
 					hp,
 					torque,
-					drive
+					drive,
+					ASSETTO_CORSA_SIMULATOR_ID
 				))
 			.when()
 				.post(CAR_URI);
@@ -662,7 +681,8 @@ class CarControllerTest {
 			VALID_NAME,
 			VALID_HP,
 			VALID_TORQUE,
-			VALID_DRIVE
+			VALID_DRIVE,
+			ASSETTO_CORSA_SIMULATOR_ID
 		);
 	}
 

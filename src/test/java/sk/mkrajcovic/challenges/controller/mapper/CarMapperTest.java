@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.model.Simulator;
 import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
+import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class CarMapperTest {
@@ -23,6 +25,7 @@ class CarMapperTest {
 		car.setName("M3");
 		car.setHorsePower(510);
 		car.setTorque(650);
+		car.setSimulator(createSimulator());
 
 		var response = CarMapper.toDetailResponse(car);
 
@@ -72,6 +75,11 @@ class CarMapperTest {
 			public WheelDrive getWheelDrive() {
 				return WheelDrive.ALL;
 			}
+
+			@Override
+			public SimulatorType getSimulatorType() {
+				return SimulatorType.ASSETTO_CORSA;
+			}
 		};
 
 		var response = CarMapper.toDetailResponse(carDetail);
@@ -95,7 +103,7 @@ class CarMapperTest {
 
 	@Test
 	void shouldMapCreateCarRequestToCar() {
-		var request = new CreateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL);
+		var request = new CreateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL, 1);
 		var car = CarMapper.toCar(request);
 
 		assertAll(
@@ -127,5 +135,11 @@ class CarMapperTest {
 	@Test
 	void shouldRejectNullUpdateCarRequest() {
 		assertThrows(NullPointerException.class, () -> CarMapper.toCar((UpdateCarRequest) null));
+	}
+
+	private Simulator createSimulator() {
+		var simulator = new Simulator();
+		simulator.setType(SimulatorType.ASSETTO_CORSA);
+		return simulator;
 	}
 }

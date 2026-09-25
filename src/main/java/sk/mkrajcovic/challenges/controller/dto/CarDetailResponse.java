@@ -9,6 +9,7 @@ public record CarDetailResponse (
 	String name,
 	Integer horsePower,
 	Integer torque,
-	WheelDrive wheelDrive
+	WheelDrive wheelDrive,
+	String simulatorName
 
 ) { }

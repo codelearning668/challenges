@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
+import sk.mkrajcovic.challenges.enums.SimulatorType;
+import sk.mkrajcovic.challenges.model.Simulator;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
@@ -25,6 +27,7 @@ class TrackMapperTest {
 		track.setName("Slovakia Ring");
 		track.setCountry("Slovakia");
 		track.setLengthKm(VALID_LENGTH_KM);
+		track.setSimulator(createSimulator());
 
 		var response = TrackMapper.toDetailResponse(track);
 
@@ -69,6 +72,11 @@ class TrackMapperTest {
 			public BigDecimal getLengthKm() {
 				return VALID_LENGTH_KM;
 			}
+
+			@Override
+			public SimulatorType getSimulatorType() {
+				return SimulatorType.ASSETTO_CORSA;
+			}
 		};
 
 		var response = TrackMapper.toDetailResponse(trackDetail);
@@ -96,7 +104,8 @@ class TrackMapperTest {
 		var request = new CreateTrackRequest(
 			"Slovakia Ring",
 			"Slovakia",
-			VALID_LENGTH_KM);
+			VALID_LENGTH_KM,
+			1);
 
 		var track = TrackMapper.toTrack(request);
 
@@ -141,5 +150,11 @@ class TrackMapperTest {
 		assertEquals(
 			"input request cannot be null in order to map its values",
 			exception.getMessage());
+	}
+
+	private Simulator createSimulator() {
+		var simulator = new Simulator();
+		simulator.setType(SimulatorType.ASSETTO_CORSA);
+		return simulator;
 	}
 }

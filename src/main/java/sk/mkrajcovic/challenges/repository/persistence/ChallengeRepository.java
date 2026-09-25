@@ -26,9 +26,14 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 	boolean existsByTrackId(Integer trackId);
 	boolean existsByCarId(Integer carId);
 
+	/*
+	 * By design, challenge creation requires the car and track to use the same simulator;
+	 * Joining through the car is therefore sufficient to filter by simulator.
+	 */
 	@Query("""
         SELECT ch.id as id,
                ch.endDate as endDate,
+               s.type as simulatorType,
                ch.bestParticipantName as bestParticipantName,
                ch.bestLapTime as bestLapTime,
                tr.name as trackName,
@@ -38,12 +43,14 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         FROM Challenge ch
         JOIN ch.track tr
         JOIN ch.car c
+        JOIN c.simulator s
         WHERE (cast(:#{#criteria.endDate} as text) IS NULL OR ch.endDate = :#{#criteria.endDate})
         AND (:#{#criteria.trackName} IS NULL OR tr.nameSearch LIKE %:#{#criteria.trackName}%)
         AND (:#{#criteria.trackCountry} IS NULL OR tr.countrySearch LIKE %:#{#criteria.trackCountry}%)
         AND (:#{#criteria.carBrand} IS NULL OR c.brandSearch LIKE %:#{#criteria.carBrand}%)
         AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
         AND (:#{#criteria.bestParticipantName} IS NULL OR ch.bestParticipantNameSearch LIKE %:#{#criteria.bestParticipantName}%)
+        AND (:#{#criteria.simulatorId} IS NULL OR s.id = :#{#criteria.simulatorId})
     """)
 	public List<ChallengeDetail> findChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 
