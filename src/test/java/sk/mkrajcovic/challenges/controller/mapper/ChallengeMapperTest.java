@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
+import sk.mkrajcovic.challenges.model.Simulator;
 import sk.mkrajcovic.challenges.model.Track;
+import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
@@ -47,6 +49,7 @@ class ChallengeMapperTest {
 
 		assertAll(() -> assertEquals(1, response.getChallengeId()),
 			() -> assertEquals(LocalDate.of(2026, 9, 30), response.getChallengeEndDate()),
+			() -> assertEquals("Assetto Corsa", response.getSimulatorName()),
 			() -> assertEquals(10, response.getTrackId()),
 			() -> assertEquals("Slovakia", response.getTrackCountry()),
 			() -> assertEquals("Slovakia Ring", response.getTrackName()),
@@ -133,6 +136,11 @@ class ChallengeMapperTest {
 			}
 
 			@Override
+			public SimulatorType getSimulatorType() {
+				return SimulatorType.ASSETTO_CORSA;
+			}
+
+			@Override
 			public String getTrackName() {
 				return "Slovakia Ring";
 			}
@@ -158,6 +166,7 @@ class ChallengeMapperTest {
 		assertAll(
 			() -> assertEquals(1, response.challengeId()),
 			() -> assertEquals(LocalDate.of(2026, 9, 30), response.challengeEndDate()),
+			() -> assertEquals("Assetto Corsa", response.simulatorName()),
 			() -> assertEquals("John", response.bestParticipantName()),
 			() -> Assertions.assertNull(response.bestLapTime()),
 			() -> assertEquals("Slovakia Ring", response.trackName()),
@@ -178,6 +187,7 @@ class ChallengeMapperTest {
 		track.setCountry("Slovakia");
 		track.setName("Slovakia Ring");
 		track.setLengthKm(BigDecimal.valueOf(5.922));
+		track.setSimulator(createSimulator());
 		return track;
 	}
 
@@ -188,6 +198,13 @@ class ChallengeMapperTest {
 		car.setName("M3");
 		car.setHorsePower(510);
 		car.setTorque(650);
+		car.setSimulator(createSimulator());
 		return car;
+	}
+
+	private static Simulator createSimulator() {
+		var simulator = new Simulator();
+		simulator.setType(SimulatorType.ASSETTO_CORSA);
+		return simulator;
 	}
 }

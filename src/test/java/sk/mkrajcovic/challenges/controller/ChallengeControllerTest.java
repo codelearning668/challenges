@@ -69,6 +69,8 @@ class ChallengeControllerTest {
     private static final String CAR_NAME = "M3";
     private static final int CAR_HP = 510;
     private static final int CAR_TORQUE = 650;
+	private static final int ASSETTO_CORSA_SIMULATOR_ID = 1;
+	private static final int WRC_GENERATIONS_SIMULATOR_ID = 3;
 
     private static final LocalDate VALID_END_DATE = LocalDate.now().plusDays(30);
     private static final LocalDate CLOSED_END_DATE = LocalDate.now().minusDays(1);
@@ -145,6 +147,16 @@ class ChallengeControllerTest {
                     containsString(CHALLENGES_URI + "/")
                 ));
         }
+
+		@Test
+		void rejectsCarAndTrackFromDifferentSimulators() {
+			int trackId = createTrackAndReturnId();
+			int carId = createCarAndReturnId(CAR_BRAND, CAR_NAME, WRC_GENERATIONS_SIMULATOR_ID);
+
+			createChallenge(trackId, carId, VALID_END_DATE)
+				.then()
+				.statusCode(UNPROCESSABLE_ENTITY);
+		}
 
         @Test
         void unauthenticatedCannotCreateChallenge() {
@@ -533,6 +545,29 @@ class ChallengeControllerTest {
                     notNullValue()
                 );
         }
+
+		@Test
+		void searchesBySimulatorId() {
+			int trackId = createTrackForSimulator(WRC_GENERATIONS_SIMULATOR_ID);
+			int carId = createCarAndReturnId(CAR_BRAND, CAR_NAME, WRC_GENERATIONS_SIMULATOR_ID);
+			String location = createChallenge(trackId, carId, VALID_END_DATE)
+				.then()
+				.statusCode(CREATED)
+				.extract()
+				.header("Location");
+
+			assertNotNull(location);
+			int challengeId = Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+
+			searchChallenges("simulatorId", String.valueOf(WRC_GENERATIONS_SIMULATOR_ID))
+				.then()
+				.statusCode(OK)
+				.body("challengeId", hasItem(challengeId))
+				.body(
+					"find { it.challengeId == " + challengeId + " }.simulatorName",
+					equalTo("WRC Generations")
+				);
+		}
 
         @Test
         void searchesByEndDate() {
@@ -1490,7 +1525,7 @@ class ChallengeControllerTest {
             trackLengthKm
         );
 
-        int carId = createCarAndReturnId(carBrand, carName);
+        int carId = createCarAndReturnId(carBrand, carName, ASSETTO_CORSA_SIMULATOR_ID);
 
         String location = createChallenge(trackId, carId, VALID_END_DATE)
             .then()
@@ -1590,6 +1625,30 @@ class ChallengeControllerTest {
         );
     }
 
+	private int createTrackForSimulator(int simulatorId) {
+		String location = given()
+			.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+			.contentType(ContentType.JSON)
+			.body(new CreateTrackRequest(
+				TRACK_NAME,
+				TRACK_COUNTRY,
+				BigDecimal.valueOf(TRACK_LENGTH_KM),
+				simulatorId
+			))
+		.when()
+			.post("/tracks")
+		.then()
+			.statusCode(CREATED)
+			.extract()
+			.header("Location");
+
+		assertNotNull(location);
+
+		return Integer.parseInt(
+			location.substring(location.lastIndexOf('/') + 1)
+		);
+	}
+
     private int createTrackAndReturnId(
             String name,
             String country,
@@ -1598,7 +1657,7 @@ class ChallengeControllerTest {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
-            .body(new CreateTrackRequest(name, country, BigDecimal.valueOf(lengthKm)))
+            .body(new CreateTrackRequest(name, country, BigDecimal.valueOf(lengthKm), ASSETTO_CORSA_SIMULATOR_ID))
         .when()
             .post("/tracks")
         .then()
@@ -1614,10 +1673,10 @@ class ChallengeControllerTest {
     }
 
     private int createCarAndReturnId() {
-        return createCarAndReturnId(CAR_BRAND, CAR_NAME);
+        return createCarAndReturnId(CAR_BRAND, CAR_NAME, ASSETTO_CORSA_SIMULATOR_ID);
     }
 
-    private int createCarAndReturnId(String brand, String name) {
+    private int createCarAndReturnId(String brand, String name, int simulatorId) {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
@@ -1626,7 +1685,8 @@ class ChallengeControllerTest {
                 name,
                 CAR_HP,
                 CAR_TORQUE,
-                WheelDrive.REAR
+                WheelDrive.REAR,
+                simulatorId
             ))
         .when()
             .post("/cars")

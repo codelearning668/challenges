@@ -29,6 +29,11 @@ public class Challenge extends BaseEntity {
 	@OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE)
 	private Set<Participant> participants;
 
+	/*
+	 * A challenge uses a car and track from the same simulator.
+	 * Its simulator is derived from those resources, so it does
+	 * not store a separate simulator reference.
+	 */
 	@ManyToOne
 	private Track track;
 

@@ -20,13 +20,16 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
                c.name as name,
                c.horsePower as horsePower,
                c.torque as torque,
-               c.wheelDrive as wheelDrive
+               c.wheelDrive as wheelDrive,
+               s.type as simulatorType
         FROM Car c
+        JOIN c.simulator s
         WHERE (:#{#criteria.brand} IS NULL OR c.brandSearch LIKE %:#{#criteria.brand}%)
         AND (:#{#criteria.name} IS NULL OR c.nameSearch LIKE %:#{#criteria.name}%)
         AND (:#{#criteria.horsePower} IS NULL OR c.horsePower = :#{#criteria.horsePower})
         AND (:#{#criteria.torque} IS NULL OR c.torque = :#{#criteria.torque})
         AND (:#{#criteria.wheelDrive} IS NULL OR c.wheelDrive = :#{#criteria.wheelDrive})
+        AND (:#{#criteria.simulatorId} IS NULL OR s.id = :#{#criteria.simulatorId})
     """)
 	public List<CarDetail> findCars(@Param("criteria") SearchCarsCriteria criteria);
 

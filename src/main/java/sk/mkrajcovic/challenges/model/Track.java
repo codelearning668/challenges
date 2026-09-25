@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
@@ -38,6 +39,12 @@ public class Track extends BaseEntity {
 	@Setter(NONE)
 	@Column(nullable = false, length = 100)
 	private String nameSearch;
+
+	@ManyToOne(optional = false)
+	private Simulator simulator;
+
+	@Column(nullable = false)
+	boolean fromDlc;
 
 	@PrePersist
 	@PreUpdate

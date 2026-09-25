@@ -7,6 +7,7 @@ public record TrackDetailResponse(
 	Integer id,
 	String country,
 	String name,
-	BigDecimal lengthKm
+	BigDecimal lengthKm,
+	String simulatorName
 
 ) { }

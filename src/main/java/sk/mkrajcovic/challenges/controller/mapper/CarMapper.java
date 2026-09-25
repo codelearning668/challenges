@@ -22,7 +22,8 @@ public final class CarMapper {
 			car.getName(),
 			car.getHorsePower(),
 			car.getTorque(),
-			car.getWheelDrive()
+			car.getWheelDrive(),
+			car.getSimulator().getType().getDisplayName()
 		);
 	}
 
@@ -35,7 +36,8 @@ public final class CarMapper {
 			carDetail.getName(),
 			carDetail.getHorsePower(),
 			carDetail.getTorque(),
-			carDetail.getWheelDrive()
+			carDetail.getWheelDrive(),
+			carDetail.getSimulatorType().getDisplayName()
 		);
 	}
 

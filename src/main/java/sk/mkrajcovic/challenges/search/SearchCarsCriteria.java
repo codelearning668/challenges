@@ -15,5 +15,6 @@ public class SearchCarsCriteria {
 	private Integer torque;
 
 	private WheelDrive wheelDrive;
+	private Integer simulatorId;
 
 }

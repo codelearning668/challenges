@@ -50,7 +50,7 @@ class TrackController implements TrackApi {
 	@RolesAllowed(ADMIN)
 	@PostMapping(produces = APPLICATION_JSON_VALUE)
 	public CreatedResponseEntity createTrack(@Valid @RequestBody CreateTrackRequest request) {
-		Integer trackId = service.createTrack(TrackMapper.toTrack(request));
+		Integer trackId = service.createTrack(TrackMapper.toTrack(request), request.simulatorId());
 		return CreatedResponseEntity.create("/tracks/{trackId}", trackId);
 	}
 

@@ -20,6 +20,7 @@ public final class ChallengeMapper {
 		var challengeDetail = new ChallengeDetailResponse();
 		challengeDetail.setChallengeId(challenge.getId());
 		challengeDetail.setChallengeEndDate(challenge.getEndDate());
+		challengeDetail.setSimulatorName(challenge.getCar().getSimulator().getType().getDisplayName());
 		challengeDetail.setBestParticipantName(challenge.getBestParticipantName());
 		challengeDetail.setBestLapTime(challenge.getBestLapTime());
 
@@ -63,6 +64,7 @@ public final class ChallengeMapper {
 		return new ChallengeSummaryResponse(
 			challengeDetail.getId(),
 			challengeDetail.getEndDate(),
+			challengeDetail.getSimulatorType().getDisplayName(),
 			challengeDetail.getBestParticipantName(),
 			challengeDetail.getBestLapTime(),
 			challengeDetail.getTrackCountry(),

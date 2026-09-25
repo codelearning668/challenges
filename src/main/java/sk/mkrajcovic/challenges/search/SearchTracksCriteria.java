@@ -11,5 +11,6 @@ public class SearchTracksCriteria {
 
 	// TODO review: support ranges?
 	private Double lengthKm;
+	private Integer simulatorId;
 
 }

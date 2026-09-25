@@ -31,7 +31,8 @@ public interface TrackApi {
 			  "id": 4,
 			  "country": "Italy",
 			  "name": "Monza",
-			  "lengthKm": 5.793
+			  "lengthKm": 5.793,
+			  "simulatorName": "Assetto Corsa"
 			}"""))
 	)
 	@ApiResponse(responseCode = "404", description = "No track exists with the supplied ID.")
@@ -47,7 +48,8 @@ public interface TrackApi {
 		    "id": 4,
 		    "country": "Italy",
 		    "name": "Monza",
-		    "lengthKm": 5.793
+		    "lengthKm": 5.793,
+		    "simulatorName": "Assetto Corsa"
 		  }
 		]"""))
 	)
@@ -61,7 +63,8 @@ public interface TrackApi {
 		{
 		  "name": "Monza",
 		  "country": "Italy",
-		  "lengthKm": 5.793
+		  "lengthKm": 5.793,
+		  "simulatorId": 1
 		}""")))
 	)
 	@ApiResponse(responseCode = "201", description = "Track created. The Location header identifies the new track.")

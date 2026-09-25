@@ -26,7 +26,7 @@ public interface ChallengeApi {
 
 	@Operation(
 		summary = "Search challenges",
-		description = "Returns challenges matching the optional end-date, leaderboard, track, and car filters. Searches by text fields are case- and diacritic-insensitive."
+		description = "Returns challenges matching the optional simulator, end-date, leaderboard, track, and car filters. The simulatorId identifies the simulator associated with both the selected car and track. Searches by text fields are case- and diacritic-insensitive."
 	)
 	@ApiResponse(
 		responseCode = "200",
@@ -38,6 +38,7 @@ public interface ChallengeApi {
 			  {
 			    "challengeId": 12,
 			    "challengeEndDate": "2026-10-31",
+			    "simulatorName": "Assetto Corsa",
 			    "bestParticipantName": "racer1",
 			    "bestLapTime": "01:42.537",
 			    "trackCountry": "Italy",
@@ -60,6 +61,7 @@ public interface ChallengeApi {
 				{
 				  "challengeId": 12,
 				  "challengeEndDate": "2028-10-31",
+				  "simulatorName": "Assetto Corsa",
 				  "bestParticipantName": "racer1",
 				  "bestLapTime": "01:42.537",
 				  "trackId": 4,
@@ -87,7 +89,7 @@ public interface ChallengeApi {
 	@Operation(
 		security = @SecurityRequirement(name = "basicAuth"),
 		summary = "Create a challenge",
-		description = "Creates an active challenge for the selected car and track. Only one active challenge may exist for the same car-and-track combination. Requires the `ADMIN` role.",
+		description = "Creates an active challenge for the selected car and track. Both must belong to the same simulator, which the challenge derives from them. Only one active challenge may exist for the same car-and-track combination. Requires the `ADMIN` role.",
 		requestBody = @RequestBody(
 			description = "The car, track, and inclusive challenge end date.",
 			content = @Content(examples = @ExampleObject(value = """

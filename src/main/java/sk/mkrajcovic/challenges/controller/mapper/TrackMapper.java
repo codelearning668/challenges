@@ -20,7 +20,8 @@ public final class TrackMapper {
 			track.getId(),
 			track.getCountry(),
 			track.getName(),
-			track.getLengthKm()
+			track.getLengthKm(),
+			track.getSimulator().getType().getDisplayName()
 		);
 	}
 
@@ -31,7 +32,8 @@ public final class TrackMapper {
 			track.getId(),
 			track.getCountry(),
 			track.getName(),
-			track.getLengthKm()
+			track.getLengthKm(),
+			track.getSimulatorType().getDisplayName()
 		);
 	}
 

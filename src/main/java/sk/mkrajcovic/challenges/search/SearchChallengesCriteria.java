@@ -16,4 +16,5 @@ public class SearchChallengesCriteria {
 	private String trackCountry;
 	private String carBrand;
 	private String carName;
+	private Integer simulatorId;
 }

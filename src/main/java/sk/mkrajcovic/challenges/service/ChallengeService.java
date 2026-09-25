@@ -4,6 +4,7 @@ import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_DELETE_
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_QUIT_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CAR_AND_TRACK_MUST_USE_SAME_SIMULATOR;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CHALLENGE_ALREADY_ACTIVE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_ALREADY_REGISTERED_FOR_CHALLENGE;
@@ -24,6 +25,8 @@ import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
 import sk.mkrajcovic.challenges.search.SearchChallengesCriteria;
@@ -76,13 +79,14 @@ public class ChallengeService {
 	}
 
 	/**
-	 * Creates a new challenge for the specified track and car.<br>
+	 * Creates a new challenge for the specified track and car.
+	 * <p>
 	 * A new challenge can only be created if there is no currently active challenge
 	 * for the same track and car.
-	 * 
+	 *
 	 * @return the ID of the newly created challenge
-	 * @throws BusinessViolation if an active challenge already exists for the
-	 *                           specified track and car
+	 * @throws BusinessViolation if the selected car and track use different simulators
+	 * @throws Conflict if an active challenge already exists for the selected track and car
 	 */
 	@Transactional
 	public Integer createChallenge(Integer trackId, Integer carId, LocalDate endDate) {
@@ -90,6 +94,8 @@ public class ChallengeService {
 
 		var track = trackService.getTrack(trackId);
 		var car = carService.getCar(carId);
+
+		verifyTrackAndCarUseSameSimulator(track, car);
 
 		var challenge = new Challenge();
 		challenge.setTrack(track);
@@ -102,6 +108,12 @@ public class ChallengeService {
 	private void verifyChallengeNotActive(Integer trackId, Integer carId) {
 		if (repository.existsActiveChallengeForTrackAndCar(trackId, carId)) {
 			throw new Conflict(CHALLENGE_ALREADY_ACTIVE);
+		}
+	}
+
+	private void verifyTrackAndCarUseSameSimulator(Track track, Car car) {
+		if (!track.getSimulator().getId().equals(car.getSimulator().getId())) {
+			throw new BusinessViolation(CAR_AND_TRACK_MUST_USE_SAME_SIMULATOR);
 		}
 	}
 

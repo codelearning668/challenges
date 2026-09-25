@@ -18,9 +18,11 @@ import sk.mkrajcovic.challenges.util.Text;
 public class TrackService {
 
 	private final TrackRepository repository;
+	private final SimulatorService simulatorService;
 
 	@Transactional
-	public Integer createTrack(Track track) {
+	public Integer createTrack(Track track, Integer simulatorId) {
+		track.setSimulator(simulatorService.getSimulator(simulatorId));
 		return repository.save(track).getId();
 	}
 

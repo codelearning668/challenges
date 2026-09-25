@@ -25,6 +25,7 @@ public class ChallengeDetailResponse {
 
 	private Integer challengeId;
 	private LocalDate challengeEndDate;
+	private String simulatorName;
 	private String bestParticipantName;
 
 	@Schema(

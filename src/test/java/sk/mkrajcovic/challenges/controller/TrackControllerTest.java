@@ -53,6 +53,8 @@ class TrackControllerTest {
     private static final String VALID_COUNTRY = "Slovakia";
     private static final String VALID_NAME = "Slovakia Ring";
     private static final BigDecimal VALID_LENGTH_KM = new BigDecimal("5.922");
+    private static final int ASSETTO_CORSA_SIMULATOR_ID = 1;
+	private static final int WRC_GENERATIONS_SIMULATOR_ID = 3;
 
     private static final String SEARCH_COUNTRY = "Slovakia";
     private static final String SEARCH_NAME = "Slovakia Ring Grand Prix";
@@ -254,7 +256,8 @@ class TrackControllerTest {
                     .contentType(ContentType.JSON)
                     .body("id", equalTo(id))
                     .body("name", equalTo(VALID_NAME))
-                    .body("country", equalTo(VALID_COUNTRY));
+                    .body("country", equalTo(VALID_COUNTRY))
+                    .body("simulatorName", equalTo("Assetto Corsa"));
 
                 // updated @Entity with the proper @Column definition for precision
                 // H2 default precision was to 2 decimal places when the table was
@@ -295,6 +298,19 @@ class TrackControllerTest {
                         .statusCode(OK)
                         .contentType(ContentType.JSON);
             }
+
+			@Test
+			void canSearchBySimulatorId() {
+				int trackId = createTrackAndReturnIdForSimulator(WRC_GENERATIONS_SIMULATOR_ID);
+
+				given()
+					.param("simulatorId", WRC_GENERATIONS_SIMULATOR_ID)
+				.when()
+					.get(TRACK_URI)
+				.then()
+					.statusCode(OK)
+					.body("find { it.id == " + trackId + " }", notNullValue());
+			}
 
             @ParameterizedTest
             @ValueSource(strings = {
@@ -433,7 +449,8 @@ class TrackControllerTest {
             .body(new CreateTrackRequest(
                 name,
                 country,
-                lengthKm
+                lengthKm,
+                ASSETTO_CORSA_SIMULATOR_ID
             ))
         .when()
             .post(TRACK_URI);
@@ -721,17 +738,39 @@ class TrackControllerTest {
         return new CreateTrackRequest(
             VALID_NAME,
             VALID_COUNTRY,
-            VALID_LENGTH_KM
+            VALID_LENGTH_KM,
+            ASSETTO_CORSA_SIMULATOR_ID
         );
     }
 
     private int createTrackAndReturnId() {
-        return createTrackAndReturnId(
-            VALID_NAME,
-            VALID_COUNTRY,
-            VALID_LENGTH_KM
-        );
-    }
+		return createTrackAndReturnIdForSimulator(ASSETTO_CORSA_SIMULATOR_ID);
+	}
+
+	private int createTrackAndReturnIdForSimulator(int simulatorId) {
+		String location = given()
+			.auth()
+				.preemptive()
+				.basic(ADMIN_USER, ADMIN_PASS)
+			.contentType(ContentType.JSON)
+			.accept(ContentType.JSON)
+			.body(new CreateTrackRequest(
+				VALID_NAME,
+				VALID_COUNTRY,
+				VALID_LENGTH_KM,
+				simulatorId
+			))
+		.when()
+			.post(TRACK_URI)
+		.then()
+			.statusCode(CREATED)
+			.extract()
+			.header("Location");
+
+		return Integer.parseInt(
+			location.substring(location.lastIndexOf('/') + 1)
+		);
+	}
 
     private int createTrackAndReturnId(
         String name,
