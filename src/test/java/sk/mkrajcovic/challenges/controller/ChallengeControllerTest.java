@@ -343,10 +343,48 @@ class ChallengeControllerTest {
 
 				getChallenge(challengeId).then().statusCode(OK)
 					.body("participants.find { it.participantName == '" + participant + "' }", nullValue());
-			}
+		}
 
-			@Test
-			void participantCanRegisterForAnotherChallengeAfterQuittingPreviousChallenge() {
+		@Test
+		void leaderQuittingChallengePromotesParticipantWithNextBestLapTime() {
+			String leader = newParticipant();
+			String nextBestParticipant = newParticipant();
+			int challengeId = createChallengeAndRegisterParticipant(leader);
+
+			registerForChallenge(challengeId, nextBestParticipant, PARTICIPANT_PASS)
+				.then()
+				.statusCode(OK);
+
+			updateLapTime(challengeId, leader, PARTICIPANT_PASS, leader, "1:23.123")
+				.then()
+				.statusCode(OK);
+
+			updateLapTime(challengeId, nextBestParticipant, PARTICIPANT_PASS, nextBestParticipant, "1:24.123")
+				.then()
+				.statusCode(OK);
+
+			getChallenge(challengeId)
+				.then()
+				.statusCode(OK)
+				.body("bestParticipantName", equalTo(leader))
+				.body("bestLapTime", equalTo("01:23.123"));
+
+			given()
+				.auth().preemptive().basic(leader, PARTICIPANT_PASS)
+			.when()
+				.delete(REGISTER_URI, challengeId)
+			.then()
+				.statusCode(NO_CONTENT);
+
+			getChallenge(challengeId)
+				.then()
+				.statusCode(OK)
+				.body("bestParticipantName", equalTo(nextBestParticipant))
+				.body("bestLapTime", equalTo("01:24.123"));
+		}
+
+		@Test
+		void participantCanRegisterForAnotherChallengeAfterQuittingPreviousChallenge() {
 				String participant = newParticipant();
 
 				int firstChallengeId = createChallengeAndRegisterParticipant(participant);
