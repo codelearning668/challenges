@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.context.CallContext;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
@@ -39,7 +38,6 @@ public class ChallengeService {
 	private final TrackService trackService;
 	private final CarService carService;
 	private final ParticipantService participantService;
-	private final SimulatorService simulatorService;
 
 	private CallContext callContext;
 
@@ -81,24 +79,22 @@ public class ChallengeService {
 	 * Creates a new challenge for the specified track and car.<br>
 	 * A new challenge can only be created if there is no currently active challenge
 	 * for the same track and car.
-	 *
+	 * 
 	 * @return the ID of the newly created challenge
 	 * @throws BusinessViolation if an active challenge already exists for the
 	 *                           specified track and car
 	 */
 	@Transactional
-	public Integer createChallenge(Integer trackId, Integer carId, LocalDate endDate, SimulatorType simulatorType) {
+	public Integer createChallenge(Integer trackId, Integer carId, LocalDate endDate) {
 		verifyChallengeNotActive(trackId, carId);
 
 		var track = trackService.getTrack(trackId);
 		var car = carService.getCar(carId);
-		var simulator = simulatorService.getSimulator(simulatorType);
 
 		var challenge = new Challenge();
 		challenge.setTrack(track);
 		challenge.setCar(car);
 		challenge.setEndDate(endDate);
-		challenge.setSimulator(simulator);
 
 		return repository.save(challenge).getId();
 	}

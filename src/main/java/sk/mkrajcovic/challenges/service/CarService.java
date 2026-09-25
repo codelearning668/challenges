@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
@@ -19,11 +18,9 @@ import sk.mkrajcovic.challenges.util.Text;
 public class CarService {
 
 	private final CarRepository repository;
-	private final SimulatorService simulatorService;
 
 	@Transactional
-	public Integer createCar(Car car, SimulatorType simulatorType) {
-		car.setSimulator(simulatorService.getSimulator(simulatorType));
+	public Integer createCar(Car car) {
 		return repository.save(car).getId();
 	}
 
