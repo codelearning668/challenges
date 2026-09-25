@@ -61,21 +61,39 @@ public class ParticipantService {
 	}
 
 	/**
-	 * Removes the participant's registration from the specified challenge.
+	 * Removes the participant's registration from the specified challenge and
+	 * recomputes its leader from the remaining participants.
 	 * <p>
 	 * The caller is responsible for verifying that leaving the challenge is
 	 * currently permitted.
 	 *
-	 * @param name the participant's name
+	 * @param participantName the participant's name
 	 * @param challenge the challenge from which the participant is removed
 	 * @throws NullPointerException if {@code name} or {@code challenge} is {@code null}
 	 */
 	@Transactional
-	public void unregisterParticipant(String name, Challenge challenge) {
-		requireNonNull(name, "cannot unregister participant without a name");
+	public void unregisterParticipant(String participantName, Challenge challenge) {
+		requireNonNull(participantName, "cannot unregister participant without a name");
 		requireNonNull(challenge, "cannot unregister from non-existent challenge");
 
-		repository.deleteByChallengeIdAndName(challenge.getId(), name);
+		repository.deleteByChallengeIdAndName(challenge.getId(), participantName);
+		/*
+		 * Removing the participant from the collection ensures that leader
+		 * re-computation does not select the participant who has just quit.
+		 */
+		synchronizeChallengeParticipantsForRemoval(challenge, participantName);
+
+		recomputeChallengeLeader(challenge);
+	}
+
+	/**
+	 * This updates only the inverse in-memory collection; it does not persist
+	 * removal of the participant relationship. The repository delete does that.
+	 */
+	private void synchronizeChallengeParticipantsForRemoval(Challenge challenge, String participantName) {
+		challenge.getParticipants()
+			.removeIf(participant -> participantName.equals(participant.getName())
+		);
 	}
 
 	/**
