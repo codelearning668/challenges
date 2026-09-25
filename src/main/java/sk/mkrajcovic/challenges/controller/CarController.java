@@ -50,7 +50,7 @@ class CarController implements CarApi {
 	@RolesAllowed(ADMIN)
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	public CreatedResponseEntity createCar(@Valid @RequestBody CreateCarRequest request) {
-		Integer carId = service.createCar(CarMapper.toCar(request));
+		Integer carId = service.createCar(CarMapper.toCar(request), request.simulator());
 		return CreatedResponseEntity.create("/cars/{carId}", carId);
 	}
 

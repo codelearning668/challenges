@@ -61,7 +61,8 @@ class ChallengeController implements ChallengeApi {
 		Integer challengeId = challengeService.createChallenge(
 				challenge.trackId(),
 				challenge.carId(),
-				challenge.endDate()
+				challenge.endDate(),
+				challenge.simulatorType()
 		);
 		return CreatedResponseEntity.create("/challenges/{challengeId}", challengeId);
 	}

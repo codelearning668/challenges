@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import sk.mkrajcovic.challenges.enums.SimulatorType;
 
 public record CreateChallengeRequest(
 
@@ -15,6 +16,9 @@ public record CreateChallengeRequest(
 	Integer carId,
 
 	@NotNull @FutureOrPresent
-	LocalDate endDate
+	LocalDate endDate,
+
+	@NotNull
+	SimulatorType simulatorType
 
 ) { }
