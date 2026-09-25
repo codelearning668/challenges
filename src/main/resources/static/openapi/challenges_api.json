@@ -18,6 +18,9 @@
     "name" : "Challenges",
     "description" : "Services for browsing and administering racing-simulator challenges, including participant registration and lap-time results."
   }, {
+    "name" : "Simulators",
+    "description" : "Supported racing simulators used to classify cars, tracks, and challenges."
+  }, {
     "name" : "Tracks",
     "description" : "Services for browsing and administering racing tracks available for challenges."
   }, {
@@ -41,6 +44,16 @@
           }
         } ],
         "responses" : {
+          "404" : {
+            "description" : "No track exists with the supplied ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackDetailResponse"
+                }
+              }
+            }
+          },
           "200" : {
             "description" : "Track details.",
             "content" : {
@@ -52,17 +65,8 @@
                   "id" : 4,
                   "country" : "Italy",
                   "name" : "Monza",
-                  "lengthKm" : 5.793
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "No track exists with the supplied ID.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TrackDetailResponse"
+                  "lengthKm" : 5.793,
+                  "simulatorName" : "Assetto Corsa"
                 }
               }
             }
@@ -101,180 +105,9 @@
         "responses" : {
           "404" : {
             "description" : "No track exists with the supplied ID."
-          }
-        },
-        "security" : [ {
-          "basicAuth" : [ ]
-        } ]
-      }
-    },
-    "/challenges/{challengeId}" : {
-      "get" : {
-        "tags" : [ "Challenges" ],
-        "summary" : "Retrieve challenge details",
-        "description" : "Returns the selected challenge, its car and track, the current leaderboard, and all registered participants.",
-        "operationId" : "getChallenge",
-        "parameters" : [ {
-          "name" : "challengeId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Challenge details.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
-                },
-                "example" : {
-                  "challengeId" : 12,
-                  "challengeEndDate" : "2028-10-31",
-                  "bestParticipantName" : "racer1",
-                  "bestLapTime" : "01:42.537",
-                  "trackId" : 4,
-                  "trackName" : "Monza",
-                  "trackCountry" : "Italy",
-                  "trackLengthKm" : 5.793,
-                  "carId" : 7,
-                  "carBrand" : "Ferrari",
-                  "carName" : "488 GT3",
-                  "carHorsePower" : 550,
-                  "carTorque" : 700,
-                  "participants" : [ {
-                    "participantId" : 31,
-                    "participantName" : "racer1",
-                    "participantBestLapTime" : "01:42.537"
-                  } ]
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "No challenge exists with the supplied ID.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put" : {
-        "tags" : [ "Challenges" ],
-        "summary" : "Change a challenge end date",
-        "description" : "Changes the inclusive end date of an active challenge. Closed challenges cannot be changed. Requires the `ADMIN` role.",
-        "operationId" : "updateChallengeEndDate",
-        "parameters" : [ {
-          "name" : "challengeId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "The new inclusive challenge end date.",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/UpdateChallengeEndDateRequest"
-              },
-              "example" : {
-                "endDate" : "2028-11-07"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "422" : {
-            "description" : "The challenge is closed or the submitted end date is invalid."
-          },
-          "404" : {
-            "description" : "No challenge exists with the supplied ID."
-          }
-        },
-        "security" : [ {
-          "basicAuth" : [ ]
-        } ]
-      },
-      "delete" : {
-        "tags" : [ "Challenges" ],
-        "summary" : "Delete a challenge",
-        "description" : "Deletes an active challenge. Closed challenges cannot be deleted. Requires the `ADMIN` role.",
-        "operationId" : "deleteChallenge",
-        "parameters" : [ {
-          "name" : "challengeId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "422" : {
-            "description" : "The challenge is closed."
-          },
-          "404" : {
-            "description" : "No challenge exists with the supplied ID."
           },
           "204" : {
-            "description" : "No Content"
-          }
-        },
-        "security" : [ {
-          "basicAuth" : [ ]
-        } ]
-      }
-    },
-    "/challenges/{challengeId}/participant" : {
-      "put" : {
-        "tags" : [ "Challenges" ],
-        "summary" : "Update a participant lap time",
-        "description" : "Records or removes a registered participant's best lap time. A participant may update only their own time while the challenge is active. An administrator may update any registered participant, including after the challenge closes. Requires the `PARTICIPANT` or `ADMIN` role.",
-        "operationId" : "updateLapTime",
-        "parameters" : [ {
-          "name" : "challengeId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "The registered participant and their new lap time. Set newLapTime to null to clear the recorded time.",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/UpdateLapTimeRequest"
-              },
-              "example" : {
-                "participantName" : "racer1",
-                "newLapTime" : "1:42.537"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "422" : {
-            "description" : "A non-administrator attempted to update a lap time after the challenge closed."
-          },
-          "404" : {
-            "description" : "The participant is not registered for the challenge."
-          },
-          "403" : {
-            "description" : "A non-administrator attempted to update another participant's lap time."
+            "description" : "Track updated."
           }
         },
         "security" : [ {
@@ -321,7 +154,8 @@
                   "name" : "488 GT3",
                   "horsePower" : 550,
                   "torque" : 700,
-                  "wheelDrive" : "REAR"
+                  "wheelDrive" : "REAR",
+                  "simulatorName" : "Assetto Corsa"
                 }
               }
             }
@@ -360,6 +194,9 @@
           "required" : true
         },
         "responses" : {
+          "204" : {
+            "description" : "Car updated."
+          },
           "404" : {
             "description" : "No car exists with the supplied ID."
           }
@@ -428,7 +265,8 @@
                   "id" : 4,
                   "country" : "Italy",
                   "name" : "Monza",
-                  "lengthKm" : 5.793
+                  "lengthKm" : 5.793,
+                  "simulatorName" : "Assetto Corsa"
                 } ]
               }
             }
@@ -449,7 +287,8 @@
               "example" : {
                 "name" : "Monza",
                 "country" : "Italy",
-                "lengthKm" : 5.793
+                "lengthKm" : 5.793,
+                "simulatorId" : 1
               }
             }
           },
@@ -476,7 +315,7 @@
       "get" : {
         "tags" : [ "Challenges" ],
         "summary" : "Search challenges",
-        "description" : "Returns challenges matching the optional end-date, leaderboard, track, and car filters. Searches by text fields are case- and diacritic-insensitive.",
+        "description" : "Returns challenges matching the optional simulator, end-date, leaderboard, track, and car filters. The simulatorId identifies the simulator associated with both the selected car and track. Searches by text fields are case- and diacritic-insensitive.",
         "operationId" : "searchChallenges",
         "parameters" : [ {
           "name" : "searchCriteria",
@@ -500,6 +339,7 @@
                 "example" : [ {
                   "challengeId" : 12,
                   "challengeEndDate" : "2026-10-31",
+                  "simulatorName" : "Assetto Corsa",
                   "bestParticipantName" : "racer1",
                   "bestLapTime" : "01:42.537",
                   "trackCountry" : "Italy",
@@ -515,7 +355,7 @@
       "post" : {
         "tags" : [ "Challenges" ],
         "summary" : "Create a challenge",
-        "description" : "Creates an active challenge for the selected car and track. Only one active challenge may exist for the same car-and-track combination. Requires the `ADMIN` role.",
+        "description" : "Creates an active challenge for the selected car and track. Both must belong to the same simulator, which the challenge derives from them. Only one active challenge may exist for the same car-and-track combination. Requires the `ADMIN` role.",
         "operationId" : "createChallenge",
         "requestBody" : {
           "description" : "The car, track, and inclusive challenge end date.",
@@ -596,6 +436,9 @@
           }
         } ],
         "responses" : {
+          "204" : {
+            "description" : "Participant registered for the challenge."
+          },
           "422" : {
             "description" : "The challenge is closed, or the participant is not eligible to join multiple active challenges."
           },
@@ -635,7 +478,7 @@
             "description" : "No challenge exists with the supplied ID."
           },
           "204" : {
-            "description" : "No Content"
+            "description" : "Participant removed from the challenge."
           }
         },
         "security" : [ {
@@ -674,7 +517,8 @@
                   "name" : "488 GT3",
                   "horsePower" : 550,
                   "torque" : 700,
-                  "wheelDrive" : "REAR"
+                  "wheelDrive" : "REAR",
+                  "simulatorName" : "Assetto Corsa"
                 } ]
               }
             }
@@ -697,7 +541,8 @@
                 "name" : "488 GT3",
                 "hp" : 550,
                 "torque" : 700,
-                "drive" : "REAR"
+                "drive" : "REAR",
+                "simulatorId" : 1
               }
             }
           },
@@ -713,6 +558,187 @@
                 }
               }
             }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}" : {
+      "get" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Retrieve challenge details",
+        "description" : "Returns the selected challenge, its car and track, the current leaderboard, and all registered participants.",
+        "operationId" : "getChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Challenge details.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
+                },
+                "example" : {
+                  "challengeId" : 12,
+                  "challengeEndDate" : "2028-10-31",
+                  "simulatorName" : "Assetto Corsa",
+                  "bestParticipantName" : "racer1",
+                  "bestLapTime" : "01:42.537",
+                  "trackId" : 4,
+                  "trackName" : "Monza",
+                  "trackCountry" : "Italy",
+                  "trackLengthKm" : 5.793,
+                  "carId" : 7,
+                  "carBrand" : "Ferrari",
+                  "carName" : "488 GT3",
+                  "carHorsePower" : 550,
+                  "carTorque" : 700,
+                  "participants" : [ {
+                    "participantId" : 31,
+                    "participantName" : "racer1",
+                    "participantBestLapTime" : "01:42.537"
+                  } ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Delete a challenge",
+        "description" : "Deletes an active challenge. Closed challenges cannot be deleted. Requires the `ADMIN` role.",
+        "operationId" : "deleteChallenge",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Challenge deleted."
+          },
+          "422" : {
+            "description" : "The challenge is closed."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Change a challenge end date",
+        "description" : "Changes the inclusive end date of an active challenge. Closed challenges cannot be changed. Requires the `ADMIN` role.",
+        "operationId" : "updateChallengeEndDate",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The new inclusive challenge end date.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateChallengeEndDateRequest"
+              },
+              "example" : {
+                "endDate" : "2028-11-07"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "422" : {
+            "description" : "The challenge is closed or the submitted end date is invalid."
+          },
+          "204" : {
+            "description" : "Challenge end date updated."
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}/participant" : {
+      "patch" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Update a participant lap time",
+        "description" : "Records or removes a registered participant's best lap time. A participant may update only their own time while the challenge is active. An administrator may update any registered participant, including after the challenge closes. Requires the `PARTICIPANT` or `ADMIN` role.",
+        "operationId" : "updateLapTime",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The registered participant and their new lap time. Set newLapTime to null to clear the recorded time.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateLapTimeRequest"
+              },
+              "example" : {
+                "participantName" : "racer1",
+                "newLapTime" : "1:42.537"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "422" : {
+            "description" : "A non-administrator attempted to update a lap time after the challenge closed."
+          },
+          "404" : {
+            "description" : "The participant is not registered for the challenge."
+          },
+          "204" : {
+            "description" : "Participant lap time updated."
+          },
+          "403" : {
+            "description" : "A non-administrator attempted to update another participant's lap time."
           }
         },
         "security" : [ {
@@ -746,6 +772,39 @@
           "basicAuth" : [ ]
         } ]
       }
+    },
+    "/simulators" : {
+      "get" : {
+        "tags" : [ "Simulators" ],
+        "summary" : "List simulators",
+        "description" : "Returns the supported simulators. Use the returned ID as simulatorId when creating a car or track.",
+        "operationId" : "getSimulators",
+        "responses" : {
+          "200" : {
+            "description" : "Supported simulators.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SimulatorDetailResponse"
+                  }
+                },
+                "example" : [ {
+                  "id" : 1,
+                  "name" : "Assetto Corsa"
+                }, {
+                  "id" : 2,
+                  "name" : "Assetto Corsa Competizione"
+                }, {
+                  "id" : 3,
+                  "name" : "WRC Generations"
+                } ]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -766,34 +825,6 @@
           },
           "lengthKm" : {
             "type" : "number"
-          }
-        }
-      },
-      "UpdateChallengeEndDateRequest" : {
-        "required" : [ "endDate" ],
-        "type" : "object",
-        "properties" : {
-          "endDate" : {
-            "type" : "string",
-            "format" : "date"
-          }
-        }
-      },
-      "UpdateLapTimeRequest" : {
-        "required" : [ "participantName" ],
-        "type" : "object",
-        "properties" : {
-          "participantName" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "type" : "string"
-          },
-          "newLapTime" : {
-            "pattern" : "^\\d+:\\d{2}\\.\\d{1,3}$",
-            "type" : "string",
-            "description" : "Lap time in m:ss.S, m:ss.SS, or m:ss.SSS format. Null clears the recorded lap time.",
-            "nullable" : true,
-            "example" : "1:20.1"
           }
         }
       },
@@ -842,7 +873,7 @@
         }
       },
       "CreateTrackRequest" : {
-        "required" : [ "name" ],
+        "required" : [ "name", "simulatorId" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -857,6 +888,10 @@
           },
           "lengthKm" : {
             "type" : "number"
+          },
+          "simulatorId" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -879,7 +914,7 @@
         }
       },
       "CreateCarRequest" : {
-        "required" : [ "brand", "name" ],
+        "required" : [ "brand", "name", "simulatorId" ],
         "type" : "object",
         "properties" : {
           "brand" : {
@@ -903,6 +938,38 @@
           "drive" : {
             "type" : "string",
             "enum" : [ "FRONT", "REAR", "ALL" ]
+          },
+          "simulatorId" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "UpdateChallengeEndDateRequest" : {
+        "required" : [ "endDate" ],
+        "type" : "object",
+        "properties" : {
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "UpdateLapTimeRequest" : {
+        "required" : [ "participantName" ],
+        "type" : "object",
+        "properties" : {
+          "participantName" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "newLapTime" : {
+            "pattern" : "^\\d+:\\d{2}\\.\\d{1,3}$",
+            "type" : "string",
+            "description" : "Lap time in m:ss.S, m:ss.SS, or m:ss.SSS format. Null clears the recorded lap time.",
+            "nullable" : true,
+            "example" : "1:20.1"
           }
         }
       },
@@ -932,6 +999,10 @@
           "lengthKm" : {
             "type" : "number",
             "format" : "double"
+          },
+          "simulatorId" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -950,6 +1021,21 @@
           },
           "lengthKm" : {
             "type" : "number"
+          },
+          "simulatorName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SimulatorDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "name" : {
+            "type" : "string"
           }
         }
       },
@@ -974,6 +1060,10 @@
           },
           "carName" : {
             "type" : "string"
+          },
+          "simulatorId" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -987,6 +1077,9 @@
           "challengeEndDate" : {
             "type" : "string",
             "format" : "date"
+          },
+          "simulatorName" : {
+            "type" : "string"
           },
           "bestParticipantName" : {
             "type" : "string"
@@ -1022,6 +1115,9 @@
           "challengeEndDate" : {
             "type" : "string",
             "format" : "date"
+          },
+          "simulatorName" : {
+            "type" : "string"
           },
           "bestParticipantName" : {
             "type" : "string"
@@ -1111,6 +1207,10 @@
           "wheelDrive" : {
             "type" : "string",
             "enum" : [ "FRONT", "REAR", "ALL" ]
+          },
+          "simulatorId" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -1138,6 +1238,9 @@
           "wheelDrive" : {
             "type" : "string",
             "enum" : [ "FRONT", "REAR", "ALL" ]
+          },
+          "simulatorName" : {
+            "type" : "string"
           }
         }
       }
