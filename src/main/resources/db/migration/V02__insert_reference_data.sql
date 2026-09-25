@@ -7,8 +7,8 @@ INSERT INTO simulator (
     name,
     created_at
 ) VALUES
-    (1, 'ASSETO_CORSA', now()),
-    (1, 'ASSETO_CORSA_COMPETIZIONE', now()),
+    (1, 'ASSETTO_CORSA', now()),
+    (1, 'ASSETTO_CORSA_COMPETIZIONE', now()),
     (1, 'WRC_GENERATIONS', now());
 
 -- all assetto corsa ultimate edition tracks (will be potentially differently structured when the simulator dependency is implemented)
