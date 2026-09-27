@@ -15,6 +15,14 @@ import sk.mkrajcovic.challenges.model.User;
 @Service
 public class SystemService {
 
+	/**
+	 * Returns information about the currently authenticated user.
+	 * <p>
+	 * The returned user contains the username and the authorities granted to the
+	 * current authentication.
+	 *
+	 * @return the current user's information
+	 */
 	public User getUserInfo() {
 		var authentication = SecurityContextHolder.getContext().getAuthentication();
 

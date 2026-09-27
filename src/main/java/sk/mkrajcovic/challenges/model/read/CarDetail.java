@@ -1,7 +1,7 @@
 package sk.mkrajcovic.challenges.model.read;
 
+import sk.mkrajcovic.challenges.model.SimulatorType;
 import sk.mkrajcovic.challenges.model.WheelDrive;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 
 public interface CarDetail {
 

@@ -22,6 +22,16 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
+	/**
+	 * Registers a new user with the specified username and password.
+	 * <p>
+	 * The password is encoded before it is persisted.<br>
+	 * The new user is enabled and is assigned to PARTICIPANT role.
+	 *
+	 * @param username name for the new user
+	 * @param rawPassword unencoded password for the new user
+	 * @throws Conflict if the specified username is already registered
+	 */
 	@Transactional
 	public void registerNewUser(String username, String rawPassword) {
 		verifyUsernameIsAvailable(username);

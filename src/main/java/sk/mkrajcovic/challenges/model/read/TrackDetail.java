@@ -2,7 +2,7 @@ package sk.mkrajcovic.challenges.model.read;
 
 import java.math.BigDecimal;
 
-import sk.mkrajcovic.challenges.enums.SimulatorType;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 
 public interface TrackDetail {
 

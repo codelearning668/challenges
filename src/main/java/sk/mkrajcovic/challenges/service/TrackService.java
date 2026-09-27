@@ -20,16 +20,39 @@ public class TrackService {
 	private final TrackRepository repository;
 	private final SimulatorService simulatorService;
 
+	/**
+	 * Creates a new track and associates it with the specified simulator.
+	 * 
+	 * @param track track to create
+	 * @param simulatorId identifier of the simulator associated with the track
+	 * @return identifier of the newly created track
+	 */
 	@Transactional
 	public Integer createTrack(Track track, Integer simulatorId) {
 		track.setSimulator(simulatorService.getSimulator(simulatorId));
 		return repository.save(track).getId();
 	}
 
+	/**
+	 * Returns the track by the specified identifier.
+	 *
+	 * @param trackId identifier of the track to retrieve
+	 * @return the track with the specified identifier
+	 * @throws ResourceNotFound if no track with the specified identifier exists
+	 */
 	public Track getTrack(Integer trackId) {
 		return EntityUtils.getExistingEntityById(repository, trackId);
 	}
 
+	/**
+	 * Searches for tracks matching the specified search criteria.
+	 * <p>
+	 * String-based search criteria are matched case-insensitively and
+	 * diacritic-insensitively.
+	 *
+	 * @param searchCriteria criteria defining the tracks to search for
+	 * @return tracks matching the specified search criteria
+	 */
 	public List<TrackDetail> searchTracks(SearchTracksCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
 		return repository.findTracks(searchCriteria);
@@ -44,6 +67,14 @@ public class TrackService {
 		criteria.setName(Text.normalizeForSearch(criteria.getName()));
 	}
 
+	/**
+	 * Updates the editable properties of an existing track.<br>
+	 * To get the up-to-date representation call {@link #getTrack(Integer)}
+	 *
+	 * @param trackId identifier of the track to update
+	 * @param trackToSave track containing the values to update
+	 * @throws ResourceNotFound if no track with the specified identifier exists
+	 */
 	@Transactional
 	public void updateTrack(Integer trackId, Track trackToSave){
 		var track = getTrack(trackId);

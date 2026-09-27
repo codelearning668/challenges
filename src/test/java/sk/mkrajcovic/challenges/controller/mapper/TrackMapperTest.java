@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.controller.dto.CreateTrackRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateTrackRequest;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.model.Simulator;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;

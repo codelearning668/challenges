@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.model.Simulator;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class SimulatorMapperTest {

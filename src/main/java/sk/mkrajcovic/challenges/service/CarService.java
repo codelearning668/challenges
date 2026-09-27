@@ -20,16 +20,39 @@ public class CarService {
 	private final CarRepository repository;
 	private final SimulatorService simulatorService;
 
+	/**
+	 * Creates a new car and associates it with the specified simulator.
+	 *
+	 * @param car car to create
+	 * @param simulatorId identifier of the simulator associated with the car
+	 * @return identifier of the newly created car
+	 */
 	@Transactional
 	public Integer createCar(Car car, Integer simulatorId) {
 		car.setSimulator(simulatorService.getSimulator(simulatorId));
 		return repository.save(car).getId();
 	}
 
+	/**
+	 * Returns the car by the specified identifier.
+	 *
+	 * @param carId identifier of the car to retrieve
+	 * @return the car with the specified identifier
+	 * @throws ResourceNotFound if no car with the specified identifier exists
+	 */
 	public Car getCar(Integer carId) {
 		return EntityUtils.getExistingEntityById(repository, carId);
 	}
 
+	/**
+	 * Searches for cars matching the specified search criteria.
+	 * <p>
+	 * String-based search criteria are matched case-insensitively and
+	 * diacritic-insensitively.
+	 *
+	 * @param searchCriteria criteria defining the cars to search for
+	 * @return cars matching the specified search criteria
+	 */
 	public List<CarDetail> searchCars(SearchCarsCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
 		return repository.findCars(searchCriteria);
@@ -44,6 +67,14 @@ public class CarService {
 		criteria.setName(Text.normalizeForSearch(criteria.getName()));
 	}
 
+	/**
+	 * Updates the editable properties of an existing car.<br>
+	 * To get the up-to-date representation call {@link #getCar(Integer)}
+	 *
+	 * @param carId identifier of the car to update
+	 * @param carToSave car containing the values to update
+	 * @throws ResourceNotFound if no car with the specified identifier exists
+	 */
 	@Transactional
 	public void updateCar(Integer carId, Car carToSave){
 		var car = getCar(carId);
