@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeSummaryResponse;
 import sk.mkrajcovic.challenges.controller.dto.ParticipantDetailResponse;
+import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
+import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
+import sk.mkrajcovic.challenges.util.Value;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ChallengeMapper {
@@ -24,15 +27,13 @@ public final class ChallengeMapper {
 		challengeDetail.setBestParticipantName(challenge.getBestParticipantName());
 		challengeDetail.setBestLapTime(challenge.getBestLapTime());
 
-		// TODO: handle NPEs here or ensure there are none
-
-		var track = challenge.getTrack();
+		var track = Value.firstNonNull(challenge.getTrack(), new Track());
 		challengeDetail.setTrackId(track.getId());
 		challengeDetail.setTrackCountry(track.getCountry());
 		challengeDetail.setTrackName(track.getName());
 		challengeDetail.setTrackLengthKm(track.getLengthKm());
 
-		var car = challenge.getCar();
+		var car = Value.firstNonNull(challenge.getCar(), new Car());
 		challengeDetail.setCarId(car.getId());
 		challengeDetail.setCarBrand(car.getBrand());
 		challengeDetail.setCarName(car.getName());
