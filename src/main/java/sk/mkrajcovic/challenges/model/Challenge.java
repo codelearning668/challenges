@@ -24,8 +24,6 @@ import sk.mkrajcovic.challenges.util.Text;
 @Getter @Setter
 public class Challenge extends BaseEntity {
 
-	// TODO: consider adding challenge title as every such event in real life has one
-
 	@OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE)
 	private Set<Participant> participants;
 
