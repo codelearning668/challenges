@@ -17,8 +17,8 @@ import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Participant;
 import sk.mkrajcovic.challenges.model.Simulator;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 import sk.mkrajcovic.challenges.model.Track;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 

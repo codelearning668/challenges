@@ -8,8 +8,6 @@ public class SearchTracksCriteria {
 
 	private String country;
 	private String name;
-
-	// TODO review: support ranges?
 	private Double lengthKm;
 	private Integer simulatorId;
 

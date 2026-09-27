@@ -180,8 +180,6 @@ public class ParticipantService {
 			.orElseThrow(() -> new ResourceNotFound(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE));
 	}
 
-	// TODO: code duplication, move this method from this and challengeService
-	// in different class like ChallengeValidator..
 	private void verifyChallengeIsActive(Challenge challenge) {
 		var today = LocalDate.now(ZoneOffset.UTC);
 		if (challenge.getEndDate().isBefore(today)) {

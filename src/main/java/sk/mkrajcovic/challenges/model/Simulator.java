@@ -6,7 +6,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 
 @Entity
 @Getter @Setter

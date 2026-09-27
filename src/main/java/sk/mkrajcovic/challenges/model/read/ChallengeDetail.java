@@ -3,7 +3,7 @@ package sk.mkrajcovic.challenges.model.read;
 import java.time.Duration;
 import java.time.LocalDate;
 
-import sk.mkrajcovic.challenges.enums.SimulatorType;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 
 public interface ChallengeDetail {
 

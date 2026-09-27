@@ -10,9 +10,9 @@ import sk.mkrajcovic.challenges.controller.dto.CreateCarRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateCarRequest;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Simulator;
+import sk.mkrajcovic.challenges.model.SimulatorType;
 import sk.mkrajcovic.challenges.model.WheelDrive;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
-import sk.mkrajcovic.challenges.enums.SimulatorType;
 import sk.mkrajcovic.challenges.test.util.EntityTestUtils;
 
 class CarMapperTest {

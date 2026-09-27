@@ -10,7 +10,6 @@ public class SearchCarsCriteria {
 	private String brand;
 	private String name;
 
-	// TODO review: accept ranges for these properties?
 	private Integer horsePower;
 	private Integer torque;
 
