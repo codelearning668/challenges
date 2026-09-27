@@ -1,11 +1,19 @@
 import { FilterPanel, filterInputCls, filterLabelCls } from '@/components/shared/FilterPanel'
+import { useSimulators } from '@/hooks/useSimulators'
 
 export interface TrackFiltersState {
     country: string
     lengthKm: string
+    simulatorId: string
+    fromDlc: '' | 'true' | 'false'
 }
 
-export const EMPTY_TRACK_FILTERS: TrackFiltersState = { country: '', lengthKm: '' }
+export const EMPTY_TRACK_FILTERS: TrackFiltersState = {
+    country: '',
+    lengthKm: '',
+    simulatorId: '',
+    fromDlc: '',
+}
 
 interface TrackFiltersProps {
     isOpen: boolean
@@ -22,9 +30,27 @@ export function TrackFilters({
                                  onClear,
                                  activeCount,
                              }: TrackFiltersProps) {
+    const { data: simulatorsRes } = useSimulators()
+    const simulatorOptions = simulatorsRes?.data ?? []
+
     return (
         <FilterPanel isOpen={isOpen} activeFilterCount={activeCount} onClear={onClear}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label className={filterLabelCls}>Simulator</label>
+                    <select
+                        value={filters.simulatorId}
+                        onChange={(e) => onChange({ ...filters, simulatorId: e.target.value })}
+                        className={filterInputCls}
+                    >
+                        <option value="">Any</option>
+                        {simulatorOptions.map((s) => (
+                            <option key={s.id} value={s.id}>
+                                {s.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <div>
                     <label className={filterLabelCls}>Country</label>
                     <input
@@ -46,6 +72,23 @@ export function TrackFilters({
                         onChange={(e) => onChange({ ...filters, lengthKm: e.target.value })}
                         className={filterInputCls}
                     />
+                </div>
+                <div>
+                    <label className={filterLabelCls}>Availability</label>
+                    <select
+                        value={filters.fromDlc}
+                        onChange={(e) =>
+                            onChange({
+                                ...filters,
+                                fromDlc: e.target.value as TrackFiltersState['fromDlc'],
+                            })
+                        }
+                        className={filterInputCls}
+                    >
+                        <option value="">Any</option>
+                        <option value="true">DLC only</option>
+                        <option value="false">Base game only</option>
+                    </select>
                 </div>
             </div>
         </FilterPanel>

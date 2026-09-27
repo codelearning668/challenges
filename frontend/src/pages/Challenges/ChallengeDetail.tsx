@@ -9,12 +9,7 @@ import { useConfirm } from '@/components/shared/ConfirmProvider'
 import { ChallengeInfoCard } from '@/components/challenges/ChallengeInfoCard'
 import { ChallengeActions } from '@/components/challenges/ChallengeActions'
 import { ParticipantsTable } from '@/components/challenges/ParticipantsTable'
-import {
-    durationToSeconds,
-    formatLapTime,
-    isChallengeActive,
-    parseLapTime,
-} from '@/utils/format'
+import { formatLapTime, isChallengeActive, parseLapTime } from '@/utils/format'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { toast } from '@/stores/useToastStore'
@@ -29,11 +24,9 @@ export function ChallengeDetail() {
     const { isAdmin, isParticipant } = usePermissions()
     const user = useAuthStore((s) => s.user)
 
-    // End-date edit state
     const [editEndDate, setEditEndDate] = useState(false)
     const [draftEndDate, setDraftEndDate] = useState('')
 
-    // Admin inline lap-time edit state
     const [editingParticipant, setEditingParticipant] = useState<string | null>(null)
     const [draftLapTime, setDraftLapTime] = useState('')
 
@@ -44,41 +37,45 @@ export function ChallengeDetail() {
         refetchOnMount: 'always',
     })
 
-    const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey: ['challenge', challengeId] })
-        queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    const invalidate = async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['challenge', challengeId] }),
+            queryClient.invalidateQueries({ queryKey: ['challenges'] }),
+        ])
     }
 
     const registerMutation = useMutation({
         mutationFn: () => challengeApi.register(challengeId),
-        onSuccess: () => {
-            invalidate()
+        onSuccess: async () => {
+            await invalidate()
             toast.success('Registered for this challenge')
         },
     })
 
     const quitMutation = useMutation({
         mutationFn: () => challengeApi.quit(challengeId),
-        onSuccess: () => {
-            invalidate()
+        onSuccess: async () => {
+            await invalidate()
             toast.success('You quit this challenge')
         },
     })
 
     const deleteMutation = useMutation({
         mutationFn: () => challengeApi.delete(challengeId),
-        onSuccess: () => {
-            invalidate()
+        onSuccess: async () => {
+            await queryClient.cancelQueries({ queryKey: ['challenge', challengeId] })
+            queryClient.removeQueries({ queryKey: ['challenge', challengeId] })
+            await queryClient.invalidateQueries({ queryKey: ['challenges'] })
             toast.success('Challenge deleted')
-            navigate('/challenges')
+            navigate('/challenges', { replace: true })
         },
     })
 
     const updateEndDateMutation = useMutation({
         mutationFn: (endDate: string) =>
             challengeApi.updateEndDate(challengeId, { endDate }),
-        onSuccess: () => {
-            invalidate()
+        onSuccess: async () => {
+            await invalidate()
             toast.success('End date updated')
             setEditEndDate(false)
         },
@@ -90,27 +87,29 @@ export function ChallengeDetail() {
                 participantName: vars.participantName,
                 newLapTime: vars.newLapTime,
             }),
-        onSuccess: () => {
-            invalidate()
+        onSuccess: async () => {
+            await invalidate()
             toast.success('Lap time updated')
             cancelEditLapTime()
         },
     })
 
-    // Sorted participants — best lap first, no-time entries last, tie-broken by name.
     const sortedParticipants = useMemo<ParticipantDetailResponse[]>(() => {
         const list = data?.data?.participants ?? []
+        const secondsOf = (v: string | null | undefined): number | null => {
+            if (!v) return null
+            const n = parseLapTime(v)
+            return Number.isFinite(n) ? n : null
+        }
         return [...list].sort((a, b) => {
-            const sa = durationToSeconds(a.participantBestLapTime)
-            const sb = durationToSeconds(b.participantBestLapTime)
+            const sa = secondsOf(a.participantBestLapTime)
+            const sb = secondsOf(b.participantBestLapTime)
             if (sa == null && sb == null) return a.participantName.localeCompare(b.participantName)
             if (sa == null) return 1
             if (sb == null) return -1
             return sa - sb
         })
     }, [data])
-
-    // ---------- end-date handlers ----------
 
     const beginEditEndDate = () => {
         if (!data?.data) return
@@ -123,10 +122,14 @@ export function ChallengeDetail() {
             toast.warning('Pick a date first')
             return
         }
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        if (new Date(`${draftEndDate}T00:00:00`).getTime() < today.getTime()) {
+            toast.error('End date cannot be in the past')
+            return
+        }
         updateEndDateMutation.mutate(draftEndDate)
     }
-
-    // ---------- challenge actions ----------
 
     const handleDelete = async () => {
         const ok = await confirm({
@@ -149,11 +152,9 @@ export function ChallengeDetail() {
         if (ok) quitMutation.mutate()
     }
 
-    // ---------- lap-time inline edit ----------
-
     const beginEditLapTime = (participant: ParticipantDetailResponse) => {
         setEditingParticipant(participant.participantName)
-        setDraftLapTime('') // admin starts fresh; existing value is shown in the row
+        setDraftLapTime('')
     }
 
     const cancelEditLapTime = () => {
@@ -189,8 +190,6 @@ export function ChallengeDetail() {
         updateLapTimeMutation.mutate({ participantName, newLapTime: null })
     }
 
-    // ---------- render ----------
-
     if (isLoading) return <div className="text-center py-12">Loading...</div>
     if (isError || !data?.data) {
         return (
@@ -209,11 +208,16 @@ export function ChallengeDetail() {
         (p) => p.participantName === user?.username,
     )
 
-    const canRegister = active && isParticipant && !alreadyRegistered
-    const canQuit = active && isParticipant && alreadyRegistered
-    const canEditOwnLapTime =
-        isAdmin || (isParticipant && active && alreadyRegistered)
-    const showAnyAction = canRegister || canQuit || canEditOwnLapTime || isAdmin
+    // Admin only sees the admin-side actions. Participant-only actions are
+    // hidden even when the admin also holds the PARTICIPANT role, so the UI
+    // stays unambiguous: admin edits lap times via the pencil in the table.
+    const canRegister = !isAdmin && active && isParticipant && !alreadyRegistered
+    const canQuit = !isAdmin && active && isParticipant && alreadyRegistered
+    const canEditLapTime = !isAdmin && isParticipant && active && alreadyRegistered
+
+    const showLeftActions = isAdmin
+    const showRightActions = canRegister || canQuit || canEditLapTime
+    const showAnyAction = showLeftActions || showRightActions
 
     return (
         <div>
@@ -257,7 +261,7 @@ export function ChallengeDetail() {
                         editEndDate={editEndDate}
                         canRegister={canRegister}
                         canQuit={canQuit}
-                        canEditOwnLapTime={canEditOwnLapTime}
+                        canEditLapTime={canEditLapTime}
                         onRegister={() => registerMutation.mutate()}
                         onQuit={handleQuit}
                         onUpdateLapTime={() => navigate(`/challenges/${challengeId}/lap-time`)}

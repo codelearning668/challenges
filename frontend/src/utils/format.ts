@@ -1,11 +1,23 @@
 import { format } from 'date-fns'
-import type { DurationJson } from '@/types/challenge'
+
+// ---------- dates ----------
 
 export const formatDate = (date: Date | string): string =>
     format(new Date(date), 'MMM dd, yyyy')
 
 export const formatDateTime = (date: Date | string): string =>
     format(new Date(date), 'MMM dd, yyyy HH:mm')
+
+/** Returns true when the challenge's end date is today or later. */
+export const isChallengeActive = (endDate: string | null | undefined): boolean => {
+  if (!endDate) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const end = new Date(`${endDate}T00:00:00`)
+  return end >= today
+}
+
+// ---------- numbers & text ----------
 
 export const formatNumber = (num: number): string => num.toLocaleString()
 
@@ -14,14 +26,27 @@ export const truncate = (str: string, maxLength: number): string => {
   return str.slice(0, maxLength - 3) + '...'
 }
 
-// ---------- lap-time parsing & formatting ----------
+export const formatDuration = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  if (hours > 0) return `${hours}h ${mins}m`
+  return `${mins}m`
+}
+
+// ---------- lap times ----------
+
+/**
+ * The backend already returns lap times in canonical "mm:ss.SSS" form,
+ * so this is just a null-guard for display.
+ */
+export const formatDurationJson = (value: string | null | undefined): string =>
+    value ?? '—'
 
 /**
  * Parse "m:ss.S", "m:ss.SS", "m:ss.SSS", or plain seconds into total seconds.
- * Returns NaN when unparseable.
+ * Returns NaN on unparseable input.
  *
  *   "1:22.555" → 82.555
- *   "0:45.2"   → 45.2
  *   "82.555"   → 82.555
  *   "1:22"     → 82
  *   "1:22,555" → 82.555   (comma tolerated)
@@ -44,7 +69,7 @@ export const parseLapTime = (input: string): number => {
   return mins * 60 + secs
 }
 
-/** Format total seconds as "mm:ss.SSS" (canonical output form). */
+/** Format total seconds as "mm:ss.SSS" (matches the backend's canonical output). */
 export const formatLapTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
@@ -54,44 +79,36 @@ export const formatLapTime = (seconds: number): string => {
       .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`
 }
 
-/** Convert any DurationJson to total seconds. */
-export const durationToSeconds = (d: DurationJson | null | undefined): number | null => {
-  if (d == null) return null
+// ---------- track length ----------
 
-  // Backend now sends "mm:ss.SSS" as a plain string.
-  if (typeof d === 'string') {
-    const parsed = parseLapTime(d)
-    return Number.isFinite(parsed) ? parsed : null
-  }
+/** Track length with 3 decimals, e.g. "5.793 km". */
+export const formatTrackLength = (km: number | null | undefined): string =>
+    km == null ? '—' : `${km.toFixed(3)} km`
 
-  const secs = typeof d.seconds === 'number' ? d.seconds : 0
-  const nano = typeof d.nano === 'number' ? d.nano : 0
-  return secs + nano / 1_000_000_000
-}
+// ---------- gaps (F1-style) ----------
 
-/** Format a DurationJson as "mm:ss.SSS", or "—" when missing. */
-export const formatDurationJson = (d: DurationJson | null | undefined): string => {
-  const s = durationToSeconds(d)
-  return s == null ? '—' : formatLapTime(s)
+/**
+ * Compute the gap between two lap-time strings, in seconds.
+ * Returns null when either side is missing or unparseable.
+ */
+export const gapBetween = (
+    a: string | null | undefined,
+    b: string | null | undefined,
+): number | null => {
+  if (!a || !b) return null
+  const sa = parseLapTime(a)
+  const sb = parseLapTime(b)
+  if (!Number.isFinite(sa) || !Number.isFinite(sb)) return null
+  return sa - sb
 }
 
 /**
- * Convert total seconds into the string the backend expects.
- *   82.555 → "01:22.555"
+ * Format a lap-time gap F1-style.
+ *
+ *   null or ≤ 0 → "—"
+ *   < 60s       → "+1.234"
+ *   ≥ 60s       → "+1:23.456"
  */
-export const secondsToLapTimeString = (seconds: number): string =>
-    formatLapTime(seconds)
-
-/** Is this challenge still active? Compares yyyy-MM-dd end date to today (local). */
-export const isChallengeActive = (endDate: string | null | undefined): boolean => {
-  if (!endDate) return false
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const end = new Date(`${endDate}T00:00:00`)
-  return end >= today
-}
-
-
 export const formatGap = (gapSeconds: number | null | undefined): string => {
   if (gapSeconds == null || gapSeconds <= 0) return '—'
   if (gapSeconds < 60) return `+${gapSeconds.toFixed(3)}`

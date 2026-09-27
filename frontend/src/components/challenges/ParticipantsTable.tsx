@@ -1,15 +1,10 @@
 import { Check, Pencil, Trash2, X } from 'lucide-react'
 import { Table } from '@/components/shared/Table'
 import { RankBadge } from '@/components/shared/RankBadge'
-import {
-    durationToSeconds,
-    formatDurationJson,
-    formatGap,
-} from '@/utils/format'
+import { formatDurationJson, formatGap, parseLapTime } from '@/utils/format'
 import type { ParticipantDetailResponse } from '@/types/challenge'
 
 interface ParticipantsTableProps {
-    /** Already sorted by best lap; the table renders as-is. */
     participants: ParticipantDetailResponse[]
     isAdmin: boolean
     editingParticipant: string | null
@@ -23,7 +18,13 @@ interface ParticipantsTableProps {
 }
 
 const inlineInputCls =
-    'w-full px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500'
+    'w-full px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500'
+
+interface RowWithGaps {
+    participant: ParticipantDetailResponse
+    gapToLeader: number | null
+    interval: number | null
+}
 
 export function ParticipantsTable({
                                       participants,
@@ -37,29 +38,25 @@ export function ParticipantsTable({
                                       onClearLapTime,
                                       isSavingLapTime,
                                   }: ParticipantsTableProps) {
-    // Precompute gaps in one pass.
-    //   gapToLeader[i] = participants[i] - participants[0]
-    //   interval[i]    = participants[i] - participants[i-1]
-    const leaderSeconds = durationToSeconds(participants[0]?.participantBestLapTime)
+    const leaderTime = participants[0]?.participantBestLapTime ?? null
 
-    const rowsWithGaps = participants.map((p, i) => {
-        const seconds = durationToSeconds(p.participantBestLapTime)
+    const rowsWithGaps: RowWithGaps[] = participants.map((p, i) => {
+        const seconds = p.participantBestLapTime ? parseLapTime(p.participantBestLapTime) : null
+        const leaderSeconds = leaderTime ? parseLapTime(leaderTime) : null
 
         const gapToLeader =
-            seconds != null && leaderSeconds != null && i > 0
-                ? seconds - leaderSeconds
-                : null
+            i > 0 && seconds != null && leaderSeconds != null ? seconds - leaderSeconds : null
 
         let interval: number | null = null
         if (i > 0 && seconds != null) {
-            // Walk backwards to the nearest participant with a recorded time —
-            // a gap should compare against the one physically in front of them
-            // who actually set a lap, not a DNF-style "no time" row.
             for (let j = i - 1; j >= 0; j--) {
-                const ahead = durationToSeconds(participants[j].participantBestLapTime)
-                if (ahead != null) {
-                    interval = seconds - ahead
-                    break
+                const aheadTime = participants[j].participantBestLapTime
+                if (aheadTime) {
+                    const aheadSeconds = parseLapTime(aheadTime)
+                    if (Number.isFinite(aheadSeconds)) {
+                        interval = seconds - aheadSeconds
+                        break
+                    }
                 }
             }
         }
@@ -78,7 +75,7 @@ export function ParticipantsTable({
         </span>
             </div>
 
-            <Table<{ participant: ParticipantDetailResponse; gapToLeader: number | null; interval: number | null }>
+            <Table<RowWithGaps>
                 columns={[
                     {
                         key: 'rank',
@@ -110,8 +107,8 @@ export function ParticipantsTable({
                         },
                     },
                     {
-                        key: 'gap',
-                        label: 'Gap',
+                        key: 'leader',
+                        label: 'Leader',
                         render: (_v, row) => (
                             <span className="tabular-nums text-gray-600 dark:text-gray-300">
                 {formatGap(row.gapToLeader)}
@@ -120,7 +117,7 @@ export function ParticipantsTable({
                     },
                     {
                         key: 'interval',
-                        label: 'Int',
+                        label: 'Interval',
                         render: (_v, row) => (
                             <span className="tabular-nums text-gray-600 dark:text-gray-300">
                 {formatGap(row.interval)}
@@ -132,11 +129,7 @@ export function ParticipantsTable({
                             {
                                 key: 'actions',
                                 label: '',
-                                render: (_: unknown, row: {
-                                    participant: ParticipantDetailResponse
-                                    gapToLeader: number | null
-                                    interval: number | null
-                                }) => {
+                                render: (_: unknown, row: RowWithGaps) => {
                                     const isEditingThis =
                                         editingParticipant === row.participant.participantName
                                     if (isEditingThis) {
@@ -144,9 +137,7 @@ export function ParticipantsTable({
                                             <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        onSaveLapTime(row.participant.participantName)
-                                                    }
+                                                    onClick={() => onSaveLapTime(row.participant.participantName)}
                                                     disabled={isSavingLapTime}
                                                     className="p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
                                                     aria-label="Save lap time"
@@ -178,9 +169,7 @@ export function ParticipantsTable({
                                             {row.participant.participantBestLapTime != null && (
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        onClearLapTime(row.participant.participantName)
-                                                    }
+                                                    onClick={() => onClearLapTime(row.participant.participantName)}
                                                     className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                                                     aria-label="Clear lap time"
                                                     title="Clear lap time"

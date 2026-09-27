@@ -1,18 +1,15 @@
-export type DurationJson =
-    | { seconds: number; nano: number; [k: string]: unknown }
-    | string
-
 export interface ParticipantDetailResponse {
   participantId: number
   participantName: string
-  participantBestLapTime: DurationJson | null
+  participantBestLapTime: string | null
 }
 
 export interface ChallengeSummaryResponse {
   challengeId: number
   challengeEndDate: string
+  simulatorName: string | null
   bestParticipantName: string | null
-  bestLapTime: DurationJson | null
+  bestLapTime: string | null
   trackCountry: string | null
   trackName: string
   carBrand: string
@@ -22,8 +19,9 @@ export interface ChallengeSummaryResponse {
 export interface ChallengeDetailResponse {
   challengeId: number
   challengeEndDate: string
+  simulatorName: string | null
   bestParticipantName: string | null
-  bestLapTime: DurationJson | null
+  bestLapTime: string | null
   trackId: number
   trackName: string
   trackCountry: string | null
@@ -43,12 +41,12 @@ export interface SearchChallengesCriteria {
   trackCountry?: string
   carBrand?: string
   carName?: string
+  simulatorId?: number
 }
 
 export interface CreateChallengeRequest {
   trackId: number
   carId: number
-  /** yyyy-MM-dd */
   endDate: string
 }
 
@@ -56,10 +54,6 @@ export interface UpdateChallengeEndDateRequest {
   endDate: string
 }
 
-/**
- * Backend accepts `m:ss.S` / `m:ss.SS` / `m:ss.SSS` on input.
- * Send `null` to clear a participant's lap time.
- */
 export interface UpdateLapTimeRequest {
   participantName: string
   newLapTime: string | null

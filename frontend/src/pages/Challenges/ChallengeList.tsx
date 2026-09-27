@@ -13,6 +13,7 @@ import {
 } from '@/utils/format'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { useSimulators } from '@/hooks/useSimulators'
 import type {
     ChallengeSummaryResponse,
     SearchChallengesCriteria,
@@ -24,6 +25,7 @@ interface Filters {
     trackCountry: string
     carBrand: string
     carName: string
+    simulatorId: string
 }
 
 const EMPTY_FILTERS: Filters = {
@@ -32,6 +34,7 @@ const EMPTY_FILTERS: Filters = {
     trackCountry: '',
     carBrand: '',
     carName: '',
+    simulatorId: '',
 }
 
 const filterInputCls =
@@ -63,12 +66,15 @@ export function ChallengeList() {
     const navigate = useNavigate()
     const { isAdmin } = usePermissions()
 
+    const { data: simulatorsRes } = useSimulators()
+    const simulatorOptions = simulatorsRes?.data ?? []
+
     const dSearch = useDebouncedValue(search, 300)
     const dBest = useDebouncedValue(filters.bestParticipantName, 300)
     const dTrackCountry = useDebouncedValue(filters.trackCountry, 300)
     const dCarBrand = useDebouncedValue(filters.carBrand, 300)
     const dCarName = useDebouncedValue(filters.carName, 300)
-    // endDate is a date picker; updates immediately.
+    const dSimulatorId = useDebouncedValue(filters.simulatorId, 300)
 
     const criteria: SearchChallengesCriteria = {
         ...(dSearch.trim() ? { trackName: dSearch.trim() } : {}),
@@ -77,8 +83,8 @@ export function ChallengeList() {
         ...(dTrackCountry.trim() ? { trackCountry: dTrackCountry.trim() } : {}),
         ...(dCarBrand.trim() ? { carBrand: dCarBrand.trim() } : {}),
         ...(dCarName.trim() ? { carName: dCarName.trim() } : {}),
+        ...(dSimulatorId ? { simulatorId: Number(dSimulatorId) } : {}),
     }
-
     const criteriaKey = JSON.stringify(criteria)
 
     const { data, isLoading, isFetching } = useQuery({
@@ -143,7 +149,24 @@ export function ChallengeList() {
 
                 {showFilters && (
                     <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                            <div>
+                                <label className={filterLabelCls}>Simulator</label>
+                                <select
+                                    value={filters.simulatorId}
+                                    onChange={(e) =>
+                                        setFilters({ ...filters, simulatorId: e.target.value })
+                                    }
+                                    className={filterInputCls}
+                                >
+                                    <option value="">Any</option>
+                                    {simulatorOptions.map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                             <div>
                                 <label className={filterLabelCls}>End Date</label>
                                 <input
@@ -157,7 +180,7 @@ export function ChallengeList() {
                                 <label className={filterLabelCls}>Best Driver</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. Martin"
+                                    placeholder="e.g. racer1"
                                     value={filters.bestParticipantName}
                                     onChange={(e) =>
                                         setFilters({ ...filters, bestParticipantName: e.target.value })
@@ -191,7 +214,7 @@ export function ChallengeList() {
                                 <label className={filterLabelCls}>Car Name</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. 488 GTB"
+                                    placeholder="e.g. 488 GT3"
                                     value={filters.carName}
                                     onChange={(e) => setFilters({ ...filters, carName: e.target.value })}
                                     className={filterInputCls}
@@ -224,6 +247,7 @@ export function ChallengeList() {
                                 label: 'Status',
                                 render: (v) => <StatusBadge endDate={v} />,
                             },
+                            { key: 'simulatorName', label: 'Simulator', render: (v) => v ?? '—' },
                             { key: 'trackName', label: 'Track' },
                             { key: 'trackCountry', label: 'Country' },
                             { key: 'carBrand', label: 'Brand' },

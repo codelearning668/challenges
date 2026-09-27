@@ -1,13 +1,15 @@
 import { Pencil, Check, X } from 'lucide-react'
 import { Card } from '@/components/shared/Card'
 import { Table } from '@/components/shared/Table'
-import { formatNumber } from '@/utils/format'
+import { DlcBadge } from '@/components/shared/DlcBadge'
+import { formatTrackLength } from '@/utils/format'
 import type { TrackDetailResponse } from '@/types/track'
 
 export interface TrackEditForm {
     name: string
     country: string
     lengthKm: string
+    fromDlc: boolean
 }
 
 const inlineInputCls =
@@ -73,6 +75,11 @@ export function TrackTable({
                             ),
                     },
                     {
+                        key: 'simulatorName',
+                        label: 'Simulator',
+                        render: (v) => v ?? '—',
+                    },
+                    {
                         key: 'lengthKm',
                         label: 'Length',
                         render: (v, row) =>
@@ -85,10 +92,27 @@ export function TrackTable({
                                     value={form.lengthKm}
                                     onChange={(e) => onFormChange({ ...form, lengthKm: e.target.value })}
                                 />
-                            ) : v != null ? (
-                                `${formatNumber(v)} km`
                             ) : (
-                                '—'
+                                formatTrackLength(v)
+                            ),
+                    },
+                    {
+                        key: 'fromDlc',
+                        label: 'Availability',
+                        render: (v, row) =>
+                            isEditing(row.id) && form ? (
+                                <select
+                                    className={inlineInputCls}
+                                    value={form.fromDlc ? 'true' : 'false'}
+                                    onChange={(e) =>
+                                        onFormChange({ ...form, fromDlc: e.target.value === 'true' })
+                                    }
+                                >
+                                    <option value="false">Base</option>
+                                    <option value="true">DLC</option>
+                                </select>
+                            ) : (
+                                <DlcBadge value={!!v} showBase />
                             ),
                     },
                     ...(isAdmin

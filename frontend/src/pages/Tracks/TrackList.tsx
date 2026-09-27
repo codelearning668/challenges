@@ -6,10 +6,11 @@ import { Card } from '@/components/shared/Card'
 import { ListPageHeader } from '@/components/shared/ListPageHeader'
 import { ListSearchBar } from '@/components/shared/ListSearchBar'
 import { EntityDetailDialog } from '@/components/shared/EntityDetailDialog'
+import { DlcBadge } from '@/components/shared/DlcBadge'
 import { TrackFilters, EMPTY_TRACK_FILTERS, type TrackFiltersState } from '@/components/tracks/TrackFilters'
 import { TrackTable, type TrackEditForm } from '@/components/tracks/TrackTable'
 import { TrackGrid } from '@/components/tracks/TrackGrid'
-import { formatNumber } from '@/utils/format'
+import { formatTrackLength } from '@/utils/format'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -33,11 +34,14 @@ export function TrackList() {
     const dSearch = useDebouncedValue(search, 300)
     const dCountry = useDebouncedValue(filters.country, 300)
     const dLength = useDebouncedValue(filters.lengthKm, 300)
+    const dSimulatorId = useDebouncedValue(filters.simulatorId, 300)
 
     const criteria: SearchTracksCriteria = {
         ...(dSearch.trim() ? { name: dSearch.trim() } : {}),
         ...(dCountry.trim() ? { country: dCountry.trim() } : {}),
         ...(dLength.trim() && Number.isFinite(Number(dLength)) ? { lengthKm: Number(dLength) } : {}),
+        ...(dSimulatorId ? { simulatorId: Number(dSimulatorId) } : {}),
+        ...(filters.fromDlc !== '' ? { fromDlc: filters.fromDlc === 'true' } : {}),
     }
     const criteriaKey = JSON.stringify(criteria)
 
@@ -58,9 +62,10 @@ export function TrackList() {
                 name: vars.body.name.trim(),
                 country: vars.body.country.trim() || undefined,
                 lengthKm: vars.body.lengthKm === '' ? undefined : Number(vars.body.lengthKm),
+                fromDlc: vars.body.fromDlc,
             }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['tracks'] })
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['tracks'] })
             toast.success('Track updated')
             cancelEdit()
         },
@@ -72,6 +77,7 @@ export function TrackList() {
             name: track.name ?? '',
             country: track.country ?? '',
             lengthKm: track.lengthKm != null ? String(track.lengthKm) : '',
+            fromDlc: track.fromDlc ?? false,
         })
     }
 
@@ -168,13 +174,12 @@ export function TrackList() {
                         ? [
                             { label: 'Name', value: selectedTrack.name },
                             { label: 'Country', value: selectedTrack.country ?? '—' },
+                            { label: 'Simulator', value: selectedTrack.simulatorName ?? '—' },
                             {
-                                label: 'Length',
-                                value:
-                                    selectedTrack.lengthKm != null
-                                        ? `${formatNumber(selectedTrack.lengthKm)} km`
-                                        : '—',
+                                label: 'Availability',
+                                value: <DlcBadge value={selectedTrack.fromDlc} showBase />,
                             },
+                            { label: 'Length', value: formatTrackLength(selectedTrack.lengthKm) },
                         ]
                         : []
                 }

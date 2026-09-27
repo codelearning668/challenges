@@ -6,6 +6,7 @@ import { Card } from '@/components/shared/Card'
 import { ListPageHeader } from '@/components/shared/ListPageHeader'
 import { ListSearchBar } from '@/components/shared/ListSearchBar'
 import { EntityDetailDialog } from '@/components/shared/EntityDetailDialog'
+import { DlcBadge } from '@/components/shared/DlcBadge'
 import { CarFilters, EMPTY_CAR_FILTERS, type CarFiltersState } from '@/components/cars/CarFilters'
 import { CarTable, type CarEditForm } from '@/components/cars/CarTable'
 import { CarGrid } from '@/components/cars/CarGrid'
@@ -34,6 +35,7 @@ export function CarList() {
     const dBrand = useDebouncedValue(filters.brand, 300)
     const dHp = useDebouncedValue(filters.horsePower, 300)
     const dTorque = useDebouncedValue(filters.torque, 300)
+    const dSimulatorId = useDebouncedValue(filters.simulatorId, 300)
 
     const criteria: SearchCarsCriteria = {
         ...(dSearch.trim() ? { name: dSearch.trim() } : {}),
@@ -41,6 +43,8 @@ export function CarList() {
         ...(dHp.trim() && Number.isFinite(Number(dHp)) ? { horsePower: Number(dHp) } : {}),
         ...(dTorque.trim() && Number.isFinite(Number(dTorque)) ? { torque: Number(dTorque) } : {}),
         ...(filters.wheelDrive ? { wheelDrive: filters.wheelDrive } : {}),
+        ...(dSimulatorId ? { simulatorId: Number(dSimulatorId) } : {}),
+        ...(filters.fromDlc !== '' ? { fromDlc: filters.fromDlc === 'true' } : {}),
     }
     const criteriaKey = JSON.stringify(criteria)
 
@@ -63,9 +67,10 @@ export function CarList() {
                 hp: vars.body.hp === '' ? undefined : Number(vars.body.hp),
                 torque: vars.body.torque === '' ? undefined : Number(vars.body.torque),
                 drive: vars.body.drive === '' ? undefined : vars.body.drive,
+                fromDlc: vars.body.fromDlc,
             }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cars'] })
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['cars'] })
             toast.success('Car updated')
             cancelEdit()
         },
@@ -79,6 +84,7 @@ export function CarList() {
             hp: car.horsePower != null ? String(car.horsePower) : '',
             torque: car.torque != null ? String(car.torque) : '',
             drive: car.wheelDrive ?? '',
+            fromDlc: car.fromDlc ?? false,
         })
     }
 
@@ -175,17 +181,24 @@ export function CarList() {
                         ? [
                             { label: 'Brand', value: selectedCar.brand },
                             { label: 'Name', value: selectedCar.name },
+                            { label: 'Simulator', value: selectedCar.simulatorName ?? '—' },
+                            {
+                                label: 'Availability',
+                                value: <DlcBadge value={selectedCar.fromDlc} showBase />,
+                            },
                             {
                                 label: 'Horsepower',
-                                value: selectedCar.horsePower != null
-                                    ? `${formatNumber(selectedCar.horsePower)} hp`
-                                    : '—',
+                                value:
+                                    selectedCar.horsePower != null
+                                        ? `${formatNumber(selectedCar.horsePower)} hp`
+                                        : '—',
                             },
                             {
                                 label: 'Torque',
-                                value: selectedCar.torque != null
-                                    ? `${formatNumber(selectedCar.torque)} Nm`
-                                    : '—',
+                                value:
+                                    selectedCar.torque != null
+                                        ? `${formatNumber(selectedCar.torque)} Nm`
+                                        : '—',
                             },
                             { label: 'Wheel Drive', value: selectedCar.wheelDrive ?? '—' },
                         ]

@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react'
-import { ModernDateInput } from '@/components/shared/ModernDateInput'
-import { formatDate, formatDurationJson } from '@/utils/format'
+import { DatePicker } from '@/components/shared/DatePicker'
+import { formatDate, formatDurationJson, formatTrackLength } from '@/utils/format'
 import type { ChallengeDetailResponse } from '@/types/challenge'
 
 interface ChallengeInfoCardProps {
@@ -43,6 +43,8 @@ export function ChallengeInfoCard({
                                       onCancelEditEndDate,
                                       isSavingEndDate,
                                   }: ChallengeInfoCardProps) {
+    const today = new Date().toISOString().slice(0, 10)
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Column 1 — Result */}
@@ -50,26 +52,27 @@ export function ChallengeInfoCard({
                 <ColumnHeader>Result</ColumnHeader>
                 <Field label="Best Driver" value={c.bestParticipantName ?? '—'} />
                 <Field label="Best Lap" value={formatDurationJson(c.bestLapTime)} />
+                <Field label="Simulator" value={c.simulatorName ?? '—'} />
 
                 <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
                         End Date
                     </p>
                     {editEndDate ? (
-                        <div className="mt-1 flex items-center gap-1.5">
+                        <div className="flex items-start gap-1.5">
                             <div className="flex-1">
-                                <ModernDateInput
+                                <DatePicker
                                     value={draftEndDate}
                                     onChange={onDraftEndDateChange}
-                                    autoFocus
-                                    compact
+                                    placeholder="Pick a date"
+                                    min={today}
                                 />
                             </div>
                             <button
                                 type="button"
                                 onClick={onSaveEndDate}
                                 disabled={isSavingEndDate}
-                                className="p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
+                                className="mt-[9px] p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
                                 aria-label="Save end date"
                             >
                                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -77,14 +80,14 @@ export function ChallengeInfoCard({
                             <button
                                 type="button"
                                 onClick={onCancelEditEndDate}
-                                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                className="mt-[9px] p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                                 aria-label="Cancel"
                             >
                                 <X className="w-4 h-4 text-gray-500" />
                             </button>
                         </div>
                     ) : (
-                        <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             {formatDate(c.challengeEndDate)}
                         </p>
                     )}
@@ -112,10 +115,7 @@ export function ChallengeInfoCard({
                     label="Track"
                     value={`${c.trackName}${c.trackCountry ? ` (${c.trackCountry})` : ''}`}
                 />
-                <Field
-                    label="Track Length"
-                    value={c.trackLengthKm != null ? `${c.trackLengthKm.toFixed(2)} km` : '—'}
-                />
+                <Field label="Track Length" value={formatTrackLength(c.trackLengthKm)} />
             </div>
         </div>
     )

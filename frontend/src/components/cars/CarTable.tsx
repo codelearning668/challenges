@@ -1,6 +1,7 @@
 import { Pencil, Check, X } from 'lucide-react'
 import { Card } from '@/components/shared/Card'
 import { Table } from '@/components/shared/Table'
+import { DlcBadge } from '@/components/shared/DlcBadge'
 import { formatNumber } from '@/utils/format'
 import type { CarDetailResponse, WheelDrive } from '@/types/car'
 
@@ -10,6 +11,7 @@ export interface CarEditForm {
     hp: string
     torque: string
     drive: WheelDrive | ''
+    fromDlc: boolean
 }
 
 export const inlineInputCls =
@@ -75,6 +77,11 @@ export function CarTable({
                             ),
                     },
                     {
+                        key: 'simulatorName',
+                        label: 'Simulator',
+                        render: (v) => v ?? '—',
+                    },
+                    {
                         key: 'horsePower',
                         label: 'Horsepower',
                         render: (v, row) =>
@@ -129,6 +136,25 @@ export function CarTable({
                                 </select>
                             ) : (
                                 v ?? '—'
+                            ),
+                    },
+                    {
+                        key: 'fromDlc',
+                        label: 'Availability',
+                        render: (v, row) =>
+                            isEditing(row.id) && form ? (
+                                <select
+                                    className={inlineInputCls}
+                                    value={form.fromDlc ? 'true' : 'false'}
+                                    onChange={(e) =>
+                                        onFormChange({ ...form, fromDlc: e.target.value === 'true' })
+                                    }
+                                >
+                                    <option value="false">Base</option>
+                                    <option value="true">DLC</option>
+                                </select>
+                            ) : (
+                                <DlcBadge value={!!v} showBase />
                             ),
                     },
                     ...(isAdmin

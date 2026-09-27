@@ -7,6 +7,8 @@ export interface CarDetailResponse {
   horsePower: number | null
   torque: number | null
   wheelDrive: WheelDrive | null
+  simulatorName: string | null
+  fromDlc: boolean
 }
 
 export interface SearchCarsCriteria {
@@ -15,6 +17,8 @@ export interface SearchCarsCriteria {
   horsePower?: number
   torque?: number
   wheelDrive?: WheelDrive
+  simulatorId?: number
+  fromDlc?: boolean
 }
 
 export interface CreateCarRequest {
@@ -23,6 +27,15 @@ export interface CreateCarRequest {
   hp?: number
   torque?: number
   drive?: WheelDrive
+  simulatorId: number
+  fromDlc: boolean
 }
 
-export type UpdateCarRequest = CreateCarRequest
+export interface UpdateCarRequest {
+  brand: string
+  name: string
+  hp?: number
+  torque?: number
+  drive?: WheelDrive
+  fromDlc?: boolean
+}

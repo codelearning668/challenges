@@ -1,5 +1,5 @@
 import MediaCard from '@/components/shared/MediaCard'
-import { formatNumber } from '@/utils/format'
+import { formatTrackLength } from '@/utils/format'
 import type { TrackDetailResponse } from '@/types/track'
 
 interface TrackGridProps {
@@ -20,7 +20,7 @@ export function TrackGrid({ items, onItemClick }: TrackGridProps) {
                     details={[
                         {
                             label: 'Length',
-                            value: track.lengthKm != null ? `${formatNumber(track.lengthKm)} km` : '—',
+                            value: formatTrackLength(track.lengthKm),
                         },
                     ]}
                 />

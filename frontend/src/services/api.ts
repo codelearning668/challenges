@@ -22,12 +22,12 @@ import type {
   SearchChallengesCriteria,
 } from '@/types/challenge'
 import type { UserInfoResponse, UserRegistrationRequest } from '@/types/user'
+import type { SimulatorDetailResponse } from '@/types/simulator'
 
 const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '/api')
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
-    /** When true, no toast is shown for errors from this request. */
     silent?: boolean
   }
 }
@@ -48,9 +48,7 @@ function describeError(error: AxiosError): string {
   if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
     return 'Request timed out. Check that the backend is running.'
   }
-  if (!error.response) {
-    return 'Network error. The backend is unreachable.'
-  }
+  if (!error.response) return 'Network error. The backend is unreachable.'
 
   const { status, data } = error.response
   const serverMessage =
@@ -67,6 +65,7 @@ function describeError(error: AxiosError): string {
     case 403: return 'You don’t have permission to do that.'
     case 404: return 'Not found.'
     case 409: return 'That conflicts with existing data.'
+    case 422: return 'The submitted data violates a business rule.'
     case 500: return 'Server error.'
     default: return `Request failed (${status}).`
   }
@@ -79,19 +78,18 @@ api.interceptors.response.use(
       const url = error.config?.url ?? ''
       const silent = error.config?.silent === true
 
-      if (status === 401) {
-        useAuthStore.getState().logout()
-      }
+      if (status === 401) useAuthStore.getState().logout()
 
       const isLoginProbe = url.endsWith('/users/info')
-
-      if (!silent && !isLoginProbe) {
-        toast.error(describeError(error))
-      }
+      if (!silent && !isLoginProbe) toast.error(describeError(error))
 
       return Promise.reject(error)
     },
 )
+
+export const simulatorApi = {
+  list: () => api.get<SimulatorDetailResponse[]>('/simulators'),
+}
 
 export const carApi = {
   search: (criteria: SearchCarsCriteria = {}) =>
@@ -99,8 +97,9 @@ export const carApi = {
 
   get: (carId: number) => api.get<CarDetailResponse>(`/cars/${carId}`),
 
-  create: (body: CreateCarRequest) => api.post<string>('/cars', body),
+  create: (body: CreateCarRequest) => api.post<void>('/cars', body),
 
+  // PUT, 204 No Content
   update: (carId: number, body: UpdateCarRequest) =>
       api.put<void>(`/cars/${carId}`, body),
 }
@@ -111,8 +110,9 @@ export const trackApi = {
 
   get: (trackId: number) => api.get<TrackDetailResponse>(`/tracks/${trackId}`),
 
-  create: (body: CreateTrackRequest) => api.post<string>('/tracks', body),
+  create: (body: CreateTrackRequest) => api.post<void>('/tracks', body),
 
+  // PUT, 204 No Content
   update: (trackId: number, body: UpdateTrackRequest) =>
       api.put<void>(`/tracks/${trackId}`, body),
 }
@@ -124,10 +124,11 @@ export const challengeApi = {
   get: (challengeId: number) =>
       api.get<ChallengeDetailResponse>(`/challenges/${challengeId}`),
 
-  create: (body: CreateChallengeRequest) => api.post<string>('/challenges', body),
+  create: (body: CreateChallengeRequest) => api.post<void>('/challenges', body),
 
+  // PATCH (was PUT)
   updateEndDate: (challengeId: number, body: UpdateChallengeEndDateRequest) =>
-      api.put<void>(`/challenges/${challengeId}`, body),
+      api.patch<void>(`/challenges/${challengeId}`, body),
 
   delete: (challengeId: number) =>
       api.delete<void>(`/challenges/${challengeId}`),
@@ -138,8 +139,9 @@ export const challengeApi = {
   quit: (challengeId: number) =>
       api.delete<void>(`/challenges/${challengeId}/registration`),
 
+  // PATCH (was PUT)
   updateLapTime: (challengeId: number, body: UpdateLapTimeRequest) =>
-      api.put<void>(`/challenges/${challengeId}/participant`, body),
+      api.patch<void>(`/challenges/${challengeId}/participant`, body),
 }
 
 export const userApi = {
