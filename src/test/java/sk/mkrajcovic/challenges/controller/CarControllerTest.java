@@ -284,6 +284,28 @@ class CarControllerTest {
 						.then()
 							.statusCode(BAD_REQUEST);
 				}
+
+				@Test
+				void withoutFromDlc() {
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body("""
+							{
+								"brand": "BMW",
+								"name": "M3",
+								"hp": 510,
+								"torque": 650,
+								"drive": "REAR",
+								"simulatorId": 1
+							}
+						""")
+					.when()
+						.post(CAR_URI)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
 			}
 		}
 	}
@@ -307,7 +329,8 @@ class CarControllerTest {
 						.body("name", equalTo(VALID_NAME))
 						.body("horsePower", equalTo(VALID_HP))
 						.body("torque", equalTo(VALID_TORQUE))
-						.body("simulatorName", equalTo("Assetto Corsa"));
+						.body("simulatorName", equalTo("Assetto Corsa"))
+						.body("fromDlc", equalTo(false));
 			}
 		}
 
@@ -351,6 +374,26 @@ class CarControllerTest {
 				.then()
 					.statusCode(OK)
 					.body("find { it.id == " + id + " }", notNullValue());
+			}
+
+			@Test
+			void canSearchByFromDlc() {
+				int dlcCarId = createCarAndReturnId(
+					VALID_BRAND,
+					VALID_NAME,
+					VALID_HP,
+					VALID_TORQUE,
+					VALID_DRIVE,
+					true
+				);
+
+				given()
+					.param("fromDlc", true)
+				.when()
+					.get(CAR_URI)
+				.then()
+					.statusCode(OK)
+					.body("find { it.id == " + dlcCarId + " }.fromDlc", equalTo(true));
 			}
 
 			@ParameterizedTest
@@ -540,7 +583,7 @@ class CarControllerTest {
 					.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
 					.contentType(ContentType.JSON)
 					.accept(ContentType.JSON)
-					.body(new UpdateCarRequest("Audi", "RS6", 600, 800, WheelDrive.ALL))
+					.body(new UpdateCarRequest("Audi", "RS6", 600, 800, WheelDrive.ALL, true))
 				.when()
 					.put(CAR_URI_WITH_ID, id)
 				.then()
@@ -553,7 +596,8 @@ class CarControllerTest {
 						.body("brand", equalTo("Audi"))
 						.body("name", equalTo("RS6"))
 						.body("horsePower", equalTo(600))
-						.body("torque", equalTo(800));
+						.body("torque", equalTo(800))
+						.body("fromDlc", equalTo(true));
 			}
 		}
 
@@ -570,7 +614,7 @@ class CarControllerTest {
 					given()
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE, false))
 					.when()
 						.put(CAR_URI_WITH_ID, id)
 					.then()
@@ -585,7 +629,7 @@ class CarControllerTest {
 						.auth().preemptive().basic(PARTICIPANT_USER, PARTICIPANT_PASS)
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE, false))
 					.when()
 						.put(CAR_URI_WITH_ID, id)
 					.then().statusCode(FORBIDDEN);
@@ -601,7 +645,14 @@ class CarControllerTest {
 						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(new UpdateCarRequest(
+							VALID_BRAND,
+							VALID_NAME,
+							VALID_HP,
+							VALID_TORQUE,
+							VALID_DRIVE,
+							false
+						))
 					.when()
 						.put(CAR_URI_WITH_ID, NON_EXISTENT_CAR_ID)
 					.then()
@@ -616,7 +667,7 @@ class CarControllerTest {
 						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new UpdateCarRequest(" ", VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE))
+						.body(new UpdateCarRequest(" ", VALID_NAME, VALID_HP, VALID_TORQUE, VALID_DRIVE, false))
 					.when()
 						.put(CAR_URI_WITH_ID, id)
 					.then()
@@ -631,7 +682,30 @@ class CarControllerTest {
 						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
 						.contentType(ContentType.JSON)
 						.accept(ContentType.JSON)
-						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, -100, VALID_TORQUE, VALID_DRIVE))
+						.body(new UpdateCarRequest(VALID_BRAND, VALID_NAME, -100, VALID_TORQUE, VALID_DRIVE, false))
+					.when()
+						.put(CAR_URI_WITH_ID, id)
+					.then()
+						.statusCode(BAD_REQUEST);
+				}
+
+				@Test
+				void withoutFromDlc() {
+					int id = createCarAndReturnId();
+
+					given()
+						.auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
+						.contentType(ContentType.JSON)
+						.accept(ContentType.JSON)
+						.body("""
+							{
+								"brand": "BMW",
+								"name": "M3",
+								"hp": 510,
+								"torque": 650,
+								"drive": "REAR"
+							}
+						""")
 					.when()
 						.put(CAR_URI_WITH_ID, id)
 					.then()
@@ -648,6 +722,17 @@ class CarControllerTest {
 		Integer torque,
 		WheelDrive drive
 	) {
+		return createCar(brand, name, hp, torque, drive, false);
+	}
+
+	private Response createCar(
+		String brand,
+		String name,
+		Integer hp,
+		Integer torque,
+		WheelDrive drive,
+		boolean fromDlc
+	) {
 		return given()
 				.auth()
 					.preemptive()
@@ -660,7 +745,8 @@ class CarControllerTest {
 					hp,
 					torque,
 					drive,
-					ASSETTO_CORSA_SIMULATOR_ID
+					ASSETTO_CORSA_SIMULATOR_ID,
+					fromDlc
 				))
 			.when()
 				.post(CAR_URI);
@@ -683,7 +769,8 @@ class CarControllerTest {
 			VALID_HP,
 			VALID_TORQUE,
 			VALID_DRIVE,
-			ASSETTO_CORSA_SIMULATOR_ID
+			ASSETTO_CORSA_SIMULATOR_ID,
+			false
 		);
 	}
 
@@ -704,12 +791,24 @@ class CarControllerTest {
 		Integer torque,
 		WheelDrive drive
 	) {
+		return createCarAndReturnId(brand, name, hp, torque, drive, false);
+	}
+
+	private int createCarAndReturnId(
+		String brand,
+		String name,
+		Integer hp,
+		Integer torque,
+		WheelDrive drive,
+		boolean fromDlc
+	) {
 		String location = createCar(
 			brand,
 			name,
 			hp,
 			torque,
-			drive
+			drive,
+			fromDlc
 		)
 			.then()
 				.statusCode(CREATED)

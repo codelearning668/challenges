@@ -21,6 +21,9 @@ public record CreateTrackRequest(
 	BigDecimal lengthKm,
 
 	@NotNull @Positive
-	Integer simulatorId
+	Integer simulatorId,
+
+	@NotNull
+	Boolean fromDlc
 
 ) { }

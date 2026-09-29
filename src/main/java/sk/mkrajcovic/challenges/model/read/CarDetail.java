@@ -12,5 +12,6 @@ public interface CarDetail {
 	Integer getTorque();
 	WheelDrive getWheelDrive();
 	SimulatorType getSimulatorType();
+	boolean getFromDlc();
 
 }

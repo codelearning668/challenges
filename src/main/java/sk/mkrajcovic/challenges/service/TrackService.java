@@ -82,6 +82,7 @@ public class TrackService {
 		track.setCountry(trackToSave.getCountry());
 		track.setName(trackToSave.getName());
 		track.setLengthKm(trackToSave.getLengthKm());
+		track.setFromDlc(trackToSave.isFromDlc());
 
 		repository.save(track);
 	}

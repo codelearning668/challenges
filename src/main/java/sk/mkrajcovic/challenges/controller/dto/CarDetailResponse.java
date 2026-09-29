@@ -10,6 +10,7 @@ public record CarDetailResponse (
 	Integer horsePower,
 	Integer torque,
 	WheelDrive wheelDrive,
-	String simulatorName
+	String simulatorName,
+	Boolean fromDlc
 
 ) { }

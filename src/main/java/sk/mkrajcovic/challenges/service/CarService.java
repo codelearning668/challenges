@@ -84,6 +84,7 @@ public class CarService {
 		car.setHorsePower(carToSave.getHorsePower());
 		car.setTorque(carToSave.getTorque());
 		car.setWheelDrive(carToSave.getWheelDrive());
+		car.setFromDlc(carToSave.isFromDlc());
 
 		repository.save(car);
 	}

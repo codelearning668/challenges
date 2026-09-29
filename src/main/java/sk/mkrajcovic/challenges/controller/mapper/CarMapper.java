@@ -23,7 +23,8 @@ public final class CarMapper {
 			car.getHorsePower(),
 			car.getTorque(),
 			car.getWheelDrive(),
-			car.getSimulator().getType().getDisplayName()
+			car.getSimulator().getType().getDisplayName(),
+			car.isFromDlc()
 		);
 	}
 
@@ -37,7 +38,8 @@ public final class CarMapper {
 			carDetail.getHorsePower(),
 			carDetail.getTorque(),
 			carDetail.getWheelDrive(),
-			carDetail.getSimulatorType().getDisplayName()
+			carDetail.getSimulatorType().getDisplayName(),
+			carDetail.getFromDlc()
 		);
 	}
 
@@ -50,19 +52,21 @@ public final class CarMapper {
 		car.setHorsePower(createRequest.hp());
 		car.setTorque(createRequest.torque());
 		car.setWheelDrive(createRequest.drive());
+		car.setFromDlc(createRequest.fromDlc());
 
 		return car;
 	}
 
-	public static Car toCar(UpdateCarRequest createRequest) {
-		Objects.requireNonNull(createRequest, "input request cannot be null in order to map its values");
+	public static Car toCar(UpdateCarRequest updateRequest) {
+		Objects.requireNonNull(updateRequest, "input request cannot be null in order to map its values");
 
 		var car = new Car();
-		car.setBrand(createRequest.brand());
-		car.setName(createRequest.name());
-		car.setHorsePower(createRequest.hp());
-		car.setTorque(createRequest.torque());
-		car.setWheelDrive(createRequest.drive());
+		car.setBrand(updateRequest.brand());
+		car.setName(updateRequest.name());
+		car.setHorsePower(updateRequest.hp());
+		car.setTorque(updateRequest.torque());
+		car.setWheelDrive(updateRequest.drive());
+		car.setFromDlc(updateRequest.fromDlc());
 
 		return car;
 	}

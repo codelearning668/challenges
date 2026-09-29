@@ -19,6 +19,7 @@ public interface TrackRepository extends JpaRepository<Track, Integer> {
                t.country as country,
                t.name as name,
                t.lengthKm as lengthKm,
+               t.fromDlc as fromDlc,
                s.type as simulatorType
         FROM Track t
         JOIN t.simulator s
@@ -26,6 +27,7 @@ public interface TrackRepository extends JpaRepository<Track, Integer> {
         AND (:#{#criteria.name} IS NULL OR t.nameSearch LIKE %:#{#criteria.name}%)
         AND (:#{#criteria.lengthKm} IS NULL OR t.lengthKm = :#{#criteria.lengthKm})
         AND (:#{#criteria.simulatorId} IS NULL OR s.id = :#{#criteria.simulatorId})
+        AND (:#{#criteria.fromDlc} IS NULL OR t.fromDlc = :#{#criteria.fromDlc})
     """)
 	public List<TrackDetail> findTracks(@Param("criteria") SearchTracksCriteria criteria);
 

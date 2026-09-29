@@ -77,6 +77,9 @@ class CarMapperTest {
 			}
 
 			@Override
+			public boolean getFromDlc() { return false; }
+
+			@Override
 			public SimulatorType getSimulatorType() {
 				return SimulatorType.ASSETTO_CORSA;
 			}
@@ -103,7 +106,7 @@ class CarMapperTest {
 
 	@Test
 	void shouldMapCreateCarRequestToCar() {
-		var request = new CreateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL, 1);
+		var request = new CreateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL, 1, true);
 		var car = CarMapper.toCar(request);
 
 		assertAll(
@@ -121,7 +124,7 @@ class CarMapperTest {
 
 	@Test
 	void shouldMapUpdateCarRequestToCar() {
-		var request = new UpdateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL);
+		var request = new UpdateCarRequest("BMW", "M3", 510, 650, WheelDrive.ALL, true);
 		var car = CarMapper.toCar(request);
 
 		assertAll(

@@ -55,7 +55,7 @@ class TrackControllerTest {
     private static final String VALID_NAME = "Slovakia Ring";
     private static final BigDecimal VALID_LENGTH_KM = new BigDecimal("5.922");
     private static final int ASSETTO_CORSA_SIMULATOR_ID = 1;
-	private static final int WRC_GENERATIONS_SIMULATOR_ID = 3;
+    private static final int WRC_GENERATIONS_SIMULATOR_ID = 3;
 
     private static final String SEARCH_COUNTRY = "Slovakia";
     private static final String SEARCH_NAME = "Slovakia Ring Grand Prix";
@@ -236,6 +236,28 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
+                @Test
+                void withoutFromDlc() {
+                    given()
+                        .auth()
+                            .preemptive()
+                            .basic(ADMIN_USER, ADMIN_PASS)
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("""
+                            {
+                                "name": "Slovakia Ring",
+                                "country": "Slovakia",
+                                "lengthKm": 5.922,
+                                "simulatorId": 1
+                            }
+                            """)
+                    .when()
+                        .post(TRACK_URI)
+                    .then()
+                        .statusCode(BAD_REQUEST);
+                }
+
             }
         }
     }
@@ -311,6 +333,23 @@ class TrackControllerTest {
 				.then()
 					.statusCode(OK)
 					.body("find { it.id == " + trackId + " }", notNullValue());
+			}
+			@Test
+			void canSearchByFromDlc() {
+				int dlcTrackId = createTrackAndReturnId(
+					VALID_NAME,
+					VALID_COUNTRY,
+					VALID_LENGTH_KM,
+					true
+				);
+
+				given()
+					.param("fromDlc", true)
+				.when()
+					.get(TRACK_URI)
+				.then()
+					.statusCode(OK)
+					.body("find { it.id == " + dlcTrackId + " }.fromDlc", equalTo(true));
 			}
 
             @ParameterizedTest
@@ -441,6 +480,15 @@ class TrackControllerTest {
         String country,
         BigDecimal lengthKm
     ) {
+        return createTrack(name, country, lengthKm, false);
+    }
+
+    private Response createTrack(
+        String name,
+        String country,
+        BigDecimal lengthKm,
+        boolean fromDlc
+    ) {
         return given()
             .auth()
                 .preemptive()
@@ -451,7 +499,8 @@ class TrackControllerTest {
                 name,
                 country,
                 lengthKm,
-                ASSETTO_CORSA_SIMULATOR_ID
+                ASSETTO_CORSA_SIMULATOR_ID,
+                fromDlc
             ))
         .when()
             .post(TRACK_URI);
@@ -567,7 +616,8 @@ class TrackControllerTest {
                         .body(new UpdateTrackRequest(
                             "Updated Track",
                             VALID_COUNTRY,
-                            VALID_LENGTH_KM
+                            VALID_LENGTH_KM,
+                            false
                         ))
                     .when()
                         .put(TRACK_URI_WITH_ID, id)
@@ -588,7 +638,8 @@ class TrackControllerTest {
                         .body(new UpdateTrackRequest(
                             "Updated Track",
                             VALID_COUNTRY,
-                            VALID_LENGTH_KM
+                            VALID_LENGTH_KM,
+                            false
                         ))
                     .when()
                         .put(TRACK_URI_WITH_ID, id)
@@ -689,6 +740,29 @@ class TrackControllerTest {
                             .statusCode(BAD_REQUEST);
                 }
 
+                @Test
+                void withoutFromDlc() {
+                    int id = createTrackAndReturnId();
+
+                    given()
+                        .auth()
+                            .preemptive()
+                            .basic(ADMIN_USER, ADMIN_PASS)
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("""
+                            {
+                                "name": "Slovakia Ring",
+                                "country": "Slovakia",
+                                "lengthKm": 5.922
+                            }
+                            """)
+                    .when()
+                        .put(TRACK_URI_WITH_ID, id)
+                    .then()
+                        .statusCode(BAD_REQUEST);
+                }
+
 
 			}
 
@@ -712,6 +786,16 @@ class TrackControllerTest {
         String country,
         BigDecimal lengthKm
     ) {
+        return updateTrack(trackId, name, country, lengthKm, false);
+    }
+
+    private Response updateTrack(
+        int trackId,
+        String name,
+        String country,
+        BigDecimal lengthKm,
+        boolean fromDlc
+    ) {
         return given()
             .auth()
                 .preemptive()
@@ -721,7 +805,8 @@ class TrackControllerTest {
             .body(new UpdateTrackRequest(
                 name,
                 country,
-                lengthKm
+                lengthKm,
+                fromDlc
             ))
         .when()
             .put(TRACK_URI_WITH_ID, trackId);
@@ -740,7 +825,8 @@ class TrackControllerTest {
             VALID_NAME,
             VALID_COUNTRY,
             VALID_LENGTH_KM,
-            ASSETTO_CORSA_SIMULATOR_ID
+            ASSETTO_CORSA_SIMULATOR_ID,
+            false
         );
     }
 
@@ -759,7 +845,8 @@ class TrackControllerTest {
 				VALID_NAME,
 				VALID_COUNTRY,
 				VALID_LENGTH_KM,
-				simulatorId
+				simulatorId,
+				false
 			))
 		.when()
 			.post(TRACK_URI)
@@ -778,10 +865,20 @@ class TrackControllerTest {
         String country,
         BigDecimal lengthKm
     ) {
+        return createTrackAndReturnId(name, country, lengthKm, false);
+    }
+
+    private int createTrackAndReturnId(
+        String name,
+        String country,
+        BigDecimal lengthKm,
+        boolean fromDlc
+    ) {
         String location = createTrack(
             name,
             country,
-            lengthKm
+            lengthKm,
+            fromDlc
         )
             .then()
                 .statusCode(CREATED)

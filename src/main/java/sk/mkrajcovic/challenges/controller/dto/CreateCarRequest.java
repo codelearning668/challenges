@@ -23,6 +23,9 @@ public record CreateCarRequest(
 	WheelDrive drive,
 
 	@NotNull @Positive
-	Integer simulatorId
+	Integer simulatorId,
+
+	@NotNull
+	Boolean fromDlc
 
 ) { }

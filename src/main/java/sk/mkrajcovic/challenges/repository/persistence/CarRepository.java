@@ -21,6 +21,7 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
                c.horsePower as horsePower,
                c.torque as torque,
                c.wheelDrive as wheelDrive,
+               c.fromDlc as fromDlc,
                s.type as simulatorType
         FROM Car c
         JOIN c.simulator s
@@ -30,6 +31,7 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
         AND (:#{#criteria.torque} IS NULL OR c.torque = :#{#criteria.torque})
         AND (:#{#criteria.wheelDrive} IS NULL OR c.wheelDrive = :#{#criteria.wheelDrive})
         AND (:#{#criteria.simulatorId} IS NULL OR s.id = :#{#criteria.simulatorId})
+        AND (:#{#criteria.fromDlc} IS NULL OR c.fromDlc = :#{#criteria.fromDlc})
     """)
 	public List<CarDetail> findCars(@Param("criteria") SearchCarsCriteria criteria);
 
