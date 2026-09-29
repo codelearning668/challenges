@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static sk.mkrajcovic.challenges.test.util.HttpCodes.BAD_REQUEST;
@@ -546,10 +547,42 @@ class ChallengeControllerTest {
                 );
         }
 
-		@Test
-		void searchesBySimulatorId() {
-			int trackId = createTrackForSimulator(WRC_GENERATIONS_SIMULATOR_ID);
-			int carId = createCarAndReturnId(CAR_BRAND, CAR_NAME, WRC_GENERATIONS_SIMULATOR_ID);
+        @Test
+        void searchesByActiveStatus() {
+            int activeChallengeId = createChallengeAndReturnId();
+            int inactiveChallengeId = createChallengeAndReturnId(
+                TRACK_NAME + " inactive",
+                TRACK_COUNTRY,
+                TRACK_LENGTH_KM,
+                CAR_BRAND,
+                CAR_NAME
+            );
+
+            closeChallenge(inactiveChallengeId);
+
+            searchChallenges("isActive", "true")
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(activeChallengeId))
+                .body("challengeId", not(hasItem(inactiveChallengeId)));
+
+            searchChallenges("isActive", "false")
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(inactiveChallengeId))
+                .body("challengeId", not(hasItem(activeChallengeId)));
+
+            searchChallenges()
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(activeChallengeId))
+                .body("challengeId", hasItem(inactiveChallengeId));
+        }
+
+        @Test
+        void searchesBySimulatorId() {
+            int trackId = createTrackForSimulator(WRC_GENERATIONS_SIMULATOR_ID);
+            int carId = createCarAndReturnId(CAR_BRAND, CAR_NAME, WRC_GENERATIONS_SIMULATOR_ID);
 			String location = createChallenge(trackId, carId, VALID_END_DATE)
 				.then()
 				.statusCode(CREATED)
@@ -1633,7 +1666,8 @@ class ChallengeControllerTest {
 				TRACK_NAME,
 				TRACK_COUNTRY,
 				BigDecimal.valueOf(TRACK_LENGTH_KM),
-				simulatorId
+				simulatorId,
+				false
 			))
 		.when()
 			.post("/tracks")
@@ -1657,7 +1691,7 @@ class ChallengeControllerTest {
         String location = given()
             .auth().preemptive().basic(ADMIN_USER, ADMIN_PASS)
             .contentType(ContentType.JSON)
-            .body(new CreateTrackRequest(name, country, BigDecimal.valueOf(lengthKm), ASSETTO_CORSA_SIMULATOR_ID))
+            .body(new CreateTrackRequest(name, country, BigDecimal.valueOf(lengthKm), ASSETTO_CORSA_SIMULATOR_ID, false))
         .when()
             .post("/tracks")
         .then()
@@ -1686,7 +1720,8 @@ class ChallengeControllerTest {
                 CAR_HP,
                 CAR_TORQUE,
                 WheelDrive.REAR,
-                simulatorId
+                simulatorId,
+                false
             ))
         .when()
             .post("/cars")

@@ -21,7 +21,8 @@ public final class TrackMapper {
 			track.getCountry(),
 			track.getName(),
 			track.getLengthKm(),
-			track.getSimulator().getType().getDisplayName()
+			track.getSimulator().getType().getDisplayName(),
+			track.isFromDlc()
 		);
 	}
 
@@ -33,28 +34,31 @@ public final class TrackMapper {
 			track.getCountry(),
 			track.getName(),
 			track.getLengthKm(),
-			track.getSimulatorType().getDisplayName()
+			track.getSimulatorType().getDisplayName(),
+			track.getFromDlc()
 		);
 	}
 
-	public static Track toTrack(CreateTrackRequest trackRequest) {
-		Objects.requireNonNull(trackRequest, "input request cannot be null in order to map its values");
+	public static Track toTrack(CreateTrackRequest createRequest) {
+		Objects.requireNonNull(createRequest, "input request cannot be null in order to map its values");
 
 		var track = new Track();
-		track.setCountry(trackRequest.country());
-		track.setName(trackRequest.name());
-		track.setLengthKm(trackRequest.lengthKm());
+		track.setCountry(createRequest.country());
+		track.setName(createRequest.name());
+		track.setLengthKm(createRequest.lengthKm());
+		track.setFromDlc(createRequest.fromDlc());
 
 		return track;
 	}
 
-	public static Track toTrack(UpdateTrackRequest trackRequest) {
-		Objects.requireNonNull(trackRequest, "input request cannot be null in order to map its values");
+	public static Track toTrack(UpdateTrackRequest updateRequest) {
+		Objects.requireNonNull(updateRequest, "input request cannot be null in order to map its values");
 
 		var track = new Track();
-		track.setCountry(trackRequest.country());
-		track.setName(trackRequest.name());
-		track.setLengthKm(trackRequest.lengthKm());
+		track.setCountry(updateRequest.country());
+		track.setName(updateRequest.name());
+		track.setLengthKm(updateRequest.lengthKm());
+		track.setFromDlc(updateRequest.fromDlc());
 
 		return track;
 	}

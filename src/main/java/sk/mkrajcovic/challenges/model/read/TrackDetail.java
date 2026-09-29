@@ -11,5 +11,6 @@ public interface TrackDetail {
 	String getName();
 	BigDecimal getLengthKm();
 	SimulatorType getSimulatorType();
+	boolean getFromDlc();
 
 }

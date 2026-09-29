@@ -74,6 +74,9 @@ class TrackMapperTest {
 			}
 
 			@Override
+			public boolean getFromDlc() { return false; }
+
+			@Override
 			public SimulatorType getSimulatorType() {
 				return SimulatorType.ASSETTO_CORSA;
 			}
@@ -105,7 +108,8 @@ class TrackMapperTest {
 			"Slovakia Ring",
 			"Slovakia",
 			VALID_LENGTH_KM,
-			1);
+			1,
+			true);
 
 		var track = TrackMapper.toTrack(request);
 
@@ -131,7 +135,8 @@ class TrackMapperTest {
 		var request = new UpdateTrackRequest(
 			"Slovakia Ring",
 			"Slovakia",
-			VALID_LENGTH_KM);
+			VALID_LENGTH_KM,
+			true);
 
 		var track = TrackMapper.toTrack(request);
 

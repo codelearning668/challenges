@@ -10,5 +10,5 @@ public class SearchTracksCriteria {
 	private String name;
 	private Double lengthKm;
 	private Integer simulatorId;
-
+	private Boolean fromDlc;
 }

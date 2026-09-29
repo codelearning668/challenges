@@ -51,6 +51,9 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         AND (:#{#criteria.carName} IS NULL OR c.nameSearch LIKE %:#{#criteria.carName}%)
         AND (:#{#criteria.bestParticipantName} IS NULL OR ch.bestParticipantNameSearch LIKE %:#{#criteria.bestParticipantName}%)
         AND (:#{#criteria.simulatorId} IS NULL OR s.id = :#{#criteria.simulatorId})
+        AND (:#{#criteria.isActive} IS NULL
+            OR (:#{#criteria.isActive} = TRUE AND ch.endDate >= CAST(now() AS date))
+            OR (:#{#criteria.isActive} = FALSE AND ch.endDate < CAST(now() AS date)))
     """)
 	public List<ChallengeDetail> findChallenges(@Param("criteria") SearchChallengesCriteria criteria);
 

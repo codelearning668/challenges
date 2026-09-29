@@ -9,11 +9,10 @@ public class SearchCarsCriteria {
 	
 	private String brand;
 	private String name;
-
 	private Integer horsePower;
 	private Integer torque;
-
 	private WheelDrive wheelDrive;
 	private Integer simulatorId;
+	private Boolean fromDlc;
 
 }

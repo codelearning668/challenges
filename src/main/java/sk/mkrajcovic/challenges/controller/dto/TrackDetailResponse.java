@@ -8,6 +8,7 @@ public record TrackDetailResponse(
 	String country,
 	String name,
 	BigDecimal lengthKm,
-	String simulatorName
+	String simulatorName,
+	boolean fromDlc
 
 ) { }
