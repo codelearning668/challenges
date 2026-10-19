@@ -6,9 +6,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeSummaryResponse;
+import sk.mkrajcovic.challenges.controller.dto.ConversationEntryDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ParticipantDetailResponse;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.model.ConversationEntry;
 import sk.mkrajcovic.challenges.model.Participant;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
@@ -44,7 +46,12 @@ public final class ChallengeMapper {
 			.map(ChallengeMapper::toParticipantDetailResponse)
 			.toList();
 
+		var conversationDetails = challenge.getConversation().stream()
+			.map(ChallengeMapper::toConversationEntryDetailResponse)
+			.toList();
+
 		challengeDetail.getParticipants().addAll(participantDetails);
+		challengeDetail.getConversation().addAll(conversationDetails);
 
 		return challengeDetail;
 	}
@@ -56,6 +63,17 @@ public final class ChallengeMapper {
 			participant.getId(),
 			participant.getName(),
 			participant.getBestLapTime()
+		);
+	}
+
+	private static ConversationEntryDetailResponse toConversationEntryDetailResponse(ConversationEntry conversationEntry) {
+		return new ConversationEntryDetailResponse(
+			conversationEntry.getId(),
+			conversationEntry.getParentEntryId(),
+			conversationEntry.getContent(),
+			conversationEntry.getParticipantName(),
+			conversationEntry.getParticipantLapTimeAtPosting(),
+			conversationEntry.getCreatedAt()
 		);
 	}
 

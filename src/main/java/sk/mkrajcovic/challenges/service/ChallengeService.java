@@ -24,8 +24,8 @@ import sk.mkrajcovic.challenges.context.CallContext;
 import sk.mkrajcovic.challenges.exception.BusinessViolation;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.exception.ResourceNotFound;
-import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Car;
+import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.ChallengeDetail;
 import sk.mkrajcovic.challenges.repository.persistence.ChallengeRepository;
@@ -41,6 +41,7 @@ public class ChallengeService {
 	private final TrackService trackService;
 	private final CarService carService;
 	private final ParticipantService participantService;
+	private final ConversationService conversationService;
 
 	private CallContext callContext;
 
@@ -239,6 +240,47 @@ public class ChallengeService {
 		if (!isRegistered(participantName, challenge)) {
 			throw new Conflict(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE);
 		}
+	}
+
+	/**
+	 * Creates a top-level conversation entry in the specified challenge.
+	 *
+	 * @param challengeId ID of the challenge
+	 * @param message content of the conversation entry
+	 * @throws ResourceNotFound  if no challenge exists with the specified ID
+	 * @throws BusinessViolation if the challenge is closed
+	 * @throws Conflict if the current participant is not registered for the challenge
+	 * @return id of the created entry
+	 */
+	@Transactional
+	public Integer createConversationEntry(Integer challengeId, String message) {
+		return createConversationEntry(challengeId, message, null);
+	}
+
+	/**
+	 * Creates a conversation entry in the specified challenge, optionally as a
+	 * reply to another entry.
+	 * <p>
+	 * The challenge must be active, and the current participant must be registered
+	 * for it. When a parent entry ID is supplied, it must identify an entry in the
+	 * same challenge.
+	 *
+	 * @param challengeId ID of the challenge
+	 * @param message content of the conversation entry
+	 * @param parentEntryId ID of the parent entry, or {@code null} for a top-level entry
+	 * @throws ResourceNotFound if no challenge exists with the specified ID
+	 * @throws BusinessViolation if the challenge is closed, or the parent entry does not belong to the challenge
+	 * @throws Conflict if the current participant is not registered for the challenge
+	 * @return id of the created entry
+	 */
+	@Transactional
+	public Integer createConversationEntry(Integer challengeId, String message, Integer parentEntryId) {
+		var challenge = getExistingEntityById(repository, challengeId);
+
+		verifyChallengeIsActive(challenge, "Cannot add message to closed challenge");
+		verifyAlreadyRegistered(callContext.getCurrentUser(), challenge);
+
+		return conversationService.createConversationEntry(challenge, callContext.getCurrentUser(), message, parentEntryId);
 	}
 
 }

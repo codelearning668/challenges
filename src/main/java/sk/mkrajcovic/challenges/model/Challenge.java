@@ -4,6 +4,7 @@ import static lombok.AccessLevel.NONE;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -14,6 +15,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
@@ -47,6 +49,14 @@ public class Challenge extends BaseEntity {
 	@JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
 	private Duration bestLapTime;
 
+	/**
+	 * Conversation entries are ordered chronologically from earliest to latest.
+	 * Entries with the same creation time are ordered by ID.
+	 */
+	@OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE)
+	@OrderBy("createdAt ASC, id ASC")
+	private List<ConversationEntry> conversation;
+
 	@Column(length = 100)
 	@Setter(NONE)
 	@Getter(NONE)
@@ -57,4 +67,5 @@ public class Challenge extends BaseEntity {
 	private void runPreSaveOperations() {
 		this.bestParticipantNameSearch = Text.normalizeForSearch(bestParticipantName);
 	}
+
 }

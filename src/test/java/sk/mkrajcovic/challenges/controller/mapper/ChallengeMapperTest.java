@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.Challenge;
+import sk.mkrajcovic.challenges.model.ConversationEntry;
 import sk.mkrajcovic.challenges.model.Participant;
 import sk.mkrajcovic.challenges.model.Simulator;
 import sk.mkrajcovic.challenges.model.SimulatorType;
@@ -44,6 +47,7 @@ class ChallengeMapperTest {
 		challenge.setBestParticipantName("John");
 		challenge.setBestLapTime(null);
 		challenge.setParticipants(Set.of(participant));
+		challenge.setConversation(List.of());
 
 		var response = ChallengeMapper.toDetailResponse(challenge);
 
@@ -74,9 +78,42 @@ class ChallengeMapperTest {
 		challenge.setTrack(createTrack());
 		challenge.setCar(createCar());
 		challenge.setParticipants(Set.of());
+		challenge.setConversation(List.of());
 
 		var response = ChallengeMapper.toDetailResponse(challenge);
 		assertTrue(response.getParticipants().isEmpty());
+	}
+
+	@Test
+	void shouldMapConversationEntriesAndPreserveTheirChronologicalOrder() throws ReflectiveOperationException {
+		var firstCreatedAt = LocalDateTime.of(2026, 10, 19, 14, 32, 10);
+		var replyCreatedAt = firstCreatedAt.plusMinutes(2);
+		var lapTime = Duration.ofMinutes(1).plusSeconds(42).plusMillis(537);
+
+		var firstEntry = createConversationEntry(81, null, "Good luck everyone!", "John", lapTime, firstCreatedAt);
+		var reply = createConversationEntry(82, 81, "Thanks, you too!", "Michael", null, replyCreatedAt);
+
+		var challenge = new Challenge();
+		challenge.setTrack(createTrack());
+		challenge.setCar(createCar());
+		challenge.setParticipants(Set.of());
+		challenge.setConversation(List.of(firstEntry, reply));
+
+		var response = ChallengeMapper.toDetailResponse(challenge);
+
+		assertAll(
+			() -> assertEquals(2, response.getConversation().size()),
+			() -> assertEquals(81, response.getConversation().get(0).entryId()),
+			() -> assertEquals("Good luck everyone!", response.getConversation().get(0).message()),
+			() -> assertEquals("John", response.getConversation().get(0).participantName()),
+			() -> assertEquals(lapTime, response.getConversation().get(0).participantLapTimeAtPosting()),
+			() -> assertEquals(firstCreatedAt, response.getConversation().get(0).createdAt()),
+			() -> assertEquals(82, response.getConversation().get(1).entryId()),
+			() -> assertEquals(81, response.getConversation().get(1).parentEntryId()),
+			() -> assertEquals("Thanks, you too!", response.getConversation().get(1).message()),
+			() -> assertEquals("Michael", response.getConversation().get(1).participantName()),
+			() -> Assertions.assertNull(response.getConversation().get(1).participantLapTimeAtPosting()),
+			() -> assertEquals(replyCreatedAt, response.getConversation().get(1).createdAt()));
 	}
 
 	@Test
@@ -206,5 +243,26 @@ class ChallengeMapperTest {
 		var simulator = new Simulator();
 		simulator.setType(SimulatorType.ASSETTO_CORSA);
 		return simulator;
+	}
+
+	private static ConversationEntry createConversationEntry(
+			Integer id,
+			Integer parentEntryId,
+			String content,
+			String participantName,
+			Duration lapTime,
+			LocalDateTime createdAt) throws ReflectiveOperationException {
+
+		var entry = new ConversationEntry();
+		EntityTestUtils.setId(entry, id);
+		entry.setParentEntryId(parentEntryId);
+		entry.setContent(content);
+		entry.setParticipantName(participantName);
+		entry.setParticipantLapTimeAtPosting(lapTime);
+
+		var createdAtField = entry.getClass().getSuperclass().getDeclaredField("createdAt");
+		createdAtField.setAccessible(true);
+		createdAtField.set(entry, createdAt);
+		return entry;
 	}
 }

@@ -26,6 +26,7 @@ import sk.mkrajcovic.challenges.controller.api.ChallengeApi;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeDetailResponse;
 import sk.mkrajcovic.challenges.controller.dto.ChallengeSummaryResponse;
 import sk.mkrajcovic.challenges.controller.dto.CreateChallengeRequest;
+import sk.mkrajcovic.challenges.controller.dto.CreateConversationEntryRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateChallengeEndDateRequest;
 import sk.mkrajcovic.challenges.controller.dto.UpdateLapTimeRequest;
 import sk.mkrajcovic.challenges.controller.mapper.ChallengeMapper;
@@ -83,14 +84,20 @@ class ChallengeController implements ChallengeApi {
 	@RolesAllowed({ADMIN, PARTICIPANT})
 	@PatchMapping(path = "/{challengeId}/participant", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(NO_CONTENT)
-	public void updateLapTime(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateLapTimeRequest request) {
+	public void updateLapTime(
+			@PathVariable @Positive Integer challengeId,
+			@Valid @RequestBody UpdateLapTimeRequest request) {
+
 		participantService.updateLapTime(challengeId, request.participantName(), request.newLapTime());
 	}
 
 	@RolesAllowed(ADMIN)
 	@PatchMapping(path = "/{challengeId}", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(NO_CONTENT)
-	public void updateChallengeEndDate(@PathVariable @Positive Integer challengeId, @Valid @RequestBody UpdateChallengeEndDateRequest request) {
+	public void updateChallengeEndDate(
+			@PathVariable @Positive Integer challengeId,
+			@Valid @RequestBody UpdateChallengeEndDateRequest request) {
+
 		challengeService.updateChallengeEndDate(challengeId, request.endDate());
 	}
 
@@ -100,4 +107,26 @@ class ChallengeController implements ChallengeApi {
 	public void deleteChallenge(@PathVariable @Positive Integer challengeId) {
 		challengeService.deleteChallenge(challengeId);
 	}
+
+	@RolesAllowed(PARTICIPANT)
+	@PostMapping(path = "/{challengeId}/conversation", consumes = APPLICATION_JSON_VALUE)
+	public CreatedResponseEntity addConversationEntry(
+			@PathVariable @Positive Integer challengeId,
+			@Valid @RequestBody CreateConversationEntryRequest request) {
+
+		Integer entryId = challengeService.createConversationEntry(challengeId, request.message());
+		return CreatedResponseEntity.create("/conversation-entries/{entryId}", entryId);
+	}
+
+	@RolesAllowed(PARTICIPANT)
+	@PostMapping(path = "/{challengeId}/conversation/{parentEntryId}", consumes = APPLICATION_JSON_VALUE)
+	public CreatedResponseEntity addConversationEntry(
+			@PathVariable @Positive Integer challengeId,
+			@PathVariable @Positive Integer parentEntryId,
+			@Valid @RequestBody CreateConversationEntryRequest request) {
+
+		Integer entryId = challengeService.createConversationEntry(challengeId, request.message(), parentEntryId);
+		return CreatedResponseEntity.create("/conversation-entries/{entryId}", entryId);
+	}
+
 }

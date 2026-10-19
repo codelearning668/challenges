@@ -1,5 +1,7 @@
 package sk.mkrajcovic.challenges.controller.dto;
 
+import static lombok.AccessLevel.NONE;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -7,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,10 +49,16 @@ public class ChallengeDetailResponse {
 	private Integer carHorsePower;
 	private Integer carTorque;
 
-	@Setter(AccessLevel.NONE)
+	@Setter(NONE)
 	private List<ParticipantDetailResponse> participants;
+
+	@Setter(NONE)
+	@Schema(description = "Conversation entries ordered from earliest to latest by creation time, with entry ID ascending as the tie-breaker.")
+	private List<ConversationEntryDetailResponse> conversation;
 
 	public ChallengeDetailResponse() {
 		participants = new ArrayList<>();
+		conversation = new ArrayList<>();
 	}
+
 }
