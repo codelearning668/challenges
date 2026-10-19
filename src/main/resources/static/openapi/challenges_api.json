@@ -15,6 +15,9 @@
     "name" : "System",
     "description" : "Services exposing information about the system availability, environment, the authenticated user etc."
   }, {
+    "name" : "Conversation entries",
+    "description" : "Administrative operations for independently identified challenge conversation entries."
+  }, {
     "name" : "Challenges",
     "description" : "Services for browsing and administering racing-simulator challenges, including participant registration and lap-time results."
   }, {
@@ -326,6 +329,19 @@
           }
         } ],
         "responses" : {
+          "400" : {
+            "description" : "Invalid search criteria.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ChallengeSummaryResponse"
+                  }
+                }
+              }
+            }
+          },
           "200" : {
             "description" : "Challenges matching the supplied criteria.",
             "content" : {
@@ -374,16 +390,6 @@
           "required" : true
         },
         "responses" : {
-          "201" : {
-            "description" : "Challenge created. The Location header identifies the new challenge.",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
           "404" : {
             "description" : "The selected car or track does not exist.",
             "content" : {
@@ -406,6 +412,36 @@
           },
           "422" : {
             "description" : "The submitted end date does not satisfy the challenge rules.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Challenge created.",
+            "headers" : {
+              "Location" : {
+                "description" : "URI of the created challenge, `/challenges/{challengeId}`.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "format" : "uri"
+                }
+              }
+            },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request.",
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -442,6 +478,9 @@
           "422" : {
             "description" : "The challenge is closed, or the participant is not eligible to join multiple active challenges."
           },
+          "400" : {
+            "description" : "Invalid path parameter."
+          },
           "409" : {
             "description" : "The authenticated participant is already registered for the challenge."
           },
@@ -474,11 +513,257 @@
           "422" : {
             "description" : "The challenge is closed."
           },
+          "400" : {
+            "description" : "Invalid path parameter."
+          },
           "404" : {
             "description" : "No challenge exists with the supplied ID."
           },
           "204" : {
             "description" : "Participant removed from the challenge."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}/conversation" : {
+      "post" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Post a conversation entry",
+        "description" : "Creates a top-level conversation entry in an active challenge for the authenticated registered participant. The participant name and best lap time are captured with the entry as historical values. Requires the `PARTICIPANT` role.",
+        "operationId" : "addConversationEntry",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "description" : "ID of the challenge receiving the conversation entry.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The conversation message, up to 1000 characters.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateConversationEntryRequest"
+              },
+              "example" : {
+                "message" : "Good luck everyone!"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "403" : {
+            "description" : "The authenticated user does not have the `PARTICIPANT` role.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "The authenticated participant is not registered for the challenge.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "The challenge is closed.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authentication is required.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Conversation entry created.",
+            "headers" : {
+              "Location" : {
+                "description" : "URI of the created conversation entry, `/conversation-entries/{entryId}`.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "format" : "uri"
+                }
+              }
+            },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request or path parameter.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/challenges/{challengeId}/conversation/{parentEntryId}" : {
+      "post" : {
+        "tags" : [ "Challenges" ],
+        "summary" : "Reply to a conversation entry",
+        "description" : "Creates a reply to an entry in the same active challenge. The authenticated participant must be registered for the challenge. The participant name and best lap time are captured with the reply as historical values. Requires the `PARTICIPANT` role.",
+        "operationId" : "addConversationEntry_1",
+        "parameters" : [ {
+          "name" : "challengeId",
+          "in" : "path",
+          "description" : "ID of the challenge receiving the reply.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "parentEntryId",
+          "in" : "path",
+          "description" : "ID of the conversation entry being replied to.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The reply message, up to 1000 characters.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateConversationEntryRequest"
+              },
+              "example" : {
+                "message" : "Thanks, looking forward to it!"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "403" : {
+            "description" : "The authenticated user does not have the `PARTICIPANT` role.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "The authenticated participant is not registered for the challenge.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authentication is required.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "The challenge is closed, or the parent entry does not belong to this challenge.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Reply created.",
+            "headers" : {
+              "Location" : {
+                "description" : "URI of the created conversation entry, `/conversation-entries/{entryId}`.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "format" : "uri"
+                }
+              }
+            },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No challenge exists with the supplied ID.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request or path parameter.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
           }
         },
         "security" : [ {
@@ -569,7 +854,7 @@
       "get" : {
         "tags" : [ "Challenges" ],
         "summary" : "Retrieve challenge details",
-        "description" : "Returns the selected challenge, its car and track, the current leaderboard, and all registered participants.",
+        "description" : "Returns the selected challenge, its car and track, the current leaderboard, registered participants, and conversation entries in chronological order from earliest to latest.",
         "operationId" : "getChallenge",
         "parameters" : [ {
           "name" : "challengeId",
@@ -581,6 +866,9 @@
           }
         } ],
         "responses" : {
+          "404" : {
+            "description" : "No challenge exists with the supplied ID."
+          },
           "200" : {
             "description" : "Challenge details.",
             "content" : {
@@ -607,20 +895,28 @@
                     "participantId" : 31,
                     "participantName" : "racer1",
                     "participantBestLapTime" : "01:42.537"
+                  } ],
+                  "conversation" : [ {
+                    "entryId" : 81,
+                    "parentEntryId" : null,
+                    "message" : "Good luck everyone!",
+                    "participantName" : "racer1",
+                    "participantLapTimeAtPosting" : "01:42.537",
+                    "createdAt" : "2026-10-19T14:32:10"
+                  }, {
+                    "entryId" : 82,
+                    "parentEntryId" : 81,
+                    "message" : "Thanks, you too!",
+                    "participantName" : "racer2",
+                    "participantLapTimeAtPosting" : null,
+                    "createdAt" : "2026-10-19T14:35:42"
                   } ]
                 }
               }
             }
           },
-          "404" : {
-            "description" : "No challenge exists with the supplied ID.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ChallengeDetailResponse"
-                }
-              }
-            }
+          "400" : {
+            "description" : "Invalid path parameter."
           }
         }
       },
@@ -644,6 +940,9 @@
           },
           "422" : {
             "description" : "The challenge is closed."
+          },
+          "400" : {
+            "description" : "Invalid path parameter."
           },
           "404" : {
             "description" : "No challenge exists with the supplied ID."
@@ -690,6 +989,9 @@
           },
           "404" : {
             "description" : "No challenge exists with the supplied ID."
+          },
+          "400" : {
+            "description" : "Invalid request or path parameter."
           }
         },
         "security" : [ {
@@ -739,6 +1041,9 @@
           },
           "403" : {
             "description" : "A non-administrator attempted to update another participant's lap time."
+          },
+          "400" : {
+            "description" : "Invalid request or path parameter."
           }
         },
         "security" : [ {
@@ -805,12 +1110,49 @@
           }
         }
       }
+    },
+    "/conversation-entries/{entryId}" : {
+      "delete" : {
+        "tags" : [ "Conversation entries" ],
+        "summary" : "Delete a conversation entry",
+        "description" : "Deletes the selected conversation entry. Any direct replies are preserved and become top-level entries. Requires the `ADMIN` role.",
+        "operationId" : "deleteConversationEntry",
+        "parameters" : [ {
+          "name" : "entryId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "No conversation entry exists with the supplied ID."
+          },
+          "401" : {
+            "description" : "Authentication is required."
+          },
+          "400" : {
+            "description" : "The entry ID is not positive."
+          },
+          "204" : {
+            "description" : "Conversation entry deleted; no response body is returned."
+          },
+          "403" : {
+            "description" : "The authenticated user does not have the `ADMIN` role."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
     "schemas" : {
       "UpdateTrackRequest" : {
-        "required" : [ "name" ],
+        "required" : [ "fromDlc", "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -825,11 +1167,14 @@
           },
           "lengthKm" : {
             "type" : "number"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
       "UpdateCarRequest" : {
-        "required" : [ "brand", "name" ],
+        "required" : [ "brand", "fromDlc", "name" ],
         "type" : "object",
         "properties" : {
           "brand" : {
@@ -853,6 +1198,9 @@
           "drive" : {
             "type" : "string",
             "enum" : [ "FRONT", "REAR", "ALL" ]
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -873,7 +1221,7 @@
         }
       },
       "CreateTrackRequest" : {
-        "required" : [ "name", "simulatorId" ],
+        "required" : [ "fromDlc", "name", "simulatorId" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -892,6 +1240,9 @@
           "simulatorId" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -913,8 +1264,19 @@
           }
         }
       },
+      "CreateConversationEntryRequest" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "maxLength" : 1000,
+            "type" : "string",
+            "description" : "Conversation message, up to 1000 characters.",
+            "example" : "Good luck everyone!"
+          }
+        }
+      },
       "CreateCarRequest" : {
-        "required" : [ "brand", "name", "simulatorId" ],
+        "required" : [ "brand", "fromDlc", "name", "simulatorId" ],
         "type" : "object",
         "properties" : {
           "brand" : {
@@ -942,6 +1304,9 @@
           "simulatorId" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1003,6 +1368,9 @@
           "simulatorId" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1024,6 +1392,9 @@
           },
           "simulatorName" : {
             "type" : "string"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1064,6 +1435,9 @@
           "simulatorId" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "isActive" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1165,8 +1539,56 @@
             "items" : {
               "$ref" : "#/components/schemas/ParticipantDetailResponse"
             }
+          },
+          "conversation" : {
+            "type" : "array",
+            "description" : "Conversation entries ordered from earliest to latest by creation time, with entry ID ascending as the tie-breaker.",
+            "items" : {
+              "$ref" : "#/components/schemas/ConversationEntryDetailResponse"
+            }
           }
         }
+      },
+      "ConversationEntryDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "entryId" : {
+            "type" : "integer",
+            "description" : "Unique identifier of the conversation entry.",
+            "format" : "int32",
+            "example" : 81
+          },
+          "parentEntryId" : {
+            "type" : "integer",
+            "description" : "ID of the parent entry for a reply; null for a top-level entry.",
+            "format" : "int32",
+            "nullable" : true,
+            "example" : 80
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "Message content posted by the participant.",
+            "example" : "Good luck everyone!"
+          },
+          "participantName" : {
+            "type" : "string",
+            "description" : "Participant name captured when the entry was posted.",
+            "example" : "racer1"
+          },
+          "participantLapTimeAtPosting" : {
+            "pattern" : "^\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Participant's best lap time captured when the entry was posted, if available; serialized in canonical mm:ss.SSS format.",
+            "nullable" : true,
+            "example" : "01:42.537"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "description" : "Local date-time when the entry was created.",
+            "format" : "date-time"
+          }
+        },
+        "description" : "Conversation entries ordered from earliest to latest by creation time, with entry ID ascending as the tie-breaker."
       },
       "ParticipantDetailResponse" : {
         "type" : "object",
@@ -1211,6 +1633,9 @@
           "simulatorId" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1241,6 +1666,9 @@
           },
           "simulatorName" : {
             "type" : "string"
+          },
+          "fromDlc" : {
+            "type" : "boolean"
           }
         }
       }
