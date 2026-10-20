@@ -87,7 +87,7 @@ export function TrackFilters({
                     >
                         <option value="">Any</option>
                         <option value="true">DLC only</option>
-                        <option value="false">Base game only</option>
+                        <option value="false">Base sim only</option>
                     </select>
                 </div>
             </div>

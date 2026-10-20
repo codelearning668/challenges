@@ -146,7 +146,7 @@ export function ChallengeForm() {
               <Select
                   label="Availability"
                   options={[
-                    { value: 'false', label: 'Base game only' },
+                    { value: 'false', label: 'Base sim only' },
                     { value: 'true', label: 'DLC only' },
                   ]}
                   placeholder="Any"

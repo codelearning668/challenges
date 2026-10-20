@@ -13,8 +13,6 @@ import type {
 
 type StatusFilter = 'all' | 'active' | 'closed'
 
-// ---------- stat tile ----------
-
 interface StatTileProps {
     icon: React.ElementType
     label: string
@@ -43,8 +41,6 @@ function StatTile({ icon: Icon, label, value, tone }: StatTileProps) {
         </div>
     )
 }
-
-// ---------- status pill group ----------
 
 function StatusFilterPills({
                                value,
@@ -95,8 +91,6 @@ function StatusFilterPills({
     )
 }
 
-// ---------- main component ----------
-
 export function AdminDashboard() {
     const { data: listData, isLoading: listLoading } = useQuery({
         queryKey: ['challenges'],
@@ -125,8 +119,6 @@ export function AdminDashboard() {
         [detailQueries],
     )
 
-    // ---------- stats ----------
-
     const stats = useMemo(() => {
         const now = Date.now()
         const weekMs = 7 * 24 * 60 * 60 * 1000
@@ -149,8 +141,6 @@ export function AdminDashboard() {
         }
         return { active, closed, endingSoon, totalRacers }
     }, [challenges])
-
-    // ---------- filter & search ----------
 
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
     const [search, setSearch] = useState('')
@@ -175,15 +165,12 @@ export function AdminDashboard() {
             )
         }
 
-        // Active first, then by soonest end date.
+        // Sort: Active first, then newest first
         return [...list].sort((a, b) => {
             const aActive = isChallengeActive(a.challengeEndDate)
             const bActive = isChallengeActive(b.challengeEndDate)
             if (aActive !== bActive) return aActive ? -1 : 1
-            return (
-                new Date(a.challengeEndDate).getTime() -
-                new Date(b.challengeEndDate).getTime()
-            )
+            return new Date(b.challengeEndDate).getTime() - new Date(a.challengeEndDate).getTime()
         })
     }, [challenges, statusFilter, dSearch])
 
@@ -204,7 +191,6 @@ export function AdminDashboard() {
                 </p>
             </div>
 
-            {/* Stat tiles */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <StatTile
                     icon={Flag}
@@ -226,7 +212,6 @@ export function AdminDashboard() {
                 />
             </div>
 
-            {/* Toolbar */}
             <Card className="mb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
                     <StatusFilterPills
@@ -251,7 +236,6 @@ export function AdminDashboard() {
                 </div>
             </Card>
 
-            {/* Challenge list */}
             {isLoading ? (
                 <Card>
                     <p className="text-center text-gray-500 dark:text-gray-400 py-10">

@@ -21,6 +21,7 @@ import type {
   UpdateLapTimeRequest,
   SearchChallengesCriteria,
 } from '@/types/challenge'
+import type { ParticipantTimelineResponse } from '@/types/participant'
 import type { UserInfoResponse, UserRegistrationRequest } from '@/types/user'
 import type { SimulatorDetailResponse } from '@/types/simulator'
 
@@ -99,7 +100,6 @@ export const carApi = {
 
   create: (body: CreateCarRequest) => api.post<void>('/cars', body),
 
-  // PUT, 204 No Content
   update: (carId: number, body: UpdateCarRequest) =>
       api.put<void>(`/cars/${carId}`, body),
 }
@@ -112,7 +112,6 @@ export const trackApi = {
 
   create: (body: CreateTrackRequest) => api.post<void>('/tracks', body),
 
-  // PUT, 204 No Content
   update: (trackId: number, body: UpdateTrackRequest) =>
       api.put<void>(`/tracks/${trackId}`, body),
 }
@@ -126,7 +125,6 @@ export const challengeApi = {
 
   create: (body: CreateChallengeRequest) => api.post<void>('/challenges', body),
 
-  // PATCH (was PUT)
   updateEndDate: (challengeId: number, body: UpdateChallengeEndDateRequest) =>
       api.patch<void>(`/challenges/${challengeId}`, body),
 
@@ -139,9 +137,22 @@ export const challengeApi = {
   quit: (challengeId: number) =>
       api.delete<void>(`/challenges/${challengeId}/registration`),
 
-  // PATCH (was PUT)
   updateLapTime: (challengeId: number, body: UpdateLapTimeRequest) =>
       api.patch<void>(`/challenges/${challengeId}/participant`, body),
+
+  addConversationEntry: (challengeId: number, message: string) =>
+      api.post<void>(`/challenges/${challengeId}/conversation`, { message }),
+
+  replyToConversationEntry: (challengeId: number, parentEntryId: number, message: string) =>
+      api.post<void>(`/challenges/${challengeId}/conversation/${parentEntryId}`, { message }),
+
+  deleteConversationEntry: (entryId: number) =>
+      api.delete<void>(`/conversation-entries/${entryId}`),
+}
+
+export const participantApi = {
+  getTimeline: (participantId: number) =>
+      api.get<ParticipantTimelineResponse[]>(`/participant/${participantId}/timeline`),
 }
 
 export const userApi = {
