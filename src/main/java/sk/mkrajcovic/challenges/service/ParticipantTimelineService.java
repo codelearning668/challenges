@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata.RevisionType;
@@ -22,54 +21,75 @@ import sk.mkrajcovic.challenges.repository.persistence.revision.ParticipantRevis
 public class ParticipantTimelineService {
 
 	private final ParticipantRevisionRepository revisionRepository;
-//TODO: refactooooooooooooooooor!!!
-	// committed in a hurry so that the UI can implement this feature..
+
+	/**
+	 * Retrieves a participant's lap-time history, ordered from newest to oldest.
+	 * <p>
+	 * Only update revisions with a defined best lap time are included. Each entry
+	 * contains the difference from the preceding eligible revision's lap time. The
+	 * first entry in chronological order has a gap of {@link Duration#ZERO}.
+	 *
+	 * @param participantId the ID of the participant
+	 * @return an immutable list of timeline entries, newest first; an empty list if
+	 *         no eligible revisions exist
+	 */
 	@Transactional(readOnly = true)
 	public List<ParticipantTimelineEntry> getTimeline(Integer participantId) {
-		
-		List<Revision<Integer, Participant>> revisions = revisionRepository.findRevisions(participantId).stream()
+		List<Participant> lapTimeRevisions = getParticipantLapTimeRevisions(participantId);
+
+		if (lapTimeRevisions.isEmpty()) {
+			return List.of();
+		}
+		return computeTimeline(lapTimeRevisions);
+	}
+
+	private List<Participant> getParticipantLapTimeRevisions(Integer participantId) {
+		return revisionRepository.findRevisions(participantId).stream()
+			// in our case, creation does never contain any lap time, nor deletion
 			.filter(this::isUpdateOperation)
+			// revision numbers provide a more reliable chronological order than modifiedAt
 			.sorted(Comparator.comparingInt(Revision::getRequiredRevisionNumber))
-			.collect(Collectors.toList());
-
-		if (revisions.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		// a non-null latest value is current; a null latest value records that the time was removed
-		// TODO: do not remove the last time
-//		if (!revisions.isEmpty() && revisions.getLast().getEntity().getBestLapTime() != null) {
-//			revisions.removeLast();
-//		}
-
-		List<Participant> historicalTimes = revisions.stream()
 			.map(Revision::getEntity)
-			.filter(participant -> participant.getBestLapTime() != null)
+			// gaps cannot be computed for revisions without a lap time
+			.filter(this::hasLapTimeDefined)
 			.toList();
-
-		List<ParticipantTimelineEntry> timeline = new ArrayList<>();
-		Duration previousLapTime = null;
-
-		for (Participant participant : historicalTimes) {
-			Duration lapTime = participant.getBestLapTime();
-			Duration signedGap = previousLapTime == null
-				? Duration.ZERO
-				: lapTime.minus(previousLapTime);
-
-			timeline.add(new ParticipantTimelineEntry(
-				lapTime,
-				participant.getModifiedAt(),
-				signedGap
-			));
-			previousLapTime = lapTime;
-		}
-
-		Collections.reverse(timeline);
-		return List.copyOf(timeline);
 	}
 
 	private boolean isUpdateOperation(Revision<Integer, Participant> revision) {
 		var revisionType = revision.getMetadata().getRevisionType();
 		return revisionType == RevisionType.UPDATE;
+	}
+
+	private boolean hasLapTimeDefined(Participant participant) {
+		return participant.getBestLapTime() != null;
+	}
+
+	private List<ParticipantTimelineEntry> computeTimeline(List<Participant> revisions) {
+		List<ParticipantTimelineEntry> timeline = new ArrayList<>();
+		// no previous lap exists for the first revision
+		Duration previousLapTime = null;
+
+		for (Participant participant : revisions) {
+			Duration lapTime = participant.getBestLapTime();
+			timeline.add(createTimelineEntry(participant, lapTime, previousLapTime));
+			previousLapTime = lapTime;
+		}
+		// the newest revisions must come first
+		Collections.reverse(timeline);
+		return List.copyOf(timeline);
+	}
+
+	private ParticipantTimelineEntry createTimelineEntry(Participant participant, Duration lapTime, Duration previousLapTime) {
+		return new ParticipantTimelineEntry(
+			lapTime,
+			participant.getModifiedAt(),
+			calculateLapTimeGap(lapTime, previousLapTime)
+		);
+	}
+
+	private Duration calculateLapTimeGap(Duration lapTime, Duration previousLapTime) {
+		return previousLapTime != null
+			? lapTime.minus(previousLapTime)
+			: Duration.ZERO;
 	}
 }
