@@ -26,9 +26,12 @@ public class JacksonConfig {
 	 * format for all {@link Duration} values.
 	 * <p>
 	 * Durations are deserialized from {@code m:ss.SSS}-style values and serialized
-	 * back to the canonical {@code mm:ss.SSS} representation.<br>
+	 * back to the canonical {@code mm:ss.SSS} representation. Negative durations
+	 * are serialized with one leading minus sign, while the deserializer continues
+	 * to accept only non-negative lap-time input.
 	 * For example, {@code "1:20.1"} is interpreted as {@code 1:20.100} and
-	 * serialized as {@code "01:20.100"}.
+	 * serialized as {@code "01:20.100"}; a negative duration is serialized as
+	 * {@code "-00:01.908"}.
 	 *
 	 * @return a Jackson customizer registering the global {@link Duration}
 	 *         serializer and deserializer
@@ -43,14 +46,15 @@ public class JacksonConfig {
 	}
 
 	/**
-	 * Serializes a {@link Duration} as a racing lap time in the canonical
+	 * Serializes a {@link Duration} as a signed racing lap-time value in the canonical
 	 * {@code mm:ss.SSS} format.
 	 * <p>
-	 * The duration is represented with minute, second, and millisecond components.
-	 * For example:
+	 * Negative durations receive one leading minus sign before the complete formatted
+	 * value. For example:
 	 * <ul>
 	 *  <li>{@code Duration.ofMillis(80100)} → {@code "01:20.100"}</li>
-	 *  <li>{@code Duration.ofMillis(83123)} → {@code "01:23.123"}</li>
+	 *  <li>{@code Duration.ofMillis(-1908)} → {@code "-00:01.908"}</li>
+	 *  <li>{@code Duration.ofMillis(-83345)} → {@code "-01:23.345"}</li>
 	 * </ul>
 	 * <p>
 	 * The serializer always produces three digits for milliseconds, ensuring a
@@ -62,7 +66,8 @@ public class JacksonConfig {
 		public void serialize(Duration duration, JsonGenerator generator, SerializerProvider provider)
 				throws IOException {
 
-			long totalMillis = duration.toMillis();
+			boolean negative = duration.isNegative();
+			long totalMillis = duration.abs().toMillis();
 
 			long minutes = totalMillis / 60_000;
 			long remainingMillis = totalMillis % 60_000;
@@ -70,7 +75,13 @@ public class JacksonConfig {
 			long seconds = remainingMillis / 1_000;
 			long milliseconds = remainingMillis % 1_000;
 
-			generator.writeString(String.format("%02d:%02d.%03d", minutes, seconds, milliseconds));
+			generator.writeString(String.format(
+				"%s%02d:%02d.%03d",
+				negative ? "-" : "",
+				minutes,
+				seconds,
+				milliseconds
+			));
 		}
 	}
 
