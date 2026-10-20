@@ -30,13 +30,10 @@ export function ChallengeConversation({
 
     const [newMessage, setNewMessage] = useState('')
     const [replyTo, setReplyTo] = useState<ConversationEntryDetailResponse | null>(null)
-
-    // State for highlighting the scrolled-to message
     const [highlightId, setHighlightId] = useState<number | null>(null)
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
-    // Auto-scroll strictly inside the chat container when new messages arrive
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
@@ -99,13 +96,12 @@ export function ChallengeConversation({
         if (e.key === 'Enter' && newMessage.trim() && canPostMessage) handleSend()
     }
 
-    // Scrolls to the specific message and highlights it briefly
     const scrollToMessage = (entryId: number) => {
         const el = document.getElementById(`msg-${entryId}`)
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' })
             setHighlightId(entryId)
-            setTimeout(() => setHighlightId(null), 2000) // remove highlight after 2s
+            setTimeout(() => setHighlightId(null), 2000)
         }
     }
 
@@ -145,7 +141,7 @@ export function ChallengeConversation({
                         return (
                             <div
                                 key={msg.entryId}
-                                id={`msg-${msg.entryId}`} // ID for scrolling
+                                id={`msg-${msg.entryId}`}
                                 className={`flex flex-col transition-all duration-500 rounded-2xl ${
                                     isMine ? 'items-end' : 'items-start'
                                 } ${highlightId === msg.entryId ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900 bg-white/50 dark:bg-gray-800/50' : ''}`}
@@ -234,8 +230,8 @@ export function ChallengeConversation({
                 ) : (
                     <>
                         {replyTo && (
-                            <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-900 rounded-t-lg px-3 py-2 text-xs border-l-2 border-primary-500 mb-2">
-                                <div className="truncate text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-900 rounded-t-lg px-3 py-2 text-xs border-l-2 border-primary-500 mb-2 text-gray-700 dark:text-gray-300">
+                                <div className="truncate">
                                     Replying to <span className="font-semibold">{replyTo.participantName}</span>: {replyTo.message}
                                 </div>
                                 <button
@@ -253,7 +249,7 @@ export function ChallengeConversation({
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 maxLength={1000}
                             />
                             <Button
