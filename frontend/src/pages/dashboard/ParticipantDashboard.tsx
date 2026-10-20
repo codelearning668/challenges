@@ -281,10 +281,13 @@ export function ParticipantDashboard() {
             if (!c || !user) return false
             return (c.participants ?? []).some((p) => p.participantName === user.username)
         })
-        .sort(
-            (a, b) =>
-                new Date(a.challengeEndDate).getTime() - new Date(b.challengeEndDate).getTime(),
-        )
+        // Sort: Active first, then newest first
+        .sort((a, b) => {
+            const aActive = isChallengeActive(a.challengeEndDate)
+            const bActive = isChallengeActive(b.challengeEndDate)
+            if (aActive !== bActive) return aActive ? -1 : 1
+            return new Date(b.challengeEndDate).getTime() - new Date(a.challengeEndDate).getTime()
+        })
 
     const joinedCount = myChallenges.length
 

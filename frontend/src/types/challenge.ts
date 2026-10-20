@@ -32,6 +32,7 @@ export interface ChallengeDetailResponse {
   carHorsePower: number | null
   carTorque: number | null
   participants: ParticipantDetailResponse[]
+  conversation: ConversationEntryDetailResponse[]
 }
 
 export interface SearchChallengesCriteria {
@@ -42,6 +43,7 @@ export interface SearchChallengesCriteria {
   carBrand?: string
   carName?: string
   simulatorId?: number
+  isActive?: boolean // NEW
 }
 
 export interface CreateChallengeRequest {
@@ -57,4 +59,13 @@ export interface UpdateChallengeEndDateRequest {
 export interface UpdateLapTimeRequest {
   participantName: string
   newLapTime: string | null
+}
+
+export interface ConversationEntryDetailResponse {
+  entryId: number
+  parentEntryId: number | null
+  message: string
+  participantName: string
+  participantLapTimeAtPosting: string | null
+  createdAt: string
 }

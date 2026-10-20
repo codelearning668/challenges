@@ -20,21 +20,21 @@ import type {
 } from '@/types/challenge'
 
 interface Filters {
-    endDate: string
     bestParticipantName: string
     trackCountry: string
     carBrand: string
     carName: string
     simulatorId: string
+    isActive: '' | 'true' | 'false'
 }
 
 const EMPTY_FILTERS: Filters = {
-    endDate: '',
     bestParticipantName: '',
     trackCountry: '',
     carBrand: '',
     carName: '',
     simulatorId: '',
+    isActive: '',
 }
 
 const filterInputCls =
@@ -78,12 +78,12 @@ export function ChallengeList() {
 
     const criteria: SearchChallengesCriteria = {
         ...(dSearch.trim() ? { trackName: dSearch.trim() } : {}),
-        ...(filters.endDate ? { endDate: filters.endDate } : {}),
         ...(dBest.trim() ? { bestParticipantName: dBest.trim() } : {}),
         ...(dTrackCountry.trim() ? { trackCountry: dTrackCountry.trim() } : {}),
         ...(dCarBrand.trim() ? { carBrand: dCarBrand.trim() } : {}),
         ...(dCarName.trim() ? { carName: dCarName.trim() } : {}),
         ...(dSimulatorId ? { simulatorId: Number(dSimulatorId) } : {}),
+        ...(filters.isActive !== '' ? { isActive: filters.isActive === 'true' } : {}),
     }
     const criteriaKey = JSON.stringify(criteria)
 
@@ -94,9 +94,15 @@ export function ChallengeList() {
         refetchOnMount: 'always',
     })
 
-    const rows = data?.data ?? []
-    const firstLoad = isLoading && !data
+    // Sort logic: Active first, then by End Date descending
+    const rows = [...(data?.data ?? [])].sort((a, b) => {
+        const aActive = isChallengeActive(a.challengeEndDate)
+        const bActive = isChallengeActive(b.challengeEndDate)
+        if (aActive !== bActive) return aActive ? -1 : 1
+        return new Date(b.challengeEndDate).getTime() - new Date(a.challengeEndDate).getTime()
+    })
 
+    const firstLoad = isLoading && !data
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const clearFilters = () => setFilters(EMPTY_FILTERS)
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -149,7 +155,21 @@ export function ChallengeList() {
 
                 {showFilters && (
                     <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                            <div>
+                                <label className={filterLabelCls}>Status</label>
+                                <select
+                                    value={filters.isActive}
+                                    onChange={(e) =>
+                                        setFilters({ ...filters, isActive: e.target.value as Filters['isActive'] })
+                                    }
+                                    className={filterInputCls}
+                                >
+                                    <option value="">Any</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Closed</option>
+                                </select>
+                            </div>
                             <div>
                                 <label className={filterLabelCls}>Simulator</label>
                                 <select
@@ -166,15 +186,6 @@ export function ChallengeList() {
                                         </option>
                                     ))}
                                 </select>
-                            </div>
-                            <div>
-                                <label className={filterLabelCls}>End Date</label>
-                                <input
-                                    type="date"
-                                    value={filters.endDate}
-                                    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                                    className={filterInputCls}
-                                />
                             </div>
                             <div>
                                 <label className={filterLabelCls}>Best Driver</label>

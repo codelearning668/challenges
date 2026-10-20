@@ -1,6 +1,5 @@
 interface DlcBadgeProps {
     value: boolean
-    /** Renders a "Base" pill when false instead of nothing. */
     showBase?: boolean
 }
 
@@ -15,7 +14,7 @@ export function DlcBadge({ value, showBase = false }: DlcBadgeProps) {
     if (showBase) {
         return (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-        Base
+        Base sim
       </span>
         )
     }

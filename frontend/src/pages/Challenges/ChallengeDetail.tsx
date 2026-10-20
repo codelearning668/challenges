@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, MessageSquare } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { challengeApi } from '@/services/api'
@@ -9,6 +9,8 @@ import { useConfirm } from '@/components/shared/ConfirmProvider'
 import { ChallengeInfoCard } from '@/components/challenges/ChallengeInfoCard'
 import { ChallengeActions } from '@/components/challenges/ChallengeActions'
 import { ParticipantsTable } from '@/components/challenges/ParticipantsTable'
+import { ChallengeConversation } from '@/components/challenges/ChallengeConversation'
+import { ParticipantTimelineModal } from '@/components/challenges/ParticipantTimelineModal'
 import { formatLapTime, isChallengeActive, parseLapTime } from '@/utils/format'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -26,9 +28,12 @@ export function ChallengeDetail() {
 
     const [editEndDate, setEditEndDate] = useState(false)
     const [draftEndDate, setDraftEndDate] = useState('')
-
     const [editingParticipant, setEditingParticipant] = useState<string | null>(null)
     const [draftLapTime, setDraftLapTime] = useState('')
+    const [timelineParticipant, setTimelineParticipant] =
+        useState<ParticipantDetailResponse | null>(null)
+
+    const [isChatOpen, setIsChatOpen] = useState(false)
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['challenge', challengeId],
@@ -208,86 +213,119 @@ export function ChallengeDetail() {
         (p) => p.participantName === user?.username,
     )
 
-    // Admin only sees the admin-side actions. Participant-only actions are
-    // hidden even when the admin also holds the PARTICIPANT role, so the UI
-    // stays unambiguous: admin edits lap times via the pencil in the table.
     const canRegister = !isAdmin && active && isParticipant && !alreadyRegistered
     const canQuit = !isAdmin && active && isParticipant && alreadyRegistered
     const canEditLapTime = !isAdmin && isParticipant && active && alreadyRegistered
+    const canPostMessage = active && isParticipant && alreadyRegistered
 
-    const showLeftActions = isAdmin
-    const showRightActions = canRegister || canQuit || canEditLapTime
-    const showAnyAction = showLeftActions || showRightActions
+    const showAnyAction = isAdmin || canRegister || canQuit || canEditLapTime
 
     return (
-        <div>
-            <div className="mb-6">
-                <Button variant="ghost" onClick={() => navigate('/challenges')} className="mr-4">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to List
-                </Button>
-                <div className="inline-flex items-baseline gap-3 flex-wrap">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {challenge.trackName} · {challenge.carBrand} {challenge.carName}
-                    </h1>
-                    <span
-                        className={
-                            'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' +
-                            (active
-                                ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')
-                        }
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+            {/* LEFT SIDE: Main Content */}
+            <div className="flex-1 min-w-0 pb-12">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                    <div>
+                        <Button variant="ghost" onClick={() => navigate('/challenges')} className="mb-4">
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back to List
+                        </Button>
+                        <div className="inline-flex items-baseline gap-3 flex-wrap">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {challenge.trackName} · {challenge.carBrand} {challenge.carName}
+                            </h1>
+                            <span
+                                className={
+                                    'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' +
+                                    (active
+                                        ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')
+                                }
+                            >
+                {active ? 'Active' : 'Closed'}
+              </span>
+                        </div>
+                    </div>
+
+                    <Button
+                        variant={isChatOpen ? 'primary' : 'secondary'}
+                        onClick={() => setIsChatOpen(!isChatOpen)}
+                        className="shrink-0"
                     >
-            {active ? 'Active' : 'Closed'}
-          </span>
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Chat {challenge.conversation?.length ? `(${challenge.conversation.length})` : ''}
+                    </Button>
                 </div>
+
+                <Card>
+                    <ChallengeInfoCard
+                        challenge={challenge}
+                        editEndDate={editEndDate}
+                        draftEndDate={draftEndDate}
+                        onDraftEndDateChange={setDraftEndDate}
+                        onSaveEndDate={saveEndDate}
+                        onCancelEditEndDate={() => setEditEndDate(false)}
+                        isSavingEndDate={updateEndDateMutation.isPending}
+                    />
+
+                    {showAnyAction && (
+                        <ChallengeActions
+                            isAdmin={isAdmin}
+                            active={active}
+                            editEndDate={editEndDate}
+                            canRegister={canRegister}
+                            canQuit={canQuit}
+                            canEditLapTime={canEditLapTime}
+                            onRegister={() => registerMutation.mutate()}
+                            onQuit={handleQuit}
+                            onUpdateLapTime={() => navigate(`/challenges/${challengeId}/lap-time`)}
+                            onBeginEditEndDate={beginEditEndDate}
+                            onDelete={handleDelete}
+                            isRegistering={registerMutation.isPending}
+                            isQuitting={quitMutation.isPending}
+                            isDeleting={deleteMutation.isPending}
+                        />
+                    )}
+                </Card>
+
+                <Card className="mt-6">
+                    <ParticipantsTable
+                        participants={sortedParticipants}
+                        isAdmin={isAdmin}
+                        editingParticipant={editingParticipant}
+                        draftLapTime={draftLapTime}
+                        onDraftLapTimeChange={setDraftLapTime}
+                        onBeginEditLapTime={beginEditLapTime}
+                        onCancelEditLapTime={cancelEditLapTime}
+                        onSaveLapTime={saveLapTime}
+                        onClearLapTime={clearLapTime}
+                        isSavingLapTime={updateLapTimeMutation.isPending}
+                        onViewTimeline={(p) => setTimelineParticipant(p)}
+                    />
+                </Card>
             </div>
 
-            <Card>
-                <ChallengeInfoCard
-                    challenge={challenge}
-                    editEndDate={editEndDate}
-                    draftEndDate={draftEndDate}
-                    onDraftEndDateChange={setDraftEndDate}
-                    onSaveEndDate={saveEndDate}
-                    onCancelEditEndDate={() => setEditEndDate(false)}
-                    isSavingEndDate={updateEndDateMutation.isPending}
-                />
-
-                {showAnyAction && (
-                    <ChallengeActions
-                        isAdmin={isAdmin}
-                        active={active}
-                        editEndDate={editEndDate}
-                        canRegister={canRegister}
-                        canQuit={canQuit}
-                        canEditLapTime={canEditLapTime}
-                        onRegister={() => registerMutation.mutate()}
-                        onQuit={handleQuit}
-                        onUpdateLapTime={() => navigate(`/challenges/${challengeId}/lap-time`)}
-                        onBeginEditEndDate={beginEditEndDate}
-                        onDelete={handleDelete}
-                        isRegistering={registerMutation.isPending}
-                        isQuitting={quitMutation.isPending}
-                        isDeleting={deleteMutation.isPending}
+            {/* RIGHT SIDE: Chat Sidebar — increased from 400px to 500px */}
+            {isChatOpen && (
+                <div className="w-full lg:w-[500px] shrink-0 sticky top-6 h-[calc(100vh-8rem)] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col">
+                    <ChallengeConversation
+                        challengeId={challengeId}
+                        conversation={challenge.conversation ?? []}
+                        onClose={() => setIsChatOpen(false)}
+                        canPostMessage={canPostMessage}
                     />
-                )}
-            </Card>
+                </div>
+            )}
 
-            <Card className="mt-6">
-                <ParticipantsTable
-                    participants={sortedParticipants}
-                    isAdmin={isAdmin}
-                    editingParticipant={editingParticipant}
-                    draftLapTime={draftLapTime}
-                    onDraftLapTimeChange={setDraftLapTime}
-                    onBeginEditLapTime={beginEditLapTime}
-                    onCancelEditLapTime={cancelEditLapTime}
-                    onSaveLapTime={saveLapTime}
-                    onClearLapTime={clearLapTime}
-                    isSavingLapTime={updateLapTimeMutation.isPending}
+            {timelineParticipant && (
+                <ParticipantTimelineModal
+                    isOpen={!!timelineParticipant}
+                    onClose={() => setTimelineParticipant(null)}
+                    participantId={timelineParticipant.participantId}
+                    participantName={timelineParticipant.participantName}
                 />
-            </Card>
+            )}
         </div>
     )
 }

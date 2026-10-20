@@ -12,6 +12,9 @@
     "name" : "Users",
     "description" : "Services for registering application users."
   }, {
+    "name" : "Participants",
+    "description" : "Participant lap-time history and progress."
+  }, {
     "name" : "System",
     "description" : "Services exposing information about the system availability, environment, the authenticated user etc."
   }, {
@@ -390,6 +393,26 @@
           "required" : true
         },
         "responses" : {
+          "201" : {
+            "description" : "Challenge created.",
+            "headers" : {
+              "Location" : {
+                "description" : "URI of the created challenge, `/challenges/{challengeId}`.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "format" : "uri"
+                }
+              }
+            },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
           "404" : {
             "description" : "The selected car or track does not exist.",
             "content" : {
@@ -412,26 +435,6 @@
           },
           "422" : {
             "description" : "The submitted end date does not satisfy the challenge rules.",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "201" : {
-            "description" : "Challenge created.",
-            "headers" : {
-              "Location" : {
-                "description" : "URI of the created challenge, `/challenges/{challengeId}`.",
-                "style" : "simple",
-                "schema" : {
-                  "type" : "string",
-                  "format" : "uri"
-                }
-              }
-            },
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -705,26 +708,6 @@
               }
             }
           },
-          "401" : {
-            "description" : "Authentication is required.",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "422" : {
-            "description" : "The challenge is closed, or the parent entry does not belong to this challenge.",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
           "201" : {
             "description" : "Reply created.",
             "headers" : {
@@ -737,6 +720,26 @@
                 }
               }
             },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authentication is required.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "The challenge is closed, or the parent entry does not belong to this challenge.",
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1111,6 +1114,52 @@
         }
       }
     },
+    "/participant/{participantId}/timeline" : {
+      "get" : {
+        "tags" : [ "Participants" ],
+        "summary" : "Retrieve a participant's lap-time history",
+        "description" : "Returns historical lap times newest-first. Each gap is the signed change from the preceding historical time (current minus previous): a negative gap means improvement and a positive gap means regression. The earliest historical time has a zero gap.",
+        "operationId" : "getParticipantTimeline",
+        "parameters" : [ {
+          "name" : "participantId",
+          "in" : "path",
+          "description" : "ID of the participant.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The participant ID is invalid.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ParticipantTimelineResponse"
+                  }
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Historical lap times, newest first.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ParticipantTimelineResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/conversation-entries/{entryId}" : {
       "delete" : {
         "tags" : [ "Conversation entries" ],
@@ -1407,6 +1456,28 @@
           },
           "name" : {
             "type" : "string"
+          }
+        }
+      },
+      "ParticipantTimelineResponse" : {
+        "type" : "object",
+        "properties" : {
+          "lapTime" : {
+            "pattern" : "^\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Historical lap time in canonical mm:ss.SSS format.",
+            "example" : "01:42.537"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "description" : "Time when this historical lap time was recorded.",
+            "format" : "date-time"
+          },
+          "gap" : {
+            "pattern" : "^-?\\d{2}:\\d{2}\\.\\d{3}$",
+            "type" : "string",
+            "description" : "Signed lap-time change from the preceding historical time, calculated as current lap time minus previous lap time. Negative means improvement; positive means regression. The earliest historical time has no predecessor and therefore a zero gap.",
+            "example" : "-00:01.250"
           }
         }
       },

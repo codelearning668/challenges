@@ -5,6 +5,8 @@ import static lombok.AccessLevel.NONE;
 import java.time.Duration;
 
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
@@ -18,6 +20,7 @@ import lombok.Setter;
 import sk.mkrajcovic.challenges.util.Text;
 
 @Entity
+@Audited
 @Getter @Setter
 @EqualsAndHashCode(callSuper = false, exclude = { "challenge", "nameSearch"})
 public class Participant extends BaseEntity {
@@ -26,6 +29,7 @@ public class Participant extends BaseEntity {
 	 * This is essentially mapped to user name. Currently there is no intention to
 	 * extend this for reference to the User entity, but keep the mind open
 	 */
+	@NotAudited
 	@Column(nullable = false, length = 100)
 	private String name;
 
@@ -34,6 +38,7 @@ public class Participant extends BaseEntity {
 	@JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
 	private Duration bestLapTime;
 
+	@NotAudited
 	@ManyToOne
 	private Challenge challenge;
 
@@ -43,6 +48,7 @@ public class Participant extends BaseEntity {
 	 */
 	@Getter(NONE)
 	@Setter(NONE)
+	@NotAudited
 	@Column(nullable = false, length = 100)
 	private String nameSearch;
 

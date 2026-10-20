@@ -2,6 +2,7 @@ package sk.mkrajcovic.challenges.model;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,15 +23,18 @@ import lombok.Setter;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
+	@Audited
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Setter(AccessLevel.NONE)
 	private Integer id;
 
+	@Audited
 	@Column(nullable = false, updatable = false)
 	@CreatedDate
 	private LocalDateTime createdAt;
 
+	@Audited
 	@LastModifiedDate
 	private LocalDateTime modifiedAt;
 

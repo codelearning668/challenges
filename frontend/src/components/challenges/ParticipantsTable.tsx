@@ -15,6 +15,7 @@ interface ParticipantsTableProps {
     onSaveLapTime: (participantName: string) => void
     onClearLapTime: (participantName: string) => void
     isSavingLapTime: boolean
+    onViewTimeline: (participant: ParticipantDetailResponse) => void
 }
 
 const inlineInputCls =
@@ -37,6 +38,7 @@ export function ParticipantsTable({
                                       onSaveLapTime,
                                       onClearLapTime,
                                       isSavingLapTime,
+                                      onViewTimeline,
                                   }: ParticipantsTableProps) {
     const leaderTime = participants[0]?.participantBestLapTime ?? null
 
@@ -137,7 +139,10 @@ export function ParticipantsTable({
                                             <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     type="button"
-                                                    onClick={() => onSaveLapTime(row.participant.participantName)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        onSaveLapTime(row.participant.participantName)
+                                                    }}
                                                     disabled={isSavingLapTime}
                                                     className="p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
                                                     aria-label="Save lap time"
@@ -146,7 +151,10 @@ export function ParticipantsTable({
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={onCancelEditLapTime}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        onCancelEditLapTime()
+                                                    }}
                                                     className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                                                     aria-label="Cancel"
                                                 >
@@ -159,7 +167,10 @@ export function ParticipantsTable({
                                         <div className="flex items-center justify-end gap-1">
                                             <button
                                                 type="button"
-                                                onClick={() => onBeginEditLapTime(row.participant)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    onBeginEditLapTime(row.participant)
+                                                }}
                                                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 aria-label="Edit lap time"
                                                 title="Edit lap time"
@@ -169,7 +180,10 @@ export function ParticipantsTable({
                                             {row.participant.participantBestLapTime != null && (
                                                 <button
                                                     type="button"
-                                                    onClick={() => onClearLapTime(row.participant.participantName)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        onClearLapTime(row.participant.participantName)
+                                                    }}
                                                     className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                                                     aria-label="Clear lap time"
                                                     title="Clear lap time"
@@ -185,6 +199,7 @@ export function ParticipantsTable({
                         : []),
                 ]}
                 rows={rowsWithGaps}
+                onRowClick={(row) => onViewTimeline(row.participant)}
                 emptyMessage="No participants yet"
             />
         </>
