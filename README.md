@@ -9,8 +9,11 @@ An application for organising and recording racing-simulator challenges. It prov
 - Only one active challenge may exist for a given car and track.
 - A participant may register or quit only while a challenge is active, and may not register twice for the same challenge.
 - Joining multiple active challenges requires a win in any earlier challenge.
-- Participants may update or remove only their own lap time while a challenge is active; administrators may update or clear any registered participant's lap time, including after the challenge closes.
+- Participants may update only their own lap time while a challenge is active. They must provide a time; if they already have one, each update must be strictly faster. A participant with no recorded time may set their first time, but cannot worsen or remove an existing time.
+- Administrators may update any registered participant's lap time, including after the challenge closes. They may clear a time or set a slower one to correct results for rule violations or changed conditions.
 - The leaderboard records the quickest non-null lap time. When its leader's result becomes slower or is cleared, the leader is recalculated; it is cleared if no recorded times remain.
+- Participants registered for an active challenge may post conversation entries and replies. Each entry captures the author's lap time at posting. Administrators may delete entries; direct replies are retained as top-level entries.
+- Participants and administrators may view a participant's lap-time history, newest first, with signed gaps showing improvement or regression between recorded times. This history is informational only and does not affect challenge eligibility, lap-time updates, or leaderboard results.
 - Lap times use `m:ss.S`, `m:ss.SS`, or `m:ss.SSS` input (for example, `1:20.1`) and are returned as `mm:ss.SSS`.
 
 ## Business flow
@@ -25,8 +28,8 @@ Roles are cumulative: a user may be authorized as both `PARTICIPANT` and `ADMIN`
 
 | Authorization role | Represents | Permitted actions |
 | --- | --- | --- |
-| `PARTICIPANT` | Authorization to act as a racer in challenges. | Register for and quit active challenges; update their own lap time while the challenge is active. |
-| `ADMIN` | Authorization to administer challenge reference data and challenges. | Create and update cars and tracks; create, change the end date of, and delete active challenges; update any registered participant's lap time, including after a challenge closes. |
+| `PARTICIPANT` | Authorization to act as a racer in challenges. | Register for and quit active challenges; update their own lap time while the challenge is active and only with a strictly faster time (or set their first time); post conversation entries and replies; view participant lap-time history. |
+| `ADMIN` | Authorization to administer challenge reference data and challenges. | Create and update cars and tracks; create, change the end date of, and delete active challenges; update any registered participant's lap time, including after a challenge closes, and clear or worsen a time; delete conversation entries; view participant lap-time history. |
 
 ## Prerequisites
 
@@ -79,7 +82,13 @@ By default, Swagger UI serves the versioned static specification at `src/main/re
 ./mvnw test
 ```
 
-This runs the test suite against H2 in-memory database and generates the JaCoCo report at `target/site/jacoco/index.html`.
+This runs the test suite against H2 in-memory database and generates the JaCoCo report at `target/site/jacoco/index.html`. To run a single test class, use Maven Surefire's `-Dtest` option; for example, to run one architecture test class:
+
+```bash
+./mvnw -Dtest=RepositoryArchitectureTest test
+```
+
+Use the test class name for the resource or behavior you want to test, such as `ChallengeControllerTest` for challenge endpoints.
 
 ## Architecture and design
 
