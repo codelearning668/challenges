@@ -164,9 +164,9 @@ public interface ChallengeApi {
 	@Operation(
 		security = @SecurityRequirement(name = "basicAuth"),
 		summary = "Update a participant lap time",
-		description = "Records or removes a registered participant's best lap time. A participant may update only their own time while the challenge is active. An administrator may update any registered participant, including after the challenge closes. Requires the `PARTICIPANT` or `ADMIN` role.",
+		description = "Records a registered participant's lap time. Participants may update only their own time while the challenge is active; they must provide a time, and each update must be strictly faster than their previous time. A participant with no recorded time may set their first time. Administrators may update any registered participant's time, including after the challenge closes; they may clear a time or set a slower time to correct results for rule violations or changed conditions. Requires the `PARTICIPANT` or `ADMIN` role.",
 		requestBody = @RequestBody(
-			description = "The registered participant and their new lap time. Set newLapTime to null to clear the recorded time.",
+			description = "The registered participant and new lap time. Participants must provide a strictly faster time (or any valid first time if none is recorded). Administrators may set the time to null to clear it or provide a slower time.",
 			content = @Content(examples = @ExampleObject(value = """
 			{
 			  "participantName": "racer1",

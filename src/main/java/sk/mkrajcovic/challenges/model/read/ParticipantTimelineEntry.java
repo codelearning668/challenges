@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * A historical lap time and its signed change from the preceding recorded time.
- * A positive change means improvement; a negative change means regression.
+ * A negative gap means improvement; a positive gap means regression.
  */
 public record ParticipantTimelineEntry(
 	Duration lapTime,

@@ -997,12 +997,11 @@ class ChallengeControllerTest {
         }
 
         @Test
-        void participantWithCurrentBestLapTimeBecomesSlowerAndNextBestParticipantBecomesLeader() {
+        void adminCanMakeCurrentLeaderSlowerAndNextBestParticipantBecomesLeader() {
             String firstParticipant = newParticipant();
             String secondParticipant = newParticipant();
 
-            int challengeId =
-                createChallengeAndRegisterParticipant(firstParticipant);
+            int challengeId = createChallengeAndRegisterParticipant(firstParticipant);
 
             registerForChallenge(
                 challengeId,
@@ -1034,8 +1033,8 @@ class ChallengeControllerTest {
 
             updateLapTime(
                 challengeId,
-                firstParticipant,
-                PARTICIPANT_PASS,
+                ADMIN_USER,
+                ADMIN_PASS,
                 firstParticipant,
                 "1:25.123"
             )
@@ -1046,11 +1045,17 @@ class ChallengeControllerTest {
                 .then()
                 .statusCode(OK)
                 .body("bestParticipantName", equalTo(secondParticipant))
-                .body("bestLapTime", equalTo("01:24.123"));
+                .body("bestLapTime", equalTo("01:24.123"))
+                .body(
+                    "participants.find { it.participantName == '"
+                        + firstParticipant
+                        + "' }.participantBestLapTime",
+                    equalTo("01:25.123")
+                );
         }
 
         @Test
-        void participantCanDiscardOwnLapTime() {
+        void participantCannotDiscardOwnLapTime() {
             String participant = newParticipant();
             int challengeId = createChallengeAndRegisterParticipant(participant);
 
@@ -1072,7 +1077,7 @@ class ChallengeControllerTest {
                 null
             )
                 .then()
-                .statusCode(NO_CONTENT);
+                .statusCode(UNPROCESSABLE_ENTITY);
 
             getChallenge(challengeId)
                 .then()
@@ -1081,8 +1086,94 @@ class ChallengeControllerTest {
                     "participants.find { it.participantName == '"
                         + participant
                         + "' }.participantBestLapTime",
-                    is(nullValue())
+                    equalTo("0" + VALID_LAP_TIME)
                 );
+        }
+
+        @Test
+        void participantCannotMakeOwnLapTimeSlower() {
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                "1:23.123"
+            )
+                .then()
+                .statusCode(NO_CONTENT);
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                "1:24.123"
+            )
+                .then()
+                .statusCode(UNPROCESSABLE_ENTITY);
+
+            getChallenge(challengeId)
+                .then()
+                .statusCode(OK)
+                .body("bestParticipantName", equalTo(participant))
+                .body("bestLapTime", equalTo("01:23.123"))
+                .body(
+                    "participants.find { it.participantName == '"
+                        + participant
+                        + "' }.participantBestLapTime",
+                    equalTo("01:23.123")
+                );
+        }
+
+        @Test
+        void participantCannotSubmitAnUnchangedLapTime() {
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                "1:23.123"
+            )
+                .then()
+                .statusCode(NO_CONTENT);
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                "1:23.123"
+            )
+                .then()
+                .statusCode(UNPROCESSABLE_ENTITY);
+        }
+
+        @Test
+        void participantCanSetFirstLapTime() {
+            String participant = newParticipant();
+            int challengeId = createChallengeAndRegisterParticipant(participant);
+
+            updateLapTime(
+                challengeId,
+                participant,
+                PARTICIPANT_PASS,
+                participant,
+                VALID_LAP_TIME
+            )
+                .then()
+                .statusCode(NO_CONTENT);
+
+            getChallenge(challengeId)
+                .then()
+                .statusCode(OK)
+                .body("bestParticipantName", equalTo(participant))
+                .body("bestLapTime", equalTo("0" + VALID_LAP_TIME));
         }
 
         @Test

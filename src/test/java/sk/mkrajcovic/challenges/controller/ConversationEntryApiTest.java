@@ -144,6 +144,15 @@ class ConversationEntryApiTest {
 		}
 
 		@Test
+		void rejectsBlankMessage() {
+			String participant = createParticipant();
+			int challengeId = createChallengeAndRegisterParticipant(participant);
+
+			postEntry(challengeId, participant, "").then().statusCode(BAD_REQUEST);
+			postEntry(challengeId, participant, "   ").then().statusCode(BAD_REQUEST);
+		}
+
+		@Test
 		void unauthenticatedUserCannotCreateEntry() {
 			String participant = createParticipant();
 			int challengeId = createChallengeAndRegisterParticipant(participant);
@@ -222,6 +231,16 @@ class ConversationEntryApiTest {
 				.body("conversation[1].parentEntryId", equalTo(parentEntryId))
 				.body("conversation[1].message", equalTo("A reply"))
 				.body("conversation[1].participantName", equalTo(participant));
+		}
+
+		@Test
+		void rejectsBlankReplyMessage() {
+			String participant = createParticipant();
+			int challengeId = createChallengeAndRegisterParticipant(participant);
+			int parentEntryId = extractCreatedEntryId(postEntry(challengeId, participant, "Parent"));
+
+			postReply(challengeId, parentEntryId, participant, "").then().statusCode(BAD_REQUEST);
+			postReply(challengeId, parentEntryId, participant, "   ").then().statusCode(BAD_REQUEST);
 		}
 
 		@Test

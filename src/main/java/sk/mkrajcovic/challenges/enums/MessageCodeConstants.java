@@ -22,6 +22,8 @@ public class MessageCodeConstants {
 	public static final String CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE = "cannotUpdateLapTimeOnClosedChallenge";
 	public static final String CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME = "cannotUpdateOtherParticipantLapTime";
 	public static final String PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE = "participantNotRegisteredForChallenge";
+	public static final String PARTICIPANT_LAP_TIME_MUST_BE_DEFINED = "participantLapTimeMustBeDefined";
+	public static final String NEW_LAP_TIME_MUST_BE_FASTER_THAN_PREVIOUS = "newLapTimeMustBeFasterThanPrevious";
 	public static final String MULTI_CHALLENGE_REGISTRATION_REQUIRES_PREVIOUS_WIN = "multiChallengeRegistrationRequiresPreviousWin";
 	public static final String CHALLENGE_ALREADY_ACTIVE = "challengeAlreadyActive";
 	public static final String CAR_OR_TRACK_ALREADY_ASSIGNED = "carOrTrackAlreadyAssigned";
@@ -30,6 +32,7 @@ public class MessageCodeConstants {
 	public static final String CANNOT_QUIT_CLOSED_CHALLENGE = "cannotQuitClosedChallenge";
 	public static final String CAR_AND_TRACK_MUST_USE_SAME_SIMULATOR = "carAndTrackMustUseSameSimulator";
     public static final String PARENT_ENTRY_NOT_IN_CHALLENGE = "parentEntryNotInChallenge";
+    public static final String CANNOT_POST_MESSAGE_ON_CLOSED_CHALLENGE = "cannotPostMessageOnClosedChallenge";
 
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 
