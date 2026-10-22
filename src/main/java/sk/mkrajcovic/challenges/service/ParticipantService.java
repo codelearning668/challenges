@@ -3,6 +3,8 @@ package sk.mkrajcovic.challenges.service;
 import static java.util.Objects.requireNonNull;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.NEW_LAP_TIME_MUST_BE_FASTER_THAN_PREVIOUS;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_LAP_TIME_MUST_BE_DEFINED;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE;
 import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
 
@@ -97,34 +99,71 @@ public class ParticipantService {
 	}
 
 	/**
-	 * Updates the participant's lap time and updates the challenge's current leader
-	 * when the new time changes the best result.
+	 * Updates a registered participant's lap time and recalculates the challenge's
+	 * current leader when the change affects the best result.
 	 * <p>
-	 * Non-administrative users may update only their own lap time and only while
-	 * the challenge is active. Administrators may update any registered
-	 * participant's lap time, including after the challenge has ended.
+	 * Participants may update only their own lap time while the challenge is
+	 * active. They must provide a lap time, and when one is already recorded, the
+	 * new time must be strictly faster. If no time is recorded yet, participant may
+	 * set their first time.
+	 * <p>
+	 * Administrators may update any registered participant's time, including after
+	 * the challenge has ended. They may clear a time by passing {@code null} or
+	 * replace it with a slower time.
 	 *
 	 * @param challengeId the identifier of the challenge
 	 * @param participantName the name of the registered participant whose lap time is being updated
-	 * @param newLapTime the new lap time recorded for the participant; may be {@code null} when removing the time
+	 * @param newLapTime the new lap time; {@code null} clears the time for administrators and is not permitted for participants
 	 * @throws ResourceNotFound if the participant is not registered for the challenge
-	 * @throws BusinessViolation if a non-administrator attempts to update a lap time after the challenge has ended
-	 * @throws AccessDenied if a non-administrator attempts to update another participant's lap time
+	 * @throws BusinessViolation if a participant updates a time after the challenge has ended, supplies no time, or does not improve
+	 * @throws AccessDenied if a participant attempts to update another participant's lap time
 	 */
 	@Transactional
 	public void updateLapTime(Integer challengeId, String participantName, Duration newLapTime) {
 		var participant = lookupRegisteredParticipant(challengeId, participantName);
-
-		// because only ADMIN can change someone else's lap time even after challenge has ended
+		/*
+		 * ADMIN may override the normal lap-time rules to keep results fair:
+		 * - remove a time when participants agree it violated the racing rules
+		 * - apply a slower time as a penalty while keeping the participant's result
+		 * - adjust a result when changed conditions make the previous performance unattainable
+		 */
 		if (!callContext.isUserInRole(ADMIN)) {
 			verifyChallengeIsActive(participant.getChallenge());
 			verifyParticipantIsCurrentUser(participantName);
+
+			verifyNewLapTimeIsDefined(newLapTime);
+			verifyNewLapTimeIsBetterThanPrevious(newLapTime, participant);
 		}
 
 		participant.setBestLapTime(newLapTime);
 		updateChallengeLeader(participant.getChallenge(), participant);
 
 		repository.save(participant);
+	}
+
+	private void verifyChallengeIsActive(Challenge challenge) {
+		var today = LocalDate.now(ZoneOffset.UTC);
+		if (challenge.getEndDate().isBefore(today)) {
+			throw new BusinessViolation(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
+		}
+	}
+
+	private void verifyParticipantIsCurrentUser(String participantName) {
+		if (!callContext.getCurrentUser().equals(participantName)) {
+			throw new AccessDenied(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
+		}
+	}
+
+	private void verifyNewLapTimeIsDefined(Duration newLapTime) {
+		if (newLapTime == null) {
+			throw new BusinessViolation(PARTICIPANT_LAP_TIME_MUST_BE_DEFINED);
+		}
+	}
+
+	private void verifyNewLapTimeIsBetterThanPrevious(Duration newLapTime, Participant participant) {
+		if (participant.getBestLapTime() != null && newLapTime.compareTo(participant.getBestLapTime()) >= 0) {
+			throw new BusinessViolation(NEW_LAP_TIME_MUST_BE_FASTER_THAN_PREVIOUS);
+		}
 	}
 
 	private void updateChallengeLeader(Challenge challenge, Participant participant) {
@@ -178,19 +217,6 @@ public class ParticipantService {
 	private Participant lookupRegisteredParticipant(Integer challengeId, String participantName) {
 		return repository.findByChallengeIdAndName(challengeId, participantName)
 			.orElseThrow(() -> new ResourceNotFound(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE));
-	}
-
-	private void verifyChallengeIsActive(Challenge challenge) {
-		var today = LocalDate.now(ZoneOffset.UTC);
-		if (challenge.getEndDate().isBefore(today)) {
-			throw new BusinessViolation(CANNOT_UPDATE_LAP_TIME_ON_CLOSED_CHALLENGE);
-		}
-	}
-
-	private void verifyParticipantIsCurrentUser(String participantName) {
-		if (!callContext.getCurrentUser().equals(participantName)) {
-			throw new AccessDenied(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
-		}
 	}
 
 }
