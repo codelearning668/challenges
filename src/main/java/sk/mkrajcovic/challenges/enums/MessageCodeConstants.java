@@ -30,6 +30,7 @@ public class MessageCodeConstants {
 	public static final String CANNOT_QUIT_CLOSED_CHALLENGE = "cannotQuitClosedChallenge";
 	public static final String CAR_AND_TRACK_MUST_USE_SAME_SIMULATOR = "carAndTrackMustUseSameSimulator";
     public static final String PARENT_ENTRY_NOT_IN_CHALLENGE = "parentEntryNotInChallenge";
+    public static final String CANNOT_POST_MESSAGE_ON_CLOSED_CHALLENGE = "cannotPostMessageOnClosedChallenge";
 
 	public static final String USERNAME_ALREADY_TAKEN = "usernameAlreadyTaken";
 

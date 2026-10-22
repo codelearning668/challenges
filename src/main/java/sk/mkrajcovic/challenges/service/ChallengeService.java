@@ -1,6 +1,8 @@
 package sk.mkrajcovic.challenges.service;
 
+
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE;
+import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_POST_MESSAGE_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_QUIT_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_REGISTER_ON_CLOSED_CHALLENGE;
 import static sk.mkrajcovic.challenges.enums.MessageCodeConstants.CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE;
@@ -277,7 +279,7 @@ public class ChallengeService {
 	public Integer createConversationEntry(Integer challengeId, String message, Integer parentEntryId) {
 		var challenge = getExistingEntityById(repository, challengeId);
 
-		verifyChallengeIsActive(challenge, "Cannot add message to closed challenge");
+		verifyChallengeIsActive(challenge, CANNOT_POST_MESSAGE_ON_CLOSED_CHALLENGE);
 		verifyAlreadyRegistered(callContext.getCurrentUser(), challenge);
 
 		return conversationService.createConversationEntry(challenge, callContext.getCurrentUser(), message, parentEntryId);
