@@ -64,7 +64,7 @@ export function ChallengeList() {
     const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
     const [showFilters, setShowFilters] = useState(false)
     const navigate = useNavigate()
-    const { isAdmin } = usePermissions()
+    const { canCreateChallenge } = usePermissions()
 
     const { data: simulatorsRes } = useSimulators()
     const simulatorOptions = simulatorsRes?.data ?? []
@@ -111,7 +111,7 @@ export function ChallengeList() {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Challenges</h1>
-                {isAdmin && (
+                {canCreateChallenge && (
                     <Button onClick={() => navigate('/challenges/new')}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Challenge

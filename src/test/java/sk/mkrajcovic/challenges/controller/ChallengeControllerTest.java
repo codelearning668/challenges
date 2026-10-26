@@ -173,22 +173,6 @@ class ChallengeControllerTest {
                 .statusCode(UNAUTHORIZED);
         }
 
-        @Test
-        void participantCannotCreateChallenge() {
-            int trackId = createTrackAndReturnId();
-            int carId = createCarAndReturnId();
-
-            createChallengeAs(
-                PARTICIPANT_USER,
-                PARTICIPANT_PASS,
-                trackId,
-                carId,
-                VALID_END_DATE
-            )
-                .then()
-                .statusCode(FORBIDDEN);
-        }
-
         @Nested
         class Validation {
 

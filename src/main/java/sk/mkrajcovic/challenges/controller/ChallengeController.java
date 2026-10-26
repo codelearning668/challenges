@@ -56,7 +56,7 @@ class ChallengeController implements ChallengeApi {
 		return ChallengeMapper.toDetailResponse(challenge);
 	}
 
-	@RolesAllowed(ADMIN)
+	@RolesAllowed({ADMIN, PARTICIPANT})
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	public CreatedResponseEntity createChallenge(@Valid @RequestBody CreateChallengeRequest challenge) {
 		Integer challengeId = challengeService.createChallenge(
