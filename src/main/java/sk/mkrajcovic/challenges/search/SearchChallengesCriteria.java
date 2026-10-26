@@ -10,6 +10,7 @@ public class SearchChallengesCriteria {
 
 	private LocalDate endDate;
 	private String bestParticipantName;
+	private String participantName;
 	private String trackName;
 	private String trackCountry;
 	private String carBrand;

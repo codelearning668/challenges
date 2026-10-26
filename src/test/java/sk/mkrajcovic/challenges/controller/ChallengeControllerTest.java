@@ -713,6 +713,50 @@ class ChallengeControllerTest {
         }
 
         @Test
+        void searchesByRegisteredParticipantNameUsingEquality() {
+            String participant = newParticipant();
+            String similarlyNamedParticipant = participant + "-suffix";
+            userRepository.save(createParticipantUser(similarlyNamedParticipant));
+
+            int matchingChallengeId = createChallengeAndReturnId(
+                "Participant filter track",
+                TRACK_COUNTRY,
+                TRACK_LENGTH_KM,
+                CAR_BRAND,
+                "Participant filter car"
+            );
+            registerForChallenge(matchingChallengeId, participant, PARTICIPANT_PASS)
+                .then()
+                .statusCode(NO_CONTENT);
+
+            int similarlyNamedChallengeId = createChallengeAndReturnId(
+                "Similar participant track",
+                TRACK_COUNTRY,
+                TRACK_LENGTH_KM,
+                CAR_BRAND,
+                "Similar participant car"
+            );
+            registerForChallenge(similarlyNamedChallengeId, similarlyNamedParticipant, PARTICIPANT_PASS)
+                .then()
+                .statusCode(NO_CONTENT);
+
+            int unregisteredChallengeId = createChallengeAndReturnId(
+                "Unregistered participant track",
+                TRACK_COUNTRY,
+                TRACK_LENGTH_KM,
+                CAR_BRAND,
+                "Unregistered participant car"
+            );
+
+            searchChallenges("participantName", participant)
+                .then()
+                .statusCode(OK)
+                .body("challengeId", hasItem(matchingChallengeId))
+                .body("challengeId", not(hasItem(similarlyNamedChallengeId)))
+                .body("challengeId", not(hasItem(unregisteredChallengeId)));
+        }
+
+        @Test
         void searchesUsingMultipleCriteria() {
             int challengeId = createChallengeAndReturnId();
 
