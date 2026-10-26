@@ -14,7 +14,7 @@ export function usePermissions() {
     isParticipant,
     canCreateCar: isAdmin,
     canCreateTrack: isAdmin,
-    canCreateChallenge: isAdmin,
+    canCreateChallenge: isAdmin || isParticipant,
     canRegisterForChallenge: isParticipant,
     canUpdateLapTime: isParticipant || isAdmin,
     canViewAdminOnly: isAdmin,

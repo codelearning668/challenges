@@ -55,7 +55,7 @@ export default function App() {
                 <Route
                     path="challenges/new"
                     element={
-                        <ProtectedRoute requiredRoles={['ADMIN']}>
+                        <ProtectedRoute requiredRoles={['ADMIN', 'PARTICIPANT']}>
                             <ChallengeForm />
                         </ProtectedRoute>
                     }
