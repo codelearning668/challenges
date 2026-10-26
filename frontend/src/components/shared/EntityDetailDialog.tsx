@@ -11,6 +11,7 @@ interface EntityDetailDialogProps {
     onClose: () => void
     title: string
     imageUrl?: string
+    onImageError?: () => void
     fields: EntityDetailField[]
 }
 
@@ -19,6 +20,7 @@ export function EntityDetailDialog({
                                        onClose,
                                        title,
                                        imageUrl,
+                                       onImageError,
                                        fields,
                                    }: EntityDetailDialogProps) {
     return (
@@ -27,7 +29,7 @@ export function EntityDetailDialog({
                 {/* Image area */}
                 <div className="w-full h-64 mb-6 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
                     {imageUrl ? (
-                        <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+                        <img src={imageUrl} alt={title} onError={onImageError} className="w-full h-full object-contain p-3" />
                     ) : (
                         <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                             <ImageOff className="w-12 h-12" />

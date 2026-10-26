@@ -30,6 +30,7 @@ export function CarList() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [form, setForm] = useState<CarEditForm | null>(null)
     const [selectedCar, setSelectedCar] = useState<CarDetailResponse | null>(null)
+    const [failedCarImageUrl, setFailedCarImageUrl] = useState<string>()
 
     const dSearch = useDebouncedValue(search, 300)
     const dBrand = useDebouncedValue(filters.brand, 300)
@@ -104,8 +105,21 @@ export function CarList() {
 
     const openDetail = (car: CarDetailResponse) => {
         if (editingId !== null) return
+        setFailedCarImageUrl(undefined)
         setSelectedCar(car)
     }
+
+    const simulatorImageDirectory = selectedCar?.simulatorName
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+    const requestedCarImageUrl = selectedCar && simulatorImageDirectory
+        ? `${import.meta.env.VITE_API_URL || '/api'}/images/${simulatorImageDirectory}/cars/${selectedCar.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')}.jpg`
+        : undefined
+    const carImageUrl = requestedCarImageUrl === failedCarImageUrl ? undefined : requestedCarImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -176,6 +190,8 @@ export function CarList() {
                 isOpen={selectedCar !== null}
                 onClose={() => setSelectedCar(null)}
                 title={selectedCar ? `${selectedCar.brand} ${selectedCar.name}` : ''}
+                imageUrl={carImageUrl}
+                onImageError={() => setFailedCarImageUrl(requestedCarImageUrl)}
                 fields={
                     selectedCar
                         ? [
