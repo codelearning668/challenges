@@ -7,11 +7,14 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import sk.mkrajcovic.challenges.exception.BusinessViolation;
+import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Challenge;
 import sk.mkrajcovic.challenges.model.ConversationEntry;
 import sk.mkrajcovic.challenges.model.Participant;
@@ -20,6 +23,8 @@ import sk.mkrajcovic.challenges.repository.persistence.ConversationEntryReposito
 @Service
 @AllArgsConstructor
 public class ConversationService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ConversationService.class);
 
 	private final ConversationEntryRepository conversationRepository;
 
@@ -47,7 +52,11 @@ public class ConversationService {
 		newEntry.setContent(message);
 		newEntry.setChallenge(challenge);
 
-		return conversationRepository.save(newEntry).getId();
+		conversationRepository.save(newEntry);
+		logEntryCreation(newEntry);
+
+		// auto-populated by the above save method
+		return newEntry.getId();
 	}
 
 	private void assignParentEntryIfValid(ConversationEntry newEntry, Integer parentEntryId, Challenge challenge) {
@@ -72,6 +81,21 @@ public class ConversationService {
 			.orElse(null);
 	}
 
+	private void logEntryCreation(ConversationEntry entry) {
+		if (!LOG.isDebugEnabled()) {
+			return;
+		}
+		Duration lapTime = entry.getParticipantLapTimeAtPosting();
+		Integer parentEntryId = entry.getParentEntryId();
+		LOG.debug("Created conversation entry {} in challenge {}: participant '{}', lap time at posting {}, {}",
+			entry.getId(),
+			entry.getChallenge().getId(),
+			entry.getParticipantName(),
+			lapTime != null ? lapTime : "none recorded",
+			parentEntryId != null ? "reply to entry " + parentEntryId : "top-level"
+		);
+	}
+
 	/**
 	 * Deletes a conversation entry while preserving its direct replies.
 	 * <p>
@@ -84,18 +108,22 @@ public class ConversationService {
 	@Transactional
 	public void deleteConversationEntry(Integer entryId) {
 		var conversationEntry = getExistingEntityById(conversationRepository, entryId);
-		clearParentReferencesToEntry(entryId);
+		int promotedReplyCount = clearParentReferencesToEntry(entryId);
 
 		conversationRepository.delete(conversationEntry);
+
+		LOG.info("Deleted conversation entry {}; promoted {} direct replies to top level",
+			entryId, promotedReplyCount);
 	}
 
-	private void clearParentReferencesToEntry(Integer entryId) {
+	private int clearParentReferencesToEntry(Integer entryId) {
 		// updates each reply individually so normal JPA entity behavior is
 		// preserved and reply-specific handling can be added here if needed
 		List<ConversationEntry> conversationEntries = conversationRepository.findAllByParentEntryId(entryId);
 		conversationEntries.forEach(entry -> entry.setParentEntryId(null));
 
 		conversationRepository.saveAllAndFlush(conversationEntries);
+		return conversationEntries.size();
 	}
 
 }

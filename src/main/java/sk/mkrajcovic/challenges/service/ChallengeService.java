@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,8 @@ import sk.mkrajcovic.challenges.util.Text;
 @Service
 @RequiredArgsConstructor
 public class ChallengeService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ChallengeService.class);
 
 	private final ChallengeRepository repository;
 
@@ -66,7 +70,18 @@ public class ChallengeService {
 	public List<ChallengeDetail> searchChallenges(SearchChallengesCriteria searchCriteria) {
 		var criteria = searchCriteria != null ? searchCriteria : new SearchChallengesCriteria();
 		normalizeSearchCriteria(criteria);
-		return repository.findChallenges(criteria);
+		List<ChallengeDetail> foundChallenges = repository.findChallenges(criteria);
+
+		LOG.debug("Challenge search normalized to car '{} {}', track '{} {}', best participant '{}' -> {} result(s)",
+			criteria.getCarBrand(),
+			criteria.getCarName(),
+			criteria.getTrackCountry(),
+			criteria.getTrackName(),
+			criteria.getBestParticipantName(),
+			foundChallenges.size()
+		);
+
+        return foundChallenges;
 	}
 
 	/*
@@ -143,12 +158,22 @@ public class ChallengeService {
 	@Transactional
 	public void updateChallengeEndDate(Integer challengeId, LocalDate endDate) {
 		var challenge = getExistingEntityById(repository, challengeId);
+		var previousEndDate = challenge.getEndDate();
 
 		verifyChallengeIsActive(challenge, CANNOT_UPDATE_END_DATE_ON_CLOSED_CHALLENGE);
 
 		challenge.setEndDate(endDate);
-
 		repository.save(challenge);
+
+		logEndDateChange(previousEndDate, challenge);
+	}
+
+	private void logEndDateChange(LocalDate previousEndDate, Challenge challenge) {
+		LOG.info("Changed end date of challenge {}: {} -> {}",
+			challenge.getId(),
+			previousEndDate,
+			challenge.getEndDate()
+		);
 	}
 
 	/**
@@ -165,6 +190,22 @@ public class ChallengeService {
 		verifyChallengeIsActive(challenge, CANNOT_DELETE_ALREADY_CLOSED_CHALLENGE);
 
 		repository.delete(challenge);
+		/*
+		 * The entity is already deleted, but its loaded fields are still in the
+		 * persistence context, so this detail exists nowhere else afterwards.
+		 */
+		logDeletion(challenge);
+	}
+
+	private void logDeletion(Challenge deleted) {
+		LOG.info("'{}' deleted challenge {}: car '{} {}', track '{}', end date {}",
+			callContext.getCurrentUser(),
+			deleted.getId(),
+			deleted.getCar().getBrand(),
+			deleted.getCar().getName(),
+			deleted.getTrack().getName(),
+			deleted.getEndDate()
+		);
 	}
 
 	/**
