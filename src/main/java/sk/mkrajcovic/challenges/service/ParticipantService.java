@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,8 @@ import sk.mkrajcovic.challenges.repository.persistence.ParticipantRepository;
 @Service
 @RequiredArgsConstructor
 public class ParticipantService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ParticipantService.class);
 
 	private final ParticipantRepository repository;
 	private CallContext callContext;
@@ -112,33 +116,57 @@ public class ParticipantService {
 	 * replace it with a slower time.
 	 *
 	 * @param challengeId the identifier of the challenge
-	 * @param participantName the name of the registered participant whose lap time is being updated
+	 * @param targetParticipantName the name of the registered participant whose lap time is being updated
 	 * @param newLapTime the new lap time; {@code null} clears the time for administrators and is not permitted for participants
 	 * @throws ResourceNotFound if the participant is not registered for the challenge
 	 * @throws BusinessViolation if a participant updates a time after the challenge has ended, supplies no time, or does not improve
 	 * @throws AccessDenied if a participant attempts to update another participant's lap time
 	 */
 	@Transactional
-	public void updateLapTime(Integer challengeId, String participantName, Duration newLapTime) {
-		var participant = lookupRegisteredParticipant(challengeId, participantName);
-		/*
-		 * ADMIN may override the normal lap-time rules to keep results fair:
-		 * - remove a time when participants agree it violated the racing rules
-		 * - apply a slower time as a penalty while keeping the participant's result
-		 * - adjust a result when changed conditions make the previous performance unattainable
-		 */
-		if (!callContext.isUserInRole(ADMIN)) {
-			verifyChallengeIsActive(participant.getChallenge());
-			verifyParticipantIsCurrentUser(participantName);
-
-			verifyNewLapTimeIsDefined(newLapTime);
-			verifyNewLapTimeIsBetterThanPrevious(newLapTime, participant);
-		}
+	public void updateLapTime(Integer challengeId, String targetParticipantName, Duration newLapTime) {
+		var participant = lookupRegisteredParticipant(challengeId, targetParticipantName);
+		verifyLapTimeUpdateAllowed(participant, targetParticipantName, newLapTime);
 
 		participant.setBestLapTime(newLapTime);
 		updateChallengeLeader(participant.getChallenge(), participant);
 
 		repository.save(participant);
+	}
+
+	private Participant lookupRegisteredParticipant(Integer challengeId, String participantName) {
+		return repository.findByChallengeIdAndName(challengeId, participantName)
+			.orElseThrow(() -> new ResourceNotFound(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE));
+	}
+
+	private void verifyLapTimeUpdateAllowed(Participant participant, String targetParticipantName, Duration newLapTime) {
+		/*
+		 * ADMIN may override the normal lap-time rules to keep results fair:
+		 * - remove a time when participants agree it violated the racing rules
+		 * - apply a slower time as a penalty while keeping the participant's result
+		 * - adjust a result when changed conditions make the previous performance unattainable
+		 *
+		 * Every such override is recorded for the audit trail.
+		 */
+		if (callContext.isUserInRole(ADMIN)) {
+			logAdminOverride(participant, newLapTime);
+			return;
+		}
+		verifyChallengeIsActive(participant.getChallenge());
+		verifyParticipantIsCurrentUser(targetParticipantName);
+		verifyNewLapTimeIsDefined(newLapTime);
+		verifyNewLapTimeIsBetterThanPrevious(newLapTime, participant);
+	}
+
+	private void logAdminOverride(Participant participant, Duration newLapTime) {
+		// reads must run before the override is applied: this is the pre-override time
+		Duration previousLapTime = participant.getBestLapTime();
+		LOG.info("Admin '{}' overrides lap time in challenge {}: participant '{}', {} -> '{}'",
+			callContext.getCurrentUser(),
+			participant.getChallenge().getId(),
+			participant.getName(),
+			previousLapTime,
+			newLapTime
+		);
 	}
 
 	private void verifyChallengeIsActive(Challenge challenge) {
@@ -205,18 +233,31 @@ public class ParticipantService {
 	}
 
 	private void setChallengeLeader(Challenge challenge, Participant participant) {
+		var previousLeader = challenge.getBestParticipantName();
 		challenge.setBestParticipantName(participant.getName());
 		challenge.setBestLapTime(participant.getBestLapTime());
+
+		logLeaderChange(challenge.getId(), previousLeader, participant);
+	}
+
+	private void logLeaderChange(Integer challengeId, String previousLeaderName, Participant newLeader) {
+		var newLeaderName = newLeader.getName();
+		if (!newLeaderName.equals(previousLeaderName)) {
+			LOG.debug("Leader of challenge {}: changed '{}' -> '{}'",
+				challengeId,
+				previousLeaderName,
+				newLeaderName
+			);
+		}
 	}
 
 	private void clearChallengeLeader(Challenge challenge) {
 		challenge.setBestParticipantName(null);
 		challenge.setBestLapTime(null);
-	}
 
-	private Participant lookupRegisteredParticipant(Integer challengeId, String participantName) {
-		return repository.findByChallengeIdAndName(challengeId, participantName)
-			.orElseThrow(() -> new ResourceNotFound(PARTICIPANT_NOT_REGISTERED_FOR_CHALLENGE));
+		LOG.debug("Leader of challenge {} cleared; no timed participants left",
+			challenge.getId()
+		);
 	}
 
 }

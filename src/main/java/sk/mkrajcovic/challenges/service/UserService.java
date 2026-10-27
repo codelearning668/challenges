@@ -1,5 +1,7 @@
 package sk.mkrajcovic.challenges.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +17,7 @@ import sk.mkrajcovic.challenges.security.UserRoles;
 @RequiredArgsConstructor
 public class UserService {
 
-	// zatial len registrujeme one-time usera
-	// vsetky pojeby musia byt fixovane nasledne DI, to je aktualne zamer, nechceme
-	// tu riesit administrativu userov
+	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -43,6 +43,12 @@ public class UserService {
 		newUser.addAuthority(UserRoles.PARTICIPANT);
 
 		userRepository.save(newUser);
+		/*
+		 * Registration payload is excluded from request logging by
+		 * default because it carries credentials;
+		 * This line is the only record of who was actually created.
+		 */
+		LOG.info("Registered new user '{}'", username);
 	}
 
 	private void verifyUsernameIsAvailable(String username) {

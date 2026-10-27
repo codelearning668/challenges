@@ -2,10 +2,13 @@ package sk.mkrajcovic.challenges.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Track;
 import sk.mkrajcovic.challenges.model.read.TrackDetail;
 import sk.mkrajcovic.challenges.repository.persistence.TrackRepository;
@@ -16,6 +19,8 @@ import sk.mkrajcovic.challenges.util.Text;
 @Service
 @RequiredArgsConstructor
 public class TrackService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(TrackService.class);
 
 	private final TrackRepository repository;
 	private final SimulatorService simulatorService;
@@ -55,7 +60,15 @@ public class TrackService {
 	 */
 	public List<TrackDetail> searchTracks(SearchTracksCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
-		return repository.findTracks(searchCriteria);
+		List<TrackDetail> foundTracks = repository.findTracks(searchCriteria);
+
+		LOG.debug("Track search normalized to country='{}', name='{}' -> {} result(s)",
+			searchCriteria.getCountry(),
+			searchCriteria.getName(),
+			foundTracks.size()
+		);
+
+		return foundTracks;
 	}
 
 	/*

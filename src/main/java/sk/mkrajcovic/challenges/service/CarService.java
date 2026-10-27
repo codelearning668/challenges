@@ -2,10 +2,13 @@ package sk.mkrajcovic.challenges.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.exception.ResourceNotFound;
 import sk.mkrajcovic.challenges.model.Car;
 import sk.mkrajcovic.challenges.model.read.CarDetail;
 import sk.mkrajcovic.challenges.repository.persistence.CarRepository;
@@ -16,6 +19,8 @@ import sk.mkrajcovic.challenges.util.Text;
 @Service
 @RequiredArgsConstructor
 public class CarService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CarService.class);
 
 	private final CarRepository repository;
 	private final SimulatorService simulatorService;
@@ -55,7 +60,17 @@ public class CarService {
 	 */
 	public List<CarDetail> searchCars(SearchCarsCriteria searchCriteria) {
 		normalizeSearchCriteria(searchCriteria);
-		return repository.findCars(searchCriteria);
+		List<CarDetail> foundCars = repository.findCars(searchCriteria);
+
+		// raw criteria are visible in the request URI; only the normalized form
+		// and the hit count tell us why a search came back empty
+		LOG.debug("Car search normalized to brand='{}', name='{}' -> {} result(s)",
+			searchCriteria.getBrand(),
+			searchCriteria.getName(),
+			foundCars.size()
+		);
+
+        return foundCars;
 	}
 
 	/*
