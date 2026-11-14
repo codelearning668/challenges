@@ -30,6 +30,7 @@ export function TrackList() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [form, setForm] = useState<TrackEditForm | null>(null)
     const [selectedTrack, setSelectedTrack] = useState<TrackDetailResponse | null>(null)
+    const [failedTrackImageUrl, setFailedTrackImageUrl] = useState<string>()
 
     const dSearch = useDebouncedValue(search, 300)
     const dCountry = useDebouncedValue(filters.country, 300)
@@ -97,8 +98,20 @@ export function TrackList() {
 
     const openDetail = (track: TrackDetailResponse) => {
         if (editingId !== null) return
+        setFailedTrackImageUrl(undefined)
         setSelectedTrack(track)
     }
+
+    const simulatorImageDirectory = selectedTrack?.simulatorName
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+    const requestedTrackImageUrl = selectedTrack && simulatorImageDirectory
+        ? `${import.meta.env.VITE_API_URL || '/api'}/images/${simulatorImageDirectory}/tracks/${selectedTrack.name
+            .toLowerCase()
+            .replace(/ /g, '-')}.png`
+        : undefined
+    const trackImageUrl = requestedTrackImageUrl === failedTrackImageUrl ? undefined : requestedTrackImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -169,6 +182,8 @@ export function TrackList() {
                 isOpen={selectedTrack !== null}
                 onClose={() => setSelectedTrack(null)}
                 title={selectedTrack?.name ?? ''}
+                imageUrl={trackImageUrl}
+                onImageError={() => setFailedTrackImageUrl(requestedTrackImageUrl)}
                 fields={
                     selectedTrack
                         ? [

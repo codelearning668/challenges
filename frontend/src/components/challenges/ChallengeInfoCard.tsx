@@ -68,7 +68,7 @@ export function ChallengeInfoCard({
         ? `${imageBaseUrl}/cars/${c.carName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.jpg`
         : undefined
     const trackImageUrl = c.simulatorName
-        ? `${imageBaseUrl}/tracks/${c.trackName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.jpg`
+        ? `${imageBaseUrl}/tracks/${c.trackName.toLowerCase().replace(/ /g, '-')}.png`
         : undefined
 
     return (
