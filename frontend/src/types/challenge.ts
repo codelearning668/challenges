@@ -38,12 +38,13 @@ export interface ChallengeDetailResponse {
 export interface SearchChallengesCriteria {
   endDate?: string
   bestParticipantName?: string
+  participantName?: string
   trackName?: string
   trackCountry?: string
   carBrand?: string
   carName?: string
   simulatorId?: number
-  isActive?: boolean // NEW
+  isActive?: boolean
 }
 
 export interface CreateChallengeRequest {

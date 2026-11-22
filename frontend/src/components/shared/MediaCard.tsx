@@ -17,6 +17,10 @@ interface MediaCardProps {
     onClick?: () => void
     className?: string
     compact?: boolean
+    /** 'cover' crops the image to fill the box. 'contain' shows the whole image. */
+    imageFit?: 'cover' | 'contain'
+    /** Background color of the image container (e.g. 'bg-black' for cars with black bars). */
+    imageBgClass?: string
 }
 
 function MediaCard({
@@ -29,6 +33,8 @@ function MediaCard({
                        onClick,
                        className,
                        compact = false,
+                       imageFit = 'cover',
+                       imageBgClass = 'bg-gray-100 dark:bg-gray-700',
                    }: MediaCardProps) {
     const showDefaultHeader = !headerRow && (title || subtitle)
 
@@ -44,12 +50,20 @@ function MediaCard({
         >
             <div
                 className={cn(
-                    'w-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden',
+                    'w-full flex items-center justify-center overflow-hidden',
+                    imageBgClass,
                     compact ? 'h-28' : 'h-44',
                 )}
             >
                 {imageUrl ? (
-                    <img src={imageUrl} alt={title ?? 'image'} className="w-full h-full object-cover" />
+                    <img
+                        src={imageUrl}
+                        alt={title ?? 'image'}
+                        className={cn(
+                            'w-full h-full',
+                            imageFit === 'contain' ? 'object-contain' : 'object-cover',
+                        )}
+                    />
                 ) : (
                     <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                         <ImageOff className={compact ? 'w-6 h-6' : 'w-10 h-10'} />

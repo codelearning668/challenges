@@ -1,5 +1,6 @@
 import MediaCard from '@/components/shared/MediaCard'
 import { formatTrackLength } from '@/utils/format'
+import { getTrackImageUrl } from '@/utils/images'
 import type { TrackDetailResponse } from '@/types/track'
 
 interface TrackGridProps {
@@ -14,6 +15,8 @@ export function TrackGrid({ items, onItemClick }: TrackGridProps) {
                 <MediaCard
                     key={track.id}
                     compact
+                    imageFit="contain"
+                    imageUrl={getTrackImageUrl(track.name, track.simulatorName)}
                     onClick={() => onItemClick(track)}
                     title={track.name}
                     subtitle={track.country ?? ''}

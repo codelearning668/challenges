@@ -11,6 +11,7 @@ import { TrackFilters, EMPTY_TRACK_FILTERS, type TrackFiltersState } from '@/com
 import { TrackTable, type TrackEditForm } from '@/components/tracks/TrackTable'
 import { TrackGrid } from '@/components/tracks/TrackGrid'
 import { formatTrackLength } from '@/utils/format'
+import { getTrackImageUrl } from '@/utils/images'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -102,16 +103,11 @@ export function TrackList() {
         setSelectedTrack(track)
     }
 
-    const simulatorImageDirectory = selectedTrack?.simulatorName
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-    const requestedTrackImageUrl = selectedTrack && simulatorImageDirectory
-        ? `${import.meta.env.VITE_API_URL || '/api'}/images/${simulatorImageDirectory}/tracks/${selectedTrack.name
-            .toLowerCase()
-            .replace(/ /g, '-')}.png`
+    const requestedTrackImageUrl = selectedTrack
+        ? getTrackImageUrl(selectedTrack.name, selectedTrack.simulatorName)
         : undefined
-    const trackImageUrl = requestedTrackImageUrl === failedTrackImageUrl ? undefined : requestedTrackImageUrl
+    const trackImageUrl =
+        requestedTrackImageUrl === failedTrackImageUrl ? undefined : requestedTrackImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -184,6 +180,9 @@ export function TrackList() {
                 title={selectedTrack?.name ?? ''}
                 imageUrl={trackImageUrl}
                 onImageError={() => setFailedTrackImageUrl(requestedTrackImageUrl)}
+                imageClassName="object-contain"
+                imageAspect="aspect-[2/1]"
+                imageBgClass="bg-gray-100 dark:bg-gray-800"
                 fields={
                     selectedTrack
                         ? [

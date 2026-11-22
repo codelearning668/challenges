@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { DatePicker } from '@/components/shared/DatePicker'
 import { formatDate, formatDurationJson, formatTrackLength } from '@/utils/format'
+import { getCarImageUrl, getTrackImageUrl } from '@/utils/images'
 import type { ChallengeDetailResponse } from '@/types/challenge'
 
 interface ChallengeInfoCardProps {
@@ -60,16 +61,8 @@ export function ChallengeInfoCard({
                                       isSavingEndDate,
                                   }: ChallengeInfoCardProps) {
     const today = new Date().toISOString().slice(0, 10)
-    const imageBaseUrl = `${import.meta.env.VITE_API_URL || '/api'}/images/${c.simulatorName
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')}`
-    const carImageUrl = c.simulatorName
-        ? `${imageBaseUrl}/cars/${c.carName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.jpg`
-        : undefined
-    const trackImageUrl = c.simulatorName
-        ? `${imageBaseUrl}/tracks/${c.trackName.toLowerCase().replace(/ /g, '-')}.png`
-        : undefined
+    const carImageUrl = getCarImageUrl(c.carName, c.simulatorName)
+    const trackImageUrl = getTrackImageUrl(c.trackName, c.simulatorName)
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -135,7 +128,13 @@ export function ChallengeInfoCard({
                             value={c.carTorque != null ? `${c.carTorque} Nm` : '—'}
                         />
                     </div>
-                    {carImageUrl && <DetailImage key={carImageUrl} src={carImageUrl} alt={`${c.carBrand} ${c.carName}`} />}
+                    {carImageUrl && (
+                        <DetailImage
+                            key={carImageUrl}
+                            src={carImageUrl}
+                            alt={`${c.carBrand} ${c.carName}`}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -150,7 +149,9 @@ export function ChallengeInfoCard({
                         />
                         <Field label="Track Length" value={formatTrackLength(c.trackLengthKm)} />
                     </div>
-                    {trackImageUrl && <DetailImage key={trackImageUrl} src={trackImageUrl} alt={c.trackName} />}
+                    {trackImageUrl && (
+                        <DetailImage key={trackImageUrl} src={trackImageUrl} alt={c.trackName} />
+                    )}
                 </div>
             </div>
         </div>

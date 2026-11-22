@@ -11,6 +11,7 @@ import { CarFilters, EMPTY_CAR_FILTERS, type CarFiltersState } from '@/component
 import { CarTable, type CarEditForm } from '@/components/cars/CarTable'
 import { CarGrid } from '@/components/cars/CarGrid'
 import { formatNumber } from '@/utils/format'
+import { getCarImageUrl } from '@/utils/images'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -109,17 +110,11 @@ export function CarList() {
         setSelectedCar(car)
     }
 
-    const simulatorImageDirectory = selectedCar?.simulatorName
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-    const requestedCarImageUrl = selectedCar && simulatorImageDirectory
-        ? `${import.meta.env.VITE_API_URL || '/api'}/images/${simulatorImageDirectory}/cars/${selectedCar.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '')}.jpg`
+    const requestedCarImageUrl = selectedCar
+        ? getCarImageUrl(selectedCar.name, selectedCar.simulatorName)
         : undefined
-    const carImageUrl = requestedCarImageUrl === failedCarImageUrl ? undefined : requestedCarImageUrl
+    const carImageUrl =
+        requestedCarImageUrl === failedCarImageUrl ? undefined : requestedCarImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -192,6 +187,9 @@ export function CarList() {
                 title={selectedCar ? `${selectedCar.brand} ${selectedCar.name}` : ''}
                 imageUrl={carImageUrl}
                 onImageError={() => setFailedCarImageUrl(requestedCarImageUrl)}
+                imageClassName="object-cover"
+                imageAspect="aspect-video"
+                imageBgClass="bg-black"
                 fields={
                     selectedCar
                         ? [
