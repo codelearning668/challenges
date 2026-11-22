@@ -6,11 +6,13 @@ import { challengeApi } from '@/services/api'
 import { Button } from '@/components/shared/Button'
 import { Card } from '@/components/shared/Card'
 import { Table } from '@/components/shared/Table'
+import { HoverImage } from '@/components/shared/HoverImage'
 import {
     formatDate,
     formatDurationJson,
     isChallengeActive,
 } from '@/utils/format'
+import { getCarImageUrl, getTrackImageUrl } from '@/utils/images'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useSimulators } from '@/hooks/useSimulators'
@@ -21,6 +23,7 @@ import type {
 
 interface Filters {
     bestParticipantName: string
+    participantName: string // NEW
     trackCountry: string
     carBrand: string
     carName: string
@@ -30,6 +33,7 @@ interface Filters {
 
 const EMPTY_FILTERS: Filters = {
     bestParticipantName: '',
+    participantName: '',
     trackCountry: '',
     carBrand: '',
     carName: '',
@@ -71,6 +75,7 @@ export function ChallengeList() {
 
     const dSearch = useDebouncedValue(search, 300)
     const dBest = useDebouncedValue(filters.bestParticipantName, 300)
+    const dParticipant = useDebouncedValue(filters.participantName, 300) // NEW
     const dTrackCountry = useDebouncedValue(filters.trackCountry, 300)
     const dCarBrand = useDebouncedValue(filters.carBrand, 300)
     const dCarName = useDebouncedValue(filters.carName, 300)
@@ -79,6 +84,7 @@ export function ChallengeList() {
     const criteria: SearchChallengesCriteria = {
         ...(dSearch.trim() ? { trackName: dSearch.trim() } : {}),
         ...(dBest.trim() ? { bestParticipantName: dBest.trim() } : {}),
+        ...(dParticipant.trim() ? { participantName: dParticipant.trim() } : {}), // NEW
         ...(dTrackCountry.trim() ? { trackCountry: dTrackCountry.trim() } : {}),
         ...(dCarBrand.trim() ? { carBrand: dCarBrand.trim() } : {}),
         ...(dCarName.trim() ? { carName: dCarName.trim() } : {}),
@@ -155,7 +161,8 @@ export function ChallengeList() {
 
                 {showFilters && (
                     <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                        {/* Changed to 4 columns on large, 7 on extra large to fit the new filter */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
                             <div>
                                 <label className={filterLabelCls}>Status</label>
                                 <select
@@ -186,6 +193,18 @@ export function ChallengeList() {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div>
+                                <label className={filterLabelCls}>Participant</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. racer1"
+                                    value={filters.participantName}
+                                    onChange={(e) =>
+                                        setFilters({ ...filters, participantName: e.target.value })
+                                    }
+                                    className={filterInputCls}
+                                />
                             </div>
                             <div>
                                 <label className={filterLabelCls}>Best Driver</label>
@@ -259,10 +278,32 @@ export function ChallengeList() {
                                 render: (v) => <StatusBadge endDate={v} />,
                             },
                             { key: 'simulatorName', label: 'Simulator', render: (v) => v ?? '—' },
-                            { key: 'trackName', label: 'Track' },
+                            {
+                                key: 'trackName',
+                                label: 'Track',
+                                render: (v, row) => (
+                                    <HoverImage
+                                        src={getTrackImageUrl(v, row.simulatorName)}
+                                        alt={v}
+                                    >
+                                        {v}
+                                    </HoverImage>
+                                ),
+                            },
                             { key: 'trackCountry', label: 'Country' },
                             { key: 'carBrand', label: 'Brand' },
-                            { key: 'carName', label: 'Car' },
+                            {
+                                key: 'carName',
+                                label: 'Car',
+                                render: (v, row) => (
+                                    <HoverImage
+                                        src={getCarImageUrl(v, row.simulatorName)}
+                                        alt={`${row.carBrand} ${v}`}
+                                    >
+                                        {v}
+                                    </HoverImage>
+                                ),
+                            },
                             { key: 'challengeEndDate', label: 'End Date', render: (v) => formatDate(v) },
                             { key: 'bestLapTime', label: 'Best Lap', render: (v) => formatDurationJson(v) },
                             { key: 'bestParticipantName', label: 'Best Driver' },

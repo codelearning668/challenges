@@ -11,6 +11,7 @@ import { CarFilters, EMPTY_CAR_FILTERS, type CarFiltersState } from '@/component
 import { CarTable, type CarEditForm } from '@/components/cars/CarTable'
 import { CarGrid } from '@/components/cars/CarGrid'
 import { formatNumber } from '@/utils/format'
+import { getCarImageUrl } from '@/utils/images'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -30,6 +31,7 @@ export function CarList() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [form, setForm] = useState<CarEditForm | null>(null)
     const [selectedCar, setSelectedCar] = useState<CarDetailResponse | null>(null)
+    const [failedCarImageUrl, setFailedCarImageUrl] = useState<string>()
 
     const dSearch = useDebouncedValue(search, 300)
     const dBrand = useDebouncedValue(filters.brand, 300)
@@ -104,8 +106,15 @@ export function CarList() {
 
     const openDetail = (car: CarDetailResponse) => {
         if (editingId !== null) return
+        setFailedCarImageUrl(undefined)
         setSelectedCar(car)
     }
+
+    const requestedCarImageUrl = selectedCar
+        ? getCarImageUrl(selectedCar.name, selectedCar.simulatorName)
+        : undefined
+    const carImageUrl =
+        requestedCarImageUrl === failedCarImageUrl ? undefined : requestedCarImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -176,6 +185,11 @@ export function CarList() {
                 isOpen={selectedCar !== null}
                 onClose={() => setSelectedCar(null)}
                 title={selectedCar ? `${selectedCar.brand} ${selectedCar.name}` : ''}
+                imageUrl={carImageUrl}
+                onImageError={() => setFailedCarImageUrl(requestedCarImageUrl)}
+                imageClassName="object-cover"
+                imageAspect="aspect-video"
+                imageBgClass="bg-black"
                 fields={
                     selectedCar
                         ? [

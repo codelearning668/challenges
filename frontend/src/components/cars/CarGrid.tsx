@@ -1,5 +1,6 @@
 import MediaCard from '@/components/shared/MediaCard'
 import { formatNumber } from '@/utils/format'
+import { getCarImageUrl } from '@/utils/images'
 import type { CarDetailResponse } from '@/types/car'
 
 interface CarGridProps {
@@ -14,6 +15,9 @@ export function CarGrid({ items, onItemClick }: CarGridProps) {
                 <MediaCard
                     key={car.id}
                     compact
+                    imageFit="cover"
+                    imageBgClass="bg-black"
+                    imageUrl={getCarImageUrl(car.name, car.simulatorName)}
                     onClick={() => onItemClick(car)}
                     headerRow={
                         <div className="flex items-baseline justify-between gap-2">

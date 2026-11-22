@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { Flag, Clock, ArrowRight, Users, Timer, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
 import { challengeApi } from '@/services/api'
 import { Card } from '@/components/shared/Card'
 import {
@@ -9,6 +10,7 @@ import {
     isChallengeActive,
     parseLapTime,
 } from '@/utils/format'
+import { getCarImageUrl, getTrackImageUrl } from '@/utils/images'
 import { useAuthStore } from '@/stores/useAuthStore'
 import type {
     ChallengeDetailResponse,
@@ -136,6 +138,23 @@ function PositionBadge({ position }: { position: number | null }) {
     )
 }
 
+/** Small image thumbnail that hides itself if the image fails to load or doesn't exist. */
+function Thumbnail({ src, alt, contain, className = '' }: { src?: string; alt: string; contain?: boolean; className?: string }) {
+    const [error, setError] = useState(false)
+    if (!src || error) return null
+
+    return (
+        <div className={`rounded-xl overflow-hidden bg-gray-900 border border-gray-700 shrink-0 shadow-sm ${className}`}>
+            <img
+                src={src}
+                alt={alt}
+                onError={() => setError(true)}
+                className={`w-full h-full ${contain ? 'object-contain p-2' : 'object-cover'}`}
+            />
+        </div>
+    )
+}
+
 function CardStat({
                       icon: Icon,
                       label,
@@ -182,6 +201,9 @@ function ChallengeCard({
     const active = isChallengeActive(challenge.challengeEndDate)
     const isLeader = stats.position === 0
 
+    const carImg = getCarImageUrl(challenge.carName, challenge.simulatorName)
+    const trackImg = getTrackImageUrl(challenge.trackName, challenge.simulatorName)
+
     const subtitle = [challenge.carBrand, challenge.carName, challenge.trackCountry]
         .filter(Boolean)
         .join(' · ')
@@ -193,38 +215,44 @@ function ChallengeCard({
         >
             <div className="flex items-start gap-4 px-5 pt-5">
                 <PositionBadge position={stats.position} />
-                <div className="flex-1 min-w-0 pt-1">
-                    <div className="flex items-center gap-2 mb-1">
-            <span
-                className={
-                    'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ' +
-                    (active
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')
-                }
-            >
-              <span
-                  className={
-                      'w-1.5 h-1.5 rounded-full ' + (active ? 'bg-green-500' : 'bg-gray-400')
-                  }
-              />
-                {active ? 'Active' : 'Closed'}
-            </span>
-                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-              <Users className="w-3 h-3" />
-                            {stats.totalRacers}
-            </span>
+
+                {/* Flex container changed to flex-wrap so the images sit right next to the text */}
+                <div className="flex-1 min-w-0 pt-1 flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <div className="min-w-0 pr-2">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span
+                                className={
+                                    'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ' +
+                                    (active
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')
+                                }
+                            >
+                                <span className={'w-1.5 h-1.5 rounded-full ' + (active ? 'bg-green-500' : 'bg-gray-400')} />
+                                {active ? 'Active' : 'Closed'}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                <Users className="w-3 h-3" />
+                                {stats.totalRacers}
+                            </span>
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+                            {challenge.trackName}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                            {subtitle}
+                        </p>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
-                        {challenge.trackName}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                        {subtitle}
-                    </p>
+
+                    {/* Thumbnails increased to w-44 h-24 (176x96) */}
+                    <div className="flex gap-4 shrink-0">
+                        <Thumbnail src={trackImg} alt="Track map" contain className="w-44 h-24" />
+                        <Thumbnail src={carImg} alt="Car" className="w-44 h-24" />
+                    </div>
                 </div>
             </div>
 
-            <div className="flex items-end gap-6 px-5 py-5">
+            <div className="flex items-end gap-6 px-5 py-5 mt-2">
                 <CardStat icon={Timer} label="Your best lap" value={stats.myLap ?? '—'} emphasize />
                 <CardStat
                     icon={TrendingUp}

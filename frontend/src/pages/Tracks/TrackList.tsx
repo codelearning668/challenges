@@ -11,6 +11,7 @@ import { TrackFilters, EMPTY_TRACK_FILTERS, type TrackFiltersState } from '@/com
 import { TrackTable, type TrackEditForm } from '@/components/tracks/TrackTable'
 import { TrackGrid } from '@/components/tracks/TrackGrid'
 import { formatTrackLength } from '@/utils/format'
+import { getTrackImageUrl } from '@/utils/images'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -30,6 +31,7 @@ export function TrackList() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [form, setForm] = useState<TrackEditForm | null>(null)
     const [selectedTrack, setSelectedTrack] = useState<TrackDetailResponse | null>(null)
+    const [failedTrackImageUrl, setFailedTrackImageUrl] = useState<string>()
 
     const dSearch = useDebouncedValue(search, 300)
     const dCountry = useDebouncedValue(filters.country, 300)
@@ -97,8 +99,15 @@ export function TrackList() {
 
     const openDetail = (track: TrackDetailResponse) => {
         if (editingId !== null) return
+        setFailedTrackImageUrl(undefined)
         setSelectedTrack(track)
     }
+
+    const requestedTrackImageUrl = selectedTrack
+        ? getTrackImageUrl(selectedTrack.name, selectedTrack.simulatorName)
+        : undefined
+    const trackImageUrl =
+        requestedTrackImageUrl === failedTrackImageUrl ? undefined : requestedTrackImageUrl
 
     const activeFilterCount = Object.values(filters).filter((v) => v !== '').length
     const isFiltering = dSearch.trim().length > 0 || activeFilterCount > 0
@@ -169,6 +178,11 @@ export function TrackList() {
                 isOpen={selectedTrack !== null}
                 onClose={() => setSelectedTrack(null)}
                 title={selectedTrack?.name ?? ''}
+                imageUrl={trackImageUrl}
+                onImageError={() => setFailedTrackImageUrl(requestedTrackImageUrl)}
+                imageClassName="object-contain"
+                imageAspect="aspect-[2/1]"
+                imageBgClass="bg-gray-100 dark:bg-gray-800"
                 fields={
                     selectedTrack
                         ? [

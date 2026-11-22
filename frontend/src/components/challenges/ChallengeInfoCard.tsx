@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { DatePicker } from '@/components/shared/DatePicker'
 import { formatDate, formatDurationJson, formatTrackLength } from '@/utils/format'
+import { getCarImageUrl, getTrackImageUrl } from '@/utils/images'
 import type { ChallengeDetailResponse } from '@/types/challenge'
 
 interface ChallengeInfoCardProps {
@@ -34,6 +36,21 @@ function ColumnHeader({ children }: { children: React.ReactNode }) {
     )
 }
 
+function DetailImage({ src, alt }: { src: string; alt: string }) {
+    const [hasFailed, setHasFailed] = useState(false)
+
+    if (hasFailed) return null
+
+    return (
+        <img
+            src={src}
+            alt={alt}
+            onError={() => setHasFailed(true)}
+            className="h-44 w-72 shrink-0 object-contain"
+        />
+    )
+}
+
 export function ChallengeInfoCard({
                                       challenge: c,
                                       editEndDate,
@@ -44,6 +61,8 @@ export function ChallengeInfoCard({
                                       isSavingEndDate,
                                   }: ChallengeInfoCardProps) {
     const today = new Date().toISOString().slice(0, 10)
+    const carImageUrl = getCarImageUrl(c.carName, c.simulatorName)
+    const trackImageUrl = getTrackImageUrl(c.trackName, c.simulatorName)
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -97,25 +116,43 @@ export function ChallengeInfoCard({
             {/* Column 2 — Car */}
             <div className="space-y-4 md:border-l md:border-gray-200 md:dark:border-gray-700 md:pl-6">
                 <ColumnHeader>Car</ColumnHeader>
-                <Field label="Car" value={`${c.carBrand} ${c.carName}`.trim()} />
-                <Field
-                    label="Horsepower"
-                    value={c.carHorsePower != null ? `${c.carHorsePower} hp` : '—'}
-                />
-                <Field
-                    label="Torque"
-                    value={c.carTorque != null ? `${c.carTorque} Nm` : '—'}
-                />
+                <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1 space-y-4">
+                        <Field label="Car" value={`${c.carBrand} ${c.carName}`.trim()} />
+                        <Field
+                            label="Horsepower"
+                            value={c.carHorsePower != null ? `${c.carHorsePower} hp` : '—'}
+                        />
+                        <Field
+                            label="Torque"
+                            value={c.carTorque != null ? `${c.carTorque} Nm` : '—'}
+                        />
+                    </div>
+                    {carImageUrl && (
+                        <DetailImage
+                            key={carImageUrl}
+                            src={carImageUrl}
+                            alt={`${c.carBrand} ${c.carName}`}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Column 3 — Track */}
             <div className="space-y-4 md:border-l md:border-gray-200 md:dark:border-gray-700 md:pl-6">
                 <ColumnHeader>Track</ColumnHeader>
-                <Field
-                    label="Track"
-                    value={`${c.trackName}${c.trackCountry ? ` (${c.trackCountry})` : ''}`}
-                />
-                <Field label="Track Length" value={formatTrackLength(c.trackLengthKm)} />
+                <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1 space-y-4">
+                        <Field
+                            label="Track"
+                            value={`${c.trackName}${c.trackCountry ? ` (${c.trackCountry})` : ''}`}
+                        />
+                        <Field label="Track Length" value={formatTrackLength(c.trackLengthKm)} />
+                    </div>
+                    {trackImageUrl && (
+                        <DetailImage key={trackImageUrl} src={trackImageUrl} alt={c.trackName} />
+                    )}
+                </div>
             </div>
         </div>
     )
