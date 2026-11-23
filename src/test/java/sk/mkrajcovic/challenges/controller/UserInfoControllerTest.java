@@ -3,6 +3,7 @@ package sk.mkrajcovic.challenges.controller;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +22,15 @@ import sk.mkrajcovic.challenges.security.UserRoles;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class SystemControllerTest {
+class UserInfoControllerTest {
 
 	private static final String USER_INFO_URI = "/users/info";
 
 	private static final String VALID_USERNAME = "ParticipantUser";
 	private static final String VALID_PASSWORD = "ParticipantUserPwd";
+	private static final String VALID_EMAIL_ADDRESS = "participant.user@example.com";
+	private static final String USER_WITHOUT_EMAIL_ADDRESS = "ParticipantWithoutEmail";
+	private static final String USER_WITHOUT_EMAIL_ADDRESS_PASSWORD = "ParticipantWithoutEmailPwd";
 
 	@LocalServerPort
 	int port;
@@ -36,14 +40,19 @@ class SystemControllerTest {
 	@Autowired private UserRepository userRepository;
 
 	@BeforeAll
-	void createUser() {
+	void createUsers() {
+		userRepository.save(createParticipant(VALID_USERNAME, VALID_PASSWORD, VALID_EMAIL_ADDRESS));
+		userRepository.save(createParticipant(USER_WITHOUT_EMAIL_ADDRESS, USER_WITHOUT_EMAIL_ADDRESS_PASSWORD, null));
+	}
+
+	private User createParticipant(String username, String password, String emailAddress) {
 		var participant = new User();
-		participant.setUsername(VALID_USERNAME);
-		participant.setPassword(passwordEncoder.encode(VALID_PASSWORD));
+		participant.setUsername(username);
+		participant.setPassword(passwordEncoder.encode(password));
+		participant.setEmailAddress(emailAddress);
 		participant.addAuthority(UserRoles.PARTICIPANT);
 		participant.setEnabled(true);
-
-		userRepository.save(participant);
+		return participant;
 	}
 
 	@BeforeEach
@@ -56,17 +65,32 @@ class SystemControllerTest {
 
 		@Test
 		void authenticatedUserCanGetOwnInfo() {
-			given()
-				.auth()
-					.preemptive()
-					.basic(VALID_USERNAME, VALID_PASSWORD)
-				.accept(ContentType.JSON)
-			.when()
-				.get(USER_INFO_URI)
+			getUserInfo(VALID_USERNAME, VALID_PASSWORD)
 			.then()
 				.statusCode(200)
 				.body("username", equalTo(VALID_USERNAME))
+				.body("emailAddress", equalTo(VALID_EMAIL_ADDRESS))
 				.body("roles", contains(UserRoles.PARTICIPANT));
+		}
+
+		@Test
+		void authenticatedUserWithoutEmailAddressGetsNullEmailAddress() {
+			getUserInfo(USER_WITHOUT_EMAIL_ADDRESS, USER_WITHOUT_EMAIL_ADDRESS_PASSWORD)
+			.then()
+				.statusCode(200)
+				.body("username", equalTo(USER_WITHOUT_EMAIL_ADDRESS))
+				.body("emailAddress", nullValue())
+				.body("roles", contains(UserRoles.PARTICIPANT));
+		}
+
+		private io.restassured.response.Response getUserInfo(String username, String password) {
+			return given()
+				.auth()
+					.preemptive()
+					.basic(username, password)
+				.accept(ContentType.JSON)
+			.when()
+				.get(USER_INFO_URI);
 		}
 	}
 }

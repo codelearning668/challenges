@@ -199,7 +199,7 @@ public class ChallengeService {
 
 	private void logDeletion(Challenge deleted) {
 		LOG.info("'{}' deleted challenge {}: car '{} {}', track '{}', end date {}",
-			callContext.getCurrentUser(),
+			callContext.getCurrentUser().username(),
 			deleted.getId(),
 			deleted.getCar().getBrand(),
 			deleted.getCar().getName(),
@@ -223,7 +223,7 @@ public class ChallengeService {
 	@Transactional
 	public void registerForChallenge(Integer challengeId) {
 		var challenge = getExistingEntityById(repository, challengeId);
-		String participantName = callContext.getCurrentUser();
+		String participantName = callContext.getCurrentUser().username();
 
 		verifyChallengeIsActive(challenge, CANNOT_REGISTER_ON_CLOSED_CHALLENGE);
 		verifyNotAlreadyRegistered(participantName, challenge);
@@ -271,7 +271,7 @@ public class ChallengeService {
 	 */
 	public void quitChallenge(Integer challengeId) {
 		var challenge = getExistingEntityById(repository, challengeId);
-		var participantName = callContext.getCurrentUser();
+		var participantName = callContext.getCurrentUser().username();
 
 		verifyChallengeIsActive(challenge, CANNOT_QUIT_CLOSED_CHALLENGE);
 		verifyAlreadyRegistered(participantName, challenge);
@@ -319,11 +319,12 @@ public class ChallengeService {
 	@Transactional
 	public Integer createConversationEntry(Integer challengeId, String message, Integer parentEntryId) {
 		var challenge = getExistingEntityById(repository, challengeId);
+		var currentUserName = callContext.getCurrentUser().username();
 
 		verifyChallengeIsActive(challenge, CANNOT_POST_MESSAGE_ON_CLOSED_CHALLENGE);
-		verifyAlreadyRegistered(callContext.getCurrentUser(), challenge);
+		verifyAlreadyRegistered(currentUserName, challenge);
 
-		return conversationService.createConversationEntry(challenge, callContext.getCurrentUser(), message, parentEntryId);
+		return conversationService.createConversationEntry(challenge, currentUserName, message, parentEntryId);
 	}
 
 }

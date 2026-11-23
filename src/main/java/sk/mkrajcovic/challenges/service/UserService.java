@@ -75,7 +75,7 @@ public class UserService {
 	 */
 	@Transactional
 	public void updateUserEmailAddress(String newEmailAddress) {
-		var user = EntityUtils.getExistingEntityById(userRepository, callContext.getCurrentUser());
+		var user = EntityUtils.getExistingEntityById(userRepository, callContext.getCurrentUser().username());
 		user.setEmailAddress(newEmailAddress);
 		userRepository.save(user);
 

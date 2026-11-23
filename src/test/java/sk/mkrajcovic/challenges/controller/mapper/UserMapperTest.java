@@ -8,30 +8,30 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import sk.mkrajcovic.challenges.model.User;
+import sk.mkrajcovic.challenges.context.UserDetail;
 import sk.mkrajcovic.challenges.security.UserRoles;
 
 class UserMapperTest {
 
 	@Test
-	void shouldMapUserToDetailResponse() {
-		var user = new User();
-		user.setUsername("john.doe");
-		user.setPassword("password");
-		user.setEnabled(true);
-		user.addAuthority(UserRoles.ADMIN);
-		user.addAuthority(UserRoles.PARTICIPANT);
+	void shouldMapUserDetailToDetailResponse() {
+		var userDetail = new UserDetail(
+			"john.doe",
+			"john.doe@example.com",
+			List.of(UserRoles.ADMIN, UserRoles.PARTICIPANT)
+		);
 
-		var response = UserMapper.toDetailResponse(user);
+		var response = UserMapper.toDetailResponse(userDetail);
 
 		assertAll(
 			() -> assertEquals("john.doe", response.username()),
+			() -> assertEquals("john.doe@example.com", response.emailAddress()),
 			() -> assertEquals(List.of(UserRoles.ADMIN, UserRoles.PARTICIPANT), response.roles())
 		);
 	}
 
 	@Test
-	void shouldRejectNullUserWhenMappingToDetailResponse() {
+	void shouldRejectNullUserDetailWhenMappingToDetailResponse() {
 		assertThrows(NullPointerException.class, () -> UserMapper.toDetailResponse(null));
 	}
 }

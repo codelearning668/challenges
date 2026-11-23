@@ -1,11 +1,18 @@
 package sk.mkrajcovic.controller.context;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
+import static sk.mkrajcovic.challenges.security.UserRoles.PARTICIPANT;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,19 +22,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import sk.mkrajcovic.challenges.context.CallContext;
-import static sk.mkrajcovic.challenges.security.UserRoles.PARTICIPANT;
-import static sk.mkrajcovic.challenges.security.UserRoles.ADMIN;
+import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
 
 class CallContextTest {
 
 	private static final String USERNAME = "user";
 	private static final String PASSWORD = "password";
+	private static final String EMAIL_ADDRESS = "user@example.com";
 
+	private UserRepository userRepository;
 	private CallContext callContext;
 
 	@BeforeEach
 	void setUp() {
-		callContext = new CallContext();
+		userRepository = mock(UserRepository.class);
+		callContext = new CallContext(userRepository);
 		SecurityContextHolder.clearContext();
 	}
 
@@ -37,33 +46,14 @@ class CallContextTest {
 	}
 
 	@Test
-	void shouldReturnNullWhenThereIsNoAuthentication() {
-		assertNull(callContext.getCurrentUser());
-	}
+	void shouldReturnEmptyUserDetailWhenThereIsNoAuthentication() {
+		var userDetail = callContext.getCurrentUser();
 
-	@Test
-	void shouldReturnCurrentUserFromAuthentication() {
-		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD,
-				List.of(new SimpleGrantedAuthority(PARTICIPANT)));
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		assertEquals(USERNAME, callContext.getCurrentUser());
-	}
-
-	@Test
-	void shouldCacheCurrentUser() {
-		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD, List.of());
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		assertEquals(USERNAME, callContext.getCurrentUser());
-
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD, List.of()));
-
-		// the value is cached in CallContext
-		assertEquals(USERNAME, callContext.getCurrentUser());
+		assertAll(
+			() -> assertEquals(null, userDetail.username()),
+			() -> assertEquals(null, userDetail.emailAddress()),
+			() -> assertEquals(List.of(), userDetail.roles())
+		);
 	}
 
 	@Test
@@ -83,11 +73,60 @@ class CallContextTest {
 	}
 
 	@Test
-	void shouldReturnTrueWhenUserHasRole() {
-		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, "password",
-				List.of(new SimpleGrantedAuthority(PARTICIPANT), new SimpleGrantedAuthority(ADMIN)));
+	void shouldReturnFalseWhenAuthenticatedUserDoesNotExist() {
+		setAuthentication(PARTICIPANT);
+		when(userRepository.findDetailByUsername(USERNAME)).thenReturn(Optional.empty());
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		assertFalse(callContext.isUserInRole(PARTICIPANT));
+	}
+
+	@Test
+	void shouldReturnEmptyUserDetailWhenAuthenticatedUserDoesNotExist() {
+		setAuthentication(PARTICIPANT);
+		when(userRepository.findDetailByUsername(USERNAME)).thenReturn(Optional.empty());
+
+		var userDetail = callContext.getCurrentUser();
+
+		assertAll(
+			() -> assertEquals(null, userDetail.username()),
+			() -> assertEquals(null, userDetail.emailAddress()),
+			() -> assertEquals(List.of(), userDetail.roles())
+		);
+	}
+
+	@Test
+	void shouldReturnAuthenticatedUserDetail() {
+		setAuthentication(PARTICIPANT, ADMIN);
+		stubUserDetail();
+
+		var userDetail = callContext.getCurrentUser();
+
+		assertAll(
+			() -> assertEquals(USERNAME, userDetail.username()),
+			() -> assertEquals(EMAIL_ADDRESS, userDetail.emailAddress()),
+			() -> assertEquals(List.of(PARTICIPANT, ADMIN), userDetail.roles())
+		);
+	}
+
+	@Test
+	void shouldCacheAuthenticatedUserDetail() {
+		setAuthentication(PARTICIPANT);
+		stubUserDetail();
+
+		var firstUserDetail = callContext.getCurrentUser();
+		SecurityContextHolder.getContext().setAuthentication(
+			new UsernamePasswordAuthenticationToken("other-user", PASSWORD, List.of(new SimpleGrantedAuthority(ADMIN)))
+		);
+		var cachedUserDetail = callContext.getCurrentUser();
+
+		assertSame(firstUserDetail, cachedUserDetail);
+		verify(userRepository).findDetailByUsername(USERNAME);
+	}
+
+	@Test
+	void shouldReturnTrueWhenUserHasRole() {
+		setAuthentication(PARTICIPANT, ADMIN);
+		stubUserDetail();
 
 		assertTrue(callContext.isUserInRole(PARTICIPANT));
 		assertTrue(callContext.isUserInRole(ADMIN));
@@ -95,23 +134,42 @@ class CallContextTest {
 
 	@Test
 	void shouldReturnFalseWhenUserDoesNotHaveRole() {
-		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD,
-				List.of(new SimpleGrantedAuthority(PARTICIPANT)));
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		setAuthentication(PARTICIPANT);
+		stubUserDetail();
 
 		assertFalse(callContext.isUserInRole(ADMIN));
 	}
 
 	@Test
 	void shouldRequireExactRoleMatch() {
-		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD,
-				List.of(new SimpleGrantedAuthority(PARTICIPANT)));
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		setAuthentication(PARTICIPANT);
+		stubUserDetail();
 
 		assertTrue(callContext.isUserInRole(PARTICIPANT));
 		assertFalse(callContext.isUserInRole("ROLE_PARTICIPANT"));
 		assertFalse(callContext.isUserInRole("participant"));
+	}
+
+	private void setAuthentication(String... roles) {
+		var authorities = List.of(roles).stream()
+			.map(SimpleGrantedAuthority::new)
+			.toList();
+		var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD, authorities);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	private void stubUserDetail() {
+		UserRepository.CurrentUser userDetail = new UserRepository.CurrentUser() {
+			@Override
+			public String getUsername() {
+				return USERNAME;
+			}
+
+			@Override
+			public String getEmailAddress() {
+				return EMAIL_ADDRESS;
+			}
+		};
+		when(userRepository.findDetailByUsername(USERNAME)).thenReturn(Optional.of(userDetail));
 	}
 }

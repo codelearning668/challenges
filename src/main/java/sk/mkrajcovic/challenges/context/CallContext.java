@@ -2,8 +2,9 @@ package sk.mkrajcovic.challenges.context;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
@@ -12,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
 import sk.mkrajcovic.challenges.util.Text;
 
 /**
@@ -27,25 +29,43 @@ import sk.mkrajcovic.challenges.util.Text;
 @Getter
 public class CallContext {
 
+	private static final UserDetail NO_CURRENT_USER = new UserDetail(null, null, List.of());
+
+	private final UserRepository userRepository;
+
 	@Setter(AccessLevel.NONE)
-	private String currentUser;
+	private UserDetail currentUser;
 
 	/**
-	 * Returns the name of the currently authenticated user.
+	 * Returns read-only details of the currently authenticated user.
 	 * <p>
-	 * The user name is resolved lazily from the current security context on the
-	 * first invocation and cached for the remainder of the request.
+	 * The details are resolved lazily and cached for the remainder of the request.
+	 * Roles reflect the effective security authorities, while the email address is
+	 * read from the application user data.
 	 *
-	 * @return the current user's name, or {@code null} if no user is authenticated
+	 * @return the authenticated user's details
 	 */
-	public String getCurrentUser() {
+	public UserDetail getCurrentUser() {
 		if (currentUser == null) {
-			var authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (authentication != null) {
-				currentUser = authentication.getName();
-			}
+			currentUser = resolveCurrentUser();
 		}
 		return currentUser;
+	}
+
+	private UserDetail resolveCurrentUser() {
+		var authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) {
+			return NO_CURRENT_USER;
+		}
+		String username = authentication.getName();
+
+		return userRepository.findDetailByUsername(username)
+			.map(user -> createUserDetail(user, authentication.getAuthorities()))
+			.orElse(NO_CURRENT_USER);
+	}
+
+	private UserDetail createUserDetail(UserRepository.CurrentUser user, Collection<? extends GrantedAuthority> authorities) {
+		return new UserDetail(user.getUsername(), user.getEmailAddress(), toRoles(authorities));
 	}
 
 	/**
@@ -56,23 +76,17 @@ public class CallContext {
 	 *         {@code false} otherwise
 	 */
 	public boolean isUserInRole(String role) {
-		if (Text.isBlank(role)) {
-			return false;
-		}
-		for (var simpleGrantedAuthority : getUserAuthorities()) {
-			if (simpleGrantedAuthority.getAuthority().equals(role)) {
-				return true;
-			}
-		}
-		return false;
+		var currentUser = getCurrentUser();
+		return !Text.isBlank(role) && currentUser.roles().contains(role);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Collection<SimpleGrantedAuthority> getUserAuthorities() {
-		var authentication = SecurityContextHolder.getContext().getAuthentication();
-		return authentication != null
-			? (Collection<SimpleGrantedAuthority>) authentication.getAuthorities()
-			: Collections.emptyList();
+	private List<String> toRoles(Collection<? extends GrantedAuthority> authorities) {
+		if (authorities == null) {
+			authorities = Collections.emptyList();
+		}
+		return authorities.stream()
+			.map(GrantedAuthority::getAuthority)
+			.toList();
 	}
 
 }

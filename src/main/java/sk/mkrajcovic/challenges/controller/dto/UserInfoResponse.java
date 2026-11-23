@@ -4,5 +4,6 @@ import java.util.List;
 
 public record UserInfoResponse (
 		String username,
+		String emailAddress,
 		List<String> roles
 ) { }

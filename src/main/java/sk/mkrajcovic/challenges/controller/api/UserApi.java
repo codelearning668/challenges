@@ -3,15 +3,31 @@ package sk.mkrajcovic.challenges.controller.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import sk.mkrajcovic.challenges.controller.dto.UserEmailAddressUpdateRequest;
+import sk.mkrajcovic.challenges.controller.dto.UserInfoResponse;
 import sk.mkrajcovic.challenges.controller.dto.UserRegistrationRequest;
 
 @Tag(name = "Users", description = "Services for registering application users.")
 public interface UserApi {
+
+	@Operation(security = @SecurityRequirement(name = "basicAuth"), summary = "Retrieve authenticated user information", description = "Returns the username, optional email address, and effective authorization roles of the authenticated user.")
+	@ApiResponse(
+		responseCode = "200",
+		description = "Authenticated user information.",
+		content = @Content(schema = @Schema(implementation = UserInfoResponse.class), examples = @ExampleObject(value = """
+		{
+		  "username": "racer1",
+		  "emailAddress": "racer1@example.com",
+		  "roles": ["PARTICIPANT"]
+		}"""))
+	)
+	UserInfoResponse getUserInfo();
 
 	@Operation(
 		summary = "Register a user",

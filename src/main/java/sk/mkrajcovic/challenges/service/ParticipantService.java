@@ -161,7 +161,7 @@ public class ParticipantService {
 		// reads must run before the override is applied: this is the pre-override time
 		Duration previousLapTime = participant.getBestLapTime();
 		LOG.info("Admin '{}' overrides lap time in challenge {}: participant '{}', {} -> '{}'",
-			callContext.getCurrentUser(),
+			callContext.getCurrentUser().username(),
 			participant.getChallenge().getId(),
 			participant.getName(),
 			previousLapTime,
@@ -177,7 +177,7 @@ public class ParticipantService {
 	}
 
 	private void verifyParticipantIsCurrentUser(String participantName) {
-		if (!callContext.getCurrentUser().equals(participantName)) {
+		if (!callContext.getCurrentUser().username().equals(participantName)) {
 			throw new AccessDenied(CANNOT_UPDATE_OTHER_PARTICIPANT_LAP_TIME);
 		}
 	}
