@@ -42,6 +42,17 @@ public final class Text {
 	}
 
 	/**
+	 * Checks whether at least one input text is blank (null, empty or contains
+	 * only whitespaces).
+	 *
+	 * @param inputs inputs to evaluate
+	 * @return {@code true} when at least one input is blank
+	 */
+	public static boolean isAnyBlank(CharSequence... inputs) {
+		return org.apache.commons.lang3.StringUtils.isAnyBlank(inputs);
+	}
+
+	/**
 	 * Normalizes a string for accent-insensitive and case-insensitive searching.
 	 *
 	 * <p>

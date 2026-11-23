@@ -52,6 +52,23 @@ class TextTest {
 	}
 
 	@Nested
+	@DisplayName("isAnyBlank()")
+	class IsAnyBlankTest {
+
+		@Test
+		void shouldReturnFalseWhenAllInputsAreNonBlank() {
+			assertFalse(Text.isAnyBlank("recipient@example.com", "Email subject", "Message body"));
+		}
+
+		@ParameterizedTest
+		@NullAndEmptySource
+		@ValueSource(strings = { " ", "	", "\n" })
+		void shouldReturnTrueWhenOneInputIsBlank(String blankInput) {
+			assertTrue(Text.isAnyBlank("recipient@example.com", blankInput, "Message body"));
+		}
+	}
+
+	@Nested
 	@DisplayName("normalizeForSearch()")
 	class NormalizeForSearchTest {
 
