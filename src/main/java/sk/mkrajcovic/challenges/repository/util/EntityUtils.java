@@ -21,7 +21,7 @@ public class EntityUtils {
 	 * @throws ResourceNotFound if the entity is not found in repository
 	 * @throws IllegalArgumentException if either argument is {@code null}
 	 */
-	public static <T> T getExistingEntityById(CrudRepository<T, Integer> repository, Integer id) {
+	public static <T, ID> T getExistingEntityById(CrudRepository<T, ID> repository, ID id) {
 		if (repository == null || id == null) {
 			throw new IllegalArgumentException("Neither of arguments can be null to successfully run query for an entity");
 		}

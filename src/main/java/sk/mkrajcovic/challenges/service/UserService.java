@@ -2,15 +2,18 @@ package sk.mkrajcovic.challenges.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sk.mkrajcovic.challenges.context.CallContext;
 import sk.mkrajcovic.challenges.enums.MessageCodeConstants;
 import sk.mkrajcovic.challenges.exception.Conflict;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.repository.persistence.UserRepository;
+import sk.mkrajcovic.challenges.repository.util.EntityUtils;
 import sk.mkrajcovic.challenges.security.UserRoles;
 
 @Service
@@ -21,6 +24,13 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+
+	private CallContext callContext;
+
+	@Autowired
+	void setCallContext(CallContext callContext) {
+		this.callContext = callContext;
+	}
 
 	/**
 	 * Registers a new user with the specified username and password.
@@ -33,12 +43,13 @@ public class UserService {
 	 * @throws Conflict if the specified username is already registered
 	 */
 	@Transactional
-	public void registerNewUser(String username, String rawPassword) {
+	public void registerNewUser(String username, String rawPassword, String emailAddress) {
 		verifyUsernameIsAvailable(username);
 
 		var newUser = new User();
 		newUser.setUsername(username);
 		newUser.setPassword(passwordEncoder.encode(rawPassword));
+		newUser.setEmailAddress(emailAddress);
 		newUser.setEnabled(true);
 		newUser.addAuthority(UserRoles.PARTICIPANT);
 
@@ -55,5 +66,20 @@ public class UserService {
 		if (userRepository.existsById(username)) {
 			throw new Conflict(MessageCodeConstants.USERNAME_ALREADY_TAKEN);
 		}
+	}
+
+	/**
+	 * Updates the current user own email address.
+	 * can be null - effectively removing his/hers email address from the application
+	 * @param newEmailAddress
+	 */
+	@Transactional
+	public void updateUserEmailAddress(String newEmailAddress) {
+		var user = EntityUtils.getExistingEntityById(userRepository, callContext.getCurrentUser());
+		user.setEmailAddress(newEmailAddress);
+		userRepository.save(user);
+
+		// no logs for email addresses; they are sensitive data
+		LOG.debug("Updated email address for user '{}'", user.getUsername());
 	}
 }

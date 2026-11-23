@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import sk.mkrajcovic.challenges.controller.dto.UserEmailAddressUpdateRequest;
 import sk.mkrajcovic.challenges.controller.dto.UserRegistrationRequest;
 
 @Tag(name = "Users", description = "Services for registering application users.")
@@ -18,11 +19,24 @@ public interface UserApi {
 		requestBody = @RequestBody(content = @Content(examples = @ExampleObject(value = """
 		{
 		  "username": "racer1",
-		  "password": "choose-a-strong-password"
+		  "password": "choose-a-strong-password",
+		  "emailAddress": "my.email@example.com"
 		}""")))
 	)
 	@ApiResponse(responseCode = "201", description = "User registered and authorized as `PARTICIPANT`.")
 	@ApiResponse(responseCode = "409", description = "The supplied username is already in use.")
 	void registerUser(@Valid UserRegistrationRequest registrationRequest);
+
+	@Operation(
+		summary = "Update a current user's email address",
+		description = "Updates the current user's email address. The address can be `null`ed out/deleted.",
+		requestBody = @RequestBody(content = @Content(examples = @ExampleObject(value = """
+		{
+		  "emailAddress": "my.other.email@example.com"
+		}""")))
+	)
+	@ApiResponse(responseCode = "204", description = "Email address was successfully updated.")
+	void updateUserEmailAddress(@Valid UserEmailAddressUpdateRequest updateEmailRequest);
+
 }
 
