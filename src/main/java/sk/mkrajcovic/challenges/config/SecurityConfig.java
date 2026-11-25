@@ -47,6 +47,8 @@ public class SecurityConfig {
             );
 		http.httpBasic(Customizer.withDefaults())
 			.authorizeHttpRequests(authorize -> authorize
+	            // notification preferences belong to the authenticated caller.
+	            .requestMatchers("/notification-configuration/**").authenticated()
 				// we allow all READ operations by default, still @RolesAllowed can restrict this on method level
 				.requestMatchers(HttpMethod.GET).permitAll()
 				.requestMatchers(

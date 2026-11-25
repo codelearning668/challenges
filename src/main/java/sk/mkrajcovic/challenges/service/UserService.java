@@ -24,6 +24,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final NotificationConfigurationService notificationConfigService;
 
 	private CallContext callContext;
 
@@ -53,13 +54,10 @@ public class UserService {
 		newUser.setEnabled(true);
 		newUser.addAuthority(UserRoles.PARTICIPANT);
 
-		userRepository.save(newUser);
-		/*
-		 * Registration payload is excluded from request logging by
-		 * default because it carries credentials;
-		 * This line is the only record of who was actually created.
-		 */
+		var registeredUser = userRepository.save(newUser);
 		LOG.info("Registered new user '{}'", username);
+
+		notificationConfigService.createDefaultConfiguration(registeredUser);
 	}
 
 	private void verifyUsernameIsAvailable(String username) {
