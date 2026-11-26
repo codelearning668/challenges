@@ -47,7 +47,7 @@ public class MimeEmailSerializer {
 			+ createRecipientsHeader("Bcc", email.getBcc())
 			+ "Subject: " + encodeHeader(email.getSubject()) + "\r\n"
 			+ "MIME-Version: 1.0\r\n"
-			+ "Content-Type: text/plain; charset=UTF-8\r\n"
+			+ "Content-Type: text/html; charset=UTF-8\r\n"
 			+ "Content-Transfer-Encoding: base64\r\n"
 			+ "\r\n"
 			+ Base64.getMimeEncoder(MIME_BASE64_LINE_LENGTH, "\r\n".getBytes(US_ASCII))

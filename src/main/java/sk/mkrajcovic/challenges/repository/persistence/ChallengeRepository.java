@@ -1,6 +1,7 @@
 package sk.mkrajcovic.challenges.repository.persistence;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -78,5 +79,23 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
         )
     """)
 	boolean hasActiveChallengeWithoutPreviousWin(String participantName);
+
+	@Query("""
+        SELECT ch.id AS id,
+               ch.endDate AS endDate,
+               ch.bestParticipantName as bestParticipantName,
+               ch.bestLapTime as bestLapTime,
+               simulator.type AS simulatorType,
+               track.name AS trackName,
+               track.country AS trackCountry,
+               car.brand AS carBrand,
+               car.name AS carName
+        FROM Challenge ch
+        JOIN ch.track track
+        JOIN ch.car car
+        JOIN car.simulator simulator
+        WHERE ch.id = :challengeId
+    """)
+	Optional<ChallengeDetail> findChallengeDetailById(@Param("challengeId") Integer challengeId);
 
 }

@@ -81,7 +81,7 @@ public class GmailAccessTokenProvider {
 	private void handleError(HttpResponse<String> response) {
 		int statusCode = response.statusCode();
 		if (statusCode / 100 != 2) {
-			throw new EmailDeliveryException("Google OAuth request failed: HTTP " + statusCode);
+			throw new EmailDeliveryException("Google OAuth request failed: HTTP " + statusCode + " -> " + response.body());
 		}
 	}
 

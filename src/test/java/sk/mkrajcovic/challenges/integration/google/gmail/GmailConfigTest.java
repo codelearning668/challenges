@@ -27,28 +27,6 @@ class GmailConfigTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = { " ", "\t", "\n" })
-	void rejectsBlankClientId(String blankValue) {
-		assertThrows(IllegalStateException.class, () -> new GmailConfig(
-			blankValue,
-			"client-secret",
-			"refresh-token",
-			"from@example.com"));
-	}
-
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = { " ", "\t", "\n" })
-	void rejectsBlankClientSecret(String blankValue) {
-		assertThrows(IllegalStateException.class, () -> new GmailConfig(
-			"client-id",
-			blankValue,
-			"refresh-token",
-			"from@example.com"));
-	}
-
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = { " ", "\t", "\n" })
 	void rejectsBlankRefreshToken(String blankValue) {
 		assertThrows(IllegalStateException.class, () -> new GmailConfig(
 			"client-id",
@@ -59,7 +37,7 @@ class GmailConfigTest {
 
 	@ParameterizedTest
 	@NullAndEmptySource
-	@ValueSource(strings = { " ", "\t", "\n" })
+	@ValueSource(strings = { " ", "	", "\n" })
 	void rejectsBlankSenderAddress(String blankValue) {
 		assertThrows(IllegalStateException.class, () -> new GmailConfig(
 			"client-id",

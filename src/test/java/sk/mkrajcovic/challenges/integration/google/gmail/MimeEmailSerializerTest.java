@@ -14,7 +14,7 @@ class MimeEmailSerializerTest {
 	private final MimeEmailSerializer serializer = new MimeEmailSerializer();
 
 	@Test
-	void serializesPlainTextEmailToGmailRawMessage() {
+	void serializesHtmlEmailToGmailRawMessage() {
 		var email = Email.builder()
 			.to("to@example.com")
 			.to("second-to@example.com")
@@ -33,7 +33,7 @@ class MimeEmailSerializerTest {
 				Bcc: bcc@example.com\r
 				Subject: =?UTF-8?B?xIxhdQ==?=\r
 				MIME-Version: 1.0\r
-				Content-Type: text/plain; charset=UTF-8\r
+				Content-Type: text/html; charset=UTF-8\r
 				Content-Transfer-Encoding: base64\r
 				\r
 				SGVsbG8gd29ybGQ=\r
@@ -55,7 +55,7 @@ class MimeEmailSerializerTest {
 				To: to@example.com\r
 				Subject: =?UTF-8?B?U3ViamVjdA==?=\r
 				MIME-Version: 1.0\r
-				Content-Type: text/plain; charset=UTF-8\r
+				Content-Type: text/html; charset=UTF-8\r
 				Content-Transfer-Encoding: base64\r
 				\r
 				Qm9keQ==\r
@@ -77,7 +77,7 @@ class MimeEmailSerializerTest {
 				To: to@example.com\r
 				Subject: =?UTF-8?B?U3ViamVjdA==?=\r
 				MIME-Version: 1.0\r
-				Content-Type: text/plain; charset=UTF-8\r
+				Content-Type: text/html; charset=UTF-8\r
 				Content-Transfer-Encoding: base64\r
 				\r
 				YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh\r

@@ -54,8 +54,7 @@ class NotificationConfigurationControllerTest {
 					.statusCode(OK)
 					.contentType(ContentType.JSON)
 					.body("notifyOnChallengeCreated", equalTo(true))
-					.body("notifyOnChallengeClosed", equalTo(false))
-					.body("notifyOnChallengeLeaderChanged", equalTo(false));
+					.body("notifyOnChallengeClosed", equalTo(false));
 		}
 
 		@Test
@@ -75,7 +74,7 @@ class NotificationConfigurationControllerTest {
 		@Test
 		void authenticatedUserCanUpdateOwnNotificationConfiguration() {
 			var username = registerUser();
-			var request = new NotificationConfigurationUpdateRequest(false, true, true);
+			var request = new NotificationConfigurationUpdateRequest(false, true);
 
 			updateNotificationConfiguration(username, request)
 				.then()
@@ -85,15 +84,14 @@ class NotificationConfigurationControllerTest {
 				.then()
 					.statusCode(OK)
 					.body("notifyOnChallengeCreated", equalTo(false))
-					.body("notifyOnChallengeClosed", equalTo(true))
-					.body("notifyOnChallengeLeaderChanged", equalTo(true));
+					.body("notifyOnChallengeClosed", equalTo(true));
 		}
 
 		@Test
 		void unauthenticatedUserCannotUpdateNotificationConfiguration() {
 			given()
 				.contentType(ContentType.JSON)
-				.body(new NotificationConfigurationUpdateRequest(false, true, true))
+				.body(new NotificationConfigurationUpdateRequest(false, true))
 			.when()
 				.put(NOTIFICATION_CONFIGURATION_URI)
 			.then()

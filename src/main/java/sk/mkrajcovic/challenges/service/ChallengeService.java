@@ -48,6 +48,7 @@ public class ChallengeService {
 	private final CarService carService;
 	private final ParticipantService participantService;
 	private final ConversationService conversationService;
+	private final NotificationService notificationService;
 
 	private CallContext callContext;
 
@@ -120,7 +121,11 @@ public class ChallengeService {
 		challenge.setCar(car);
 		challenge.setEndDate(endDate);
 
-		return repository.save(challenge).getId();
+		Integer challengeId = repository.save(challenge).getId();
+
+		notificationService.notifyChallengeCreatedAfterCommit(challengeId);
+
+		return challengeId;
 	}
 
 	private void verifyChallengeNotActive(Integer trackId, Integer carId) {
