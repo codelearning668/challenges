@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 import sk.mkrajcovic.challenges.mail.EmailDeliveryException;
 
@@ -21,7 +19,6 @@ import sk.mkrajcovic.challenges.mail.EmailDeliveryException;
  * Refresh-token exchange keeps the short-lived access token out of application
  * configuration.
  */
-@Component
 @RequiredArgsConstructor
 public class GmailAccessTokenProvider {
 

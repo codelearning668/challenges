@@ -7,8 +7,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import org.springframework.stereotype.Component;
-
 import sk.mkrajcovic.challenges.mail.EmailDeliveryException;
 
 /**
@@ -16,7 +14,6 @@ import sk.mkrajcovic.challenges.mail.EmailDeliveryException;
  * <p>
  * Reuses one JDK HTTP client for OAuth token and Gmail API requests.
  */
-@Component
 public class GmailHttpClient {
 
 	private final HttpClient httpClient = HttpClient.newBuilder()

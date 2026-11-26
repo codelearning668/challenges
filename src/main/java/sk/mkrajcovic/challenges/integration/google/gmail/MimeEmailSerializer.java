@@ -6,14 +6,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Base64;
 import java.util.List;
 
-import org.springframework.stereotype.Component;
-
 import sk.mkrajcovic.challenges.mail.Email;
 
 /**
  * Serializes application email messages to Gmail's RFC 822 raw-message format.
  */
-@Component
 public class MimeEmailSerializer {
 
 	/** MIME requires Base64-encoded body lines to contain max 76 characters */
