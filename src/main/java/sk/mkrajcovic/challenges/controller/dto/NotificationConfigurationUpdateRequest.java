@@ -14,12 +14,6 @@ public record NotificationConfigurationUpdateRequest(
 		description = "Receive an email when a challenge closes.",
 		example = "false"
 	)
-	boolean notifyOnChallengeClosed,
-
-	@Schema(
-		description = "Receive an email when a challenge leader changes.",
-		example = "true"
-	)
-	boolean notifyOnChallengeLeaderChanged
+	boolean notifyOnChallengeClosed
 
 ) { }

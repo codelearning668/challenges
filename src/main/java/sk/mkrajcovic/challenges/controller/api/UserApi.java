@@ -44,6 +44,7 @@ public interface UserApi {
 	void registerUser(@Valid UserRegistrationRequest registrationRequest);
 
 	@Operation(
+		security = @SecurityRequirement(name = "basicAuth"),
 		summary = "Update a current user's email address",
 		description = "Updates the current user's email address. The address can be `null`ed out/deleted.",
 		requestBody = @RequestBody(content = @Content(examples = @ExampleObject(value = """

@@ -1,5 +1,7 @@
 package sk.mkrajcovic.challenges.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import sk.mkrajcovic.challenges.context.CallContext;
 import sk.mkrajcovic.challenges.model.NotificationConfiguration;
 import sk.mkrajcovic.challenges.model.User;
 import sk.mkrajcovic.challenges.repository.persistence.NotificationConfigurationRepository;
+import sk.mkrajcovic.challenges.repository.persistence.NotificationConfigurationRepository.NotificationRecipient;
 
 /**
  * Manages user-owned email-notification preference configurations.
@@ -79,14 +82,12 @@ public class NotificationConfigurationService {
 	@Transactional
 	public void updateNotificationConfiguration(
 			boolean notifyOnChallengeCreated,
-			boolean notifyOnChallengeClosed,
-			boolean notifyOnChallengeLeaderChanged) {
+			boolean notifyOnChallengeClosed) {
 
 		var configuration = getExistingNotificationConfiguration();
 
 		configuration.setNotifyOnChallengeCreated(notifyOnChallengeCreated);
 		configuration.setNotifyOnChallengeClosed(notifyOnChallengeClosed);
-		configuration.setNotifyOnChallengeLeaderChanged(notifyOnChallengeLeaderChanged);
 
 		repository.save(configuration);
 
@@ -105,6 +106,24 @@ public class NotificationConfigurationService {
 			.orElseThrow(() -> new IllegalStateException(
 				"Missing notification configuration for registered user '%s'".formatted(username)
 		));
+	}
+
+	/**
+	 * Finds enabled users that opted in to challenge-created email notifications.
+	 *
+	 * @return eligible email recipients, possibly empty
+	 */
+	List<NotificationRecipient> findChallengeCreatedRecipients() {
+		return repository.findChallengeCreatedRecipients();
+	}
+
+	/**
+	 * Finds enabled users that opted in to challenge-closed email notifications.
+	 *
+	 * @return eligible email recipients, possibly empty
+	 */
+	List<NotificationRecipient> findChallengeClosedRecipients() {
+		return repository.findChallengeClosedRecipients();
 	}
 
 }

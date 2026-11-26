@@ -15,9 +15,6 @@
     "name" : "Participants",
     "description" : "Participant lap-time history and progress."
   }, {
-    "name" : "System",
-    "description" : "Services exposing information about the system availability, environment, the authenticated user etc."
-  }, {
     "name" : "Conversation entries",
     "description" : "Administrative operations for independently identified challenge conversation entries."
   }, {
@@ -29,6 +26,9 @@
   }, {
     "name" : "Tracks",
     "description" : "Services for browsing and administering racing tracks available for challenges."
+  }, {
+    "name" : "Notification configuration",
+    "description" : "Email-notification preferences of the authenticated user."
   }, {
     "name" : "Cars",
     "description" : "Services for browsing and administering cars available for challenges."
@@ -114,6 +114,61 @@
           },
           "204" : {
             "description" : "Track updated."
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/notification-configuration" : {
+      "get" : {
+        "tags" : [ "Notification configuration" ],
+        "summary" : "Retrieve current notification preferences",
+        "description" : "Returns the complete email-notification preference configuration of the authenticated user.",
+        "operationId" : "getNotificationConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Current notification preferences.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationConfigurationDetail"
+                },
+                "example" : {
+                  "notifyOnChallengeCreated" : true,
+                  "notifyOnChallengeClosed" : false
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Notification configuration" ],
+        "summary" : "Update current notification preferences",
+        "description" : "Replaces every email-notification preference of the authenticated user.\nThe request contains no username because users can update only their own\nconfiguration.\n",
+        "operationId" : "updateNotificationConfiguration",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NotificationConfigurationUpdateRequest"
+              },
+              "example" : {
+                "notifyOnChallengeCreated" : true,
+                "notifyOnChallengeClosed" : false
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Notification preferences updated."
           }
         },
         "security" : [ {
@@ -226,7 +281,8 @@
               },
               "example" : {
                 "username" : "racer1",
-                "password" : "choose-a-strong-password"
+                "password" : "choose-a-strong-password",
+                "emailAddress" : "my.email@example.com"
               }
             }
           },
@@ -315,6 +371,17 @@
         "security" : [ {
           "basicAuth" : [ ]
         } ]
+      }
+    },
+    "/emails/default-message" : {
+      "post" : {
+        "tags" : [ "email-controller" ],
+        "operationId" : "sendDefaultMessage",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
       }
     },
     "/challenges" : {
@@ -592,6 +659,16 @@
               }
             }
           },
+          "401" : {
+            "description" : "Authentication is required.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
           "201" : {
             "description" : "Conversation entry created.",
             "headers" : {
@@ -604,16 +681,6 @@
                 }
               }
             },
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Authentication is required.",
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -688,6 +755,26 @@
           "required" : true
         },
         "responses" : {
+          "201" : {
+            "description" : "Reply created.",
+            "headers" : {
+              "Location" : {
+                "description" : "URI of the created conversation entry, `/conversation-entries/{entryId}`.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "format" : "uri"
+                }
+              }
+            },
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
           "403" : {
             "description" : "The authenticated user does not have the `PARTICIPANT` role.",
             "content" : {
@@ -720,26 +807,6 @@
           },
           "422" : {
             "description" : "The challenge is closed, or the parent entry does not belong to this challenge.",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "201" : {
-            "description" : "Reply created.",
-            "headers" : {
-              "Location" : {
-                "description" : "URI of the created conversation entry, `/conversation-entries/{entryId}`.",
-                "style" : "simple",
-                "schema" : {
-                  "type" : "string",
-                  "format" : "uri"
-                }
-              }
-            },
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -846,6 +913,35 @@
                 }
               }
             }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/users/email-address" : {
+      "patch" : {
+        "tags" : [ "Users" ],
+        "summary" : "Update a current user's email address",
+        "description" : "Updates the current user's email address. The address can be `null`ed out/deleted.",
+        "operationId" : "updateUserEmailAddress",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserEmailAddressUpdateRequest"
+              },
+              "example" : {
+                "emailAddress" : "my.other.email@example.com"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Email address was successfully updated."
           }
         },
         "security" : [ {
@@ -1056,9 +1152,9 @@
     },
     "/users/info" : {
       "get" : {
-        "tags" : [ "System" ],
+        "tags" : [ "Users" ],
         "summary" : "Retrieve authenticated user information",
-        "description" : "Returns the username and authorization roles of the authenticated user.",
+        "description" : "Returns the username, optional email address, and effective authorization roles of the authenticated user.",
         "operationId" : "getUserInfo",
         "responses" : {
           "200" : {
@@ -1070,6 +1166,7 @@
                 },
                 "example" : {
                   "username" : "racer1",
+                  "emailAddress" : "racer1@example.com",
                   "roles" : [ "PARTICIPANT" ]
                 }
               }
@@ -1131,19 +1228,6 @@
           }
         } ],
         "responses" : {
-          "200" : {
-            "description" : "Historical lap times, newest first.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ParticipantTimelineResponse"
-                  }
-                }
-              }
-            }
-          },
           "400" : {
             "description" : "The participant ID is invalid.",
             "content" : {
@@ -1156,6 +1240,63 @@
                 }
               }
             }
+          },
+          "200" : {
+            "description" : "Historical lap times, newest first.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ParticipantTimelineResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/google/callback" : {
+      "get" : {
+        "tags" : [ "gmail-authorization-controller" ],
+        "operationId" : "callback",
+        "parameters" : [ {
+          "name" : "code",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "state",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/google/authorize" : {
+      "get" : {
+        "tags" : [ "gmail-authorization-controller" ],
+        "operationId" : "authorize",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
           }
         }
       }
@@ -1222,6 +1363,21 @@
           }
         }
       },
+      "NotificationConfigurationUpdateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "notifyOnChallengeCreated" : {
+            "type" : "boolean",
+            "description" : "Receive an email when a new challenge is created.",
+            "example" : true
+          },
+          "notifyOnChallengeClosed" : {
+            "type" : "boolean",
+            "description" : "Receive an email when a challenge closes.",
+            "example" : false
+          }
+        }
+      },
       "UpdateCarRequest" : {
         "required" : [ "brand", "fromDlc", "name" ],
         "type" : "object",
@@ -1265,6 +1421,12 @@
           "password" : {
             "maxLength" : 500,
             "minLength" : 0,
+            "type" : "string"
+          },
+          "emailAddress" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "pattern" : "(?s).*\\S.*",
             "type" : "string"
           }
         }
@@ -1360,6 +1522,17 @@
           }
         }
       },
+      "UserEmailAddressUpdateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "emailAddress" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "pattern" : "(?s).*\\S.*",
+            "type" : "string"
+          }
+        }
+      },
       "UpdateChallengeEndDateRequest" : {
         "required" : [ "endDate" ],
         "type" : "object",
@@ -1392,6 +1565,9 @@
         "type" : "object",
         "properties" : {
           "username" : {
+            "type" : "string"
+          },
+          "emailAddress" : {
             "type" : "string"
           },
           "roles" : {
@@ -1482,6 +1658,17 @@
           }
         }
       },
+      "NotificationConfigurationDetail" : {
+        "type" : "object",
+        "properties" : {
+          "notifyOnChallengeCreated" : {
+            "type" : "boolean"
+          },
+          "notifyOnChallengeClosed" : {
+            "type" : "boolean"
+          }
+        }
+      },
       "SearchChallengesCriteria" : {
         "type" : "object",
         "properties" : {
@@ -1490,6 +1677,9 @@
             "format" : "date"
           },
           "bestParticipantName" : {
+            "type" : "string"
+          },
+          "participantName" : {
             "type" : "string"
           },
           "trackName" : {

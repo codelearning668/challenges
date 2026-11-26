@@ -11,8 +11,7 @@ public class NotificationConfigurationMapper {
 	public static NotificationConfigurationDetail toDetailResponse(NotificationConfiguration configuration) {
 		return new NotificationConfigurationDetail(
 			configuration.isNotifyOnChallengeCreated(),
-			configuration.isNotifyOnChallengeClosed(),
-			configuration.isNotifyOnChallengeLeaderChanged()
+			configuration.isNotifyOnChallengeClosed()
 		);
 	}
 }

@@ -31,8 +31,7 @@ public interface NotificationConfigurationApi {
 			examples = @ExampleObject(value = """
 				{
 				  "notifyOnChallengeCreated": true,
-				  "notifyOnChallengeClosed": false,
-				  "notifyOnChallengeLeaderChanged": true
+				  "notifyOnChallengeClosed": false
 				}
 				""")
 		)
@@ -51,8 +50,7 @@ public interface NotificationConfigurationApi {
 			examples = @ExampleObject(value = """
 				{
 				  "notifyOnChallengeCreated": true,
-				  "notifyOnChallengeClosed": false,
-				  "notifyOnChallengeLeaderChanged": true
+				  "notifyOnChallengeClosed": false
 				}
 				""")
 		))

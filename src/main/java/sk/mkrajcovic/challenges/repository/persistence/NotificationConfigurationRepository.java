@@ -28,7 +28,7 @@ public interface NotificationConfigurationRepository extends JpaRepository<Notif
         AND configuration.user.enabled = true
         AND configuration.user.emailAddress IS NOT NULL
     """)
-	List<ChallengeRecipient> findChallengeCreatedRecipients();
+	List<NotificationRecipient> findChallengeCreatedRecipients();
 
 	/**
 	 * Finds the unique notification configuration belonging to a user.
@@ -38,7 +38,16 @@ public interface NotificationConfigurationRepository extends JpaRepository<Notif
 	 */
 	Optional<NotificationConfiguration> findByUserUsername(String username);
 
-	interface ChallengeRecipient {
+	@Query("""
+        SELECT configuration.user.emailAddress AS emailAddress
+        FROM NotificationConfiguration configuration
+        WHERE configuration.notifyOnChallengeClosed = true
+        AND configuration.user.enabled = true
+        AND configuration.user.emailAddress IS NOT NULL
+	""")
+	List<NotificationRecipient> findChallengeClosedRecipients();
+
+	interface NotificationRecipient {
 		String getEmailAddress();
 	}
 }

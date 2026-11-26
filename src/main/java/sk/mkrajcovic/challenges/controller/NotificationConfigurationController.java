@@ -37,8 +37,7 @@ class NotificationConfigurationController implements NotificationConfigurationAp
 
 		service.updateNotificationConfiguration(
 			request.notifyOnChallengeCreated(),
-			request.notifyOnChallengeClosed(),
-			request.notifyOnChallengeLeaderChanged()
+			request.notifyOnChallengeClosed()
 		);
 	}
 

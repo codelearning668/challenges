@@ -29,7 +29,4 @@ public class NotificationConfiguration extends BaseEntity {
 	@Column(nullable = false)
 	private boolean notifyOnChallengeClosed;
 
-	@Column(nullable = false)
-	private boolean notifyOnChallengeLeaderChanged;
-
 }
