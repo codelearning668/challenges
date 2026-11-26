@@ -69,6 +69,28 @@ class TextTest {
 	}
 
 	@Nested
+	@DisplayName("defaultIfBlank()")
+	class DefaultIfBlankTest {
+
+		@ParameterizedTest
+		@NullAndEmptySource
+		@ValueSource(strings = { " ", "	", "\n" })
+		void shouldReturnDefaultWhenInputIsBlank(String input) {
+			assertEquals("fallback", Text.defaultIfBlank(input, "fallback"));
+		}
+
+		@Test
+		void shouldKeepNonBlankInput() {
+			assertEquals(" input ", Text.defaultIfBlank(" input ", "fallback"));
+		}
+
+		@Test
+		void shouldAllowNullDefault() {
+			assertNull(Text.defaultIfBlank("	", null));
+		}
+	}
+
+	@Nested
 	@DisplayName("normalizeForSearch()")
 	class NormalizeForSearchTest {
 

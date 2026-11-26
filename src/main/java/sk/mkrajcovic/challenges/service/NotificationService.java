@@ -1,12 +1,12 @@
 package sk.mkrajcovic.challenges.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static sk.mkrajcovic.challenges.util.Text.defaultIfBlank;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -176,7 +176,7 @@ public class NotificationService {
 			.subject(buildClosedChallengeSubject(challenge))
 			.textBody(buildClosedChallengeBody(challenge));
 
-		recipients.forEach(recipient -> emailBuilder.to(recipient.getEmailAddress()));
+		recipients.forEach(recipient -> emailBuilder.bcc(recipient.getEmailAddress()));
 		return emailBuilder.build();
 	}
 
@@ -191,8 +191,8 @@ public class NotificationService {
 	private String buildClosedChallengeBody(ChallengeDetail challenge) {
 		final String bestDriverFallback = "No recorded lap time";
 
-		String winner = StringUtils.defaultIfBlank(escapeHtml(challenge.getBestParticipantName()), bestDriverFallback);
-		String bestLapTime = StringUtils.defaultIfBlank(formatLapTime(challenge.getBestLapTime()), bestDriverFallback);
+		String winner = defaultIfBlank(escapeHtml(challenge.getBestParticipantName()), bestDriverFallback);
+		String bestLapTime = defaultIfBlank(formatLapTime(challenge.getBestLapTime()), bestDriverFallback);
 
 		return CHALLENGE_CLOSED_HTML_EMAIL_BODY_TEMPLATE.formatted(
 			escapeHtml(challenge.getSimulatorType().getDisplayName()),

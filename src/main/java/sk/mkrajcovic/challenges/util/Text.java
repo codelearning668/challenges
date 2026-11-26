@@ -76,4 +76,17 @@ public final class Text {
 			.toLowerCase(Locale.ROOT);
 	}
 
+	/**
+	 * Returns either the passed in String, or if the String is whitespace, empty
+	 * ("") or {@code null}, the value of {@code defaultString}.
+	 *
+	 * @param string the String to check, may be null
+	 * @param defaultString the default String to return if the input is whitespace,
+	 *                      empty ("") or {@code null}, may be null
+	 * @return the passed in String, or the default
+	 */
+    public static String defaultIfBlank(String string, String defaultString) {
+    	return org.apache.commons.lang3.StringUtils.defaultIfBlank(string, defaultString);
+    }
+
 }

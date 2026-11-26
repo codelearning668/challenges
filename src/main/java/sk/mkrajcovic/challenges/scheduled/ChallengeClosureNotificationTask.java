@@ -15,7 +15,7 @@ import sk.mkrajcovic.challenges.service.NotificationService;
 
 @Component
 @RequiredArgsConstructor
-public class ChallengeClosureNotificationTask { // pick a better name
+public class ChallengeClosureNotificationTask {
 
 	private static final String EVERY_DAY_AT_1AM = "0 0 1 * * *";
 	private static final String UTC = "UTC";
