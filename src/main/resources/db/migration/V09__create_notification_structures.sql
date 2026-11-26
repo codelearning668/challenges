@@ -8,7 +8,6 @@ create table notification_configuration (
     username varchar(100) not null,
     notify_on_challenge_created boolean not null default false,
     notify_on_challenge_closed boolean not null default false,
-    notify_on_challenge_leader_changed boolean not null default false,
 
     primary key (id),
     constraint uk_notification_configuration_user unique (username),
